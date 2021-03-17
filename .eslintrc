@@ -1,0 +1,4 @@
+{
+  "extends": "@yandeu/eslint-config",
+  "env": { "jest": true }
+}
