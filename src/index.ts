@@ -15,7 +15,7 @@ import url from 'url'
 // FIX: Packages are not maintained anymore (replace them!)
 import connect from './dependencies/connect' // const connect = require('connect')
 import serveIndex from './dependencies/serve-index' // const serveIndex = require('serve-index')
-const send = require('send')
+import send from './dependencies/send'
 const es = require('event-stream') // looks ok for now (https://david-dm.org/dominictarr/event-stream)
 
 // MOD: Replaced "faye-websocket" by "ws"
