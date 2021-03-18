@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* eslint-disable sort-imports */
+
 import 'colors'
 import chokidar from 'chokidar'
 import { error } from './misc'
@@ -11,7 +13,7 @@ import path from 'path'
 import url from 'url'
 
 // FIX: Packages are not maintained anymore (replace them!)
-const connect = require('connect')
+import connect from './dependencies/connect' // const connect = require('connect')
 const es = require('event-stream')
 const send = require('send')
 const serveIndex = require('serve-index')
@@ -188,7 +190,7 @@ export default class LiveServer {
     }
 
     // Setup a web server
-    var app = connect()
+    const app = connect.create()
 
     // Add logger. Level 2 logs only errors
     if (LiveServer.logLevel === 2) {
