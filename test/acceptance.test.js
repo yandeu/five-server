@@ -18,21 +18,21 @@ describe('basic functional tests', function () {
     request(liveServer)
       .get('/')
       .expect('Content-Type', 'text/html; charset=UTF-8')
-      .expect(/<script [^]+?live reload enabled[^]+?<\/script>/i)
+      .expect(/<script [^]+?Five-Server is connected[^]+?<\/script>/i)
       .expect(200, done)
   })
   it('should inject script when tags are in CAPS', function (done) {
     request(liveServer)
       .get('/index-caps.htm')
       .expect('Content-Type', 'text/html; charset=UTF-8')
-      .expect(/<script [^]+?live reload enabled[^]+?<\/script>/i)
+      .expect(/<script [^]+?Five-Server is connected[^]+?<\/script>/i)
       .expect(200, done)
   })
   it('should inject to <head> when no <body>', function (done) {
     request(liveServer)
       .get('/index-head.html')
       .expect('Content-Type', 'text/html; charset=UTF-8')
-      .expect(/<script [^]+?live reload enabled[^]+?<\/script>/i)
+      .expect(/<script [^]+?Five-Server is connected[^]+?<\/script>/i)
       .expect(200, done)
   })
   it('should inject also svg files', function (done) {
@@ -40,7 +40,7 @@ describe('basic functional tests', function () {
       .get('/test.svg')
       .expect('Content-Type', 'image/svg+xml')
       .expect(function (res) {
-        if (res.body.toString().indexOf('Live reload enabled') == -1) throw new Error('injected code not found')
+        if (res.body.toString().indexOf('Five-Server is connected') == -1) throw new Error('injected code not found')
       })
       .expect(200, done)
   })
@@ -49,7 +49,7 @@ describe('basic functional tests', function () {
       .get('/fragment.html')
       .expect('Content-Type', 'text/html; charset=UTF-8')
       .expect(function (res) {
-        if (res.text.toString().indexOf('Live reload enabled') > -1)
+        if (res.text.toString().indexOf('Five-Server is connected') > -1)
           throw new Error('injected code should not be found')
       })
       .expect(200, done)

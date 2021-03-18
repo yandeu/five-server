@@ -19,16 +19,22 @@
       }
       var protocol = window.location.protocol === "http:" ? "ws://" : "wss://";
       var address = protocol + window.location.host + window.location.pathname + "/ws";
-      console.log("address", address);
       var socket = new WebSocket(address);
       socket.onmessage = function (msg) {
         if (msg.data == "reload") window.location.reload();
         else if (msg.data == "refreshcss") refreshCSS();
       };
       socket.onopen = function () {
-        console.log("is open");
+        console.log(
+          `%c %c %c %c %c Five-Server is connected. %c https://npmjs.com/five-server`,
+          "background: #ff0000",
+          "background: #ffff00",
+          "background: #00ff00",
+          "background: #00ffff",
+          "color: #fff; background: #000000;",
+          "background: none",
+        );
       };
-      console.log("Live reload enabled.");
     })();
   }
   // ]]>
