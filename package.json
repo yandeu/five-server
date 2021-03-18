@@ -9,15 +9,17 @@
     "five-server": "./lib/live-server.js"
   },
   "keywords": [
-    "front-end",
+    "browser",
     "development",
     "tool",
-    "live",
     "http",
+    "live",
     "server",
     "cli",
     "reload",
-    "refresh"
+    "refresh",
+    "live-server",
+    "live server"
   ],
   "scripts": {
     "start": "npm run dev",
