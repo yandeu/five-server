@@ -1,5 +1,5 @@
 module.exports = {
   maxWorkers: 1,
   collectCoverage: true,
-  collectCoverageFrom: ['lib/**/*.{js,jsx}']
+  collectCoverageFrom: ['lib/*.js', 'lib/middleware/*.js']
 }
