@@ -25,18 +25,18 @@ const getConfigFile = () => {
   const configPath = path.join(homeDir, '.live-server.json')
 
   if (fs.existsSync(configPath)) {
-    var userConfig = fs.readFileSync(configPath, 'utf8')
+    const userConfig = fs.readFileSync(configPath, 'utf8')
     assign(opts, JSON.parse(userConfig))
     if (opts.ignorePattern) opts.ignorePattern = new RegExp(opts.ignorePattern)
   }
 }
 getConfigFile()
 
-for (var i = process.argv.length - 1; i >= 2; --i) {
-  var arg = process.argv[i]
+for (let i = process.argv.length - 1; i >= 2; --i) {
+  const arg = process.argv[i]
   if (arg.indexOf('--port=') > -1) {
-    var portString = arg.substring(7)
-    var portNumber = parseInt(portString, 10)
+    const portString = arg.substring(7)
+    const portNumber = parseInt(portString, 10)
     if (portNumber === +portString) {
       opts.port = portNumber
       process.argv.splice(i, 1)
@@ -45,7 +45,7 @@ for (var i = process.argv.length - 1; i >= 2; --i) {
     opts.host = arg.substring(7)
     process.argv.splice(i, 1)
   } else if (arg.indexOf('--open=') > -1) {
-    var open = arg.substring(7)
+    let open = arg.substring(7)
     if (open.indexOf('/') !== 0) {
       open = `/${open}`
     }
@@ -82,7 +82,7 @@ for (var i = process.argv.length - 1; i >= 2; --i) {
     opts.browser = arg.substring(10).split(',')
     process.argv.splice(i, 1)
   } else if (arg.indexOf('--entry-file=') > -1) {
-    var file = arg.substring(13)
+    const file = arg.substring(13)
     if (file.length) {
       opts.file = file
       process.argv.splice(i, 1)
@@ -107,8 +107,8 @@ for (var i = process.argv.length - 1; i >= 2; --i) {
       process.argv.splice(i, 1)
     }
   } else if (arg.indexOf('--wait=') > -1) {
-    var waitString = arg.substring(7)
-    var waitNumber = parseInt(waitString, 10)
+    const waitString = arg.substring(7)
+    const waitNumber = parseInt(waitString, 10)
     if (waitNumber === +waitString) {
       opts.wait = waitNumber
       process.argv.splice(i, 1)
@@ -152,7 +152,7 @@ for (var i = process.argv.length - 1; i >= 2; --i) {
 }
 
 // Patch paths
-var dir = (opts.root = process.argv[2] || '')
+const dir = (opts.root = process.argv[2] || '')
 
 if (opts.watch) {
   opts.watch = opts.watch.map(function (relativePath) {

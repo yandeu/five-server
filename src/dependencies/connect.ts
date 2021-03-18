@@ -51,8 +51,8 @@ export default class Server extends EventEmitter {
   }
 
   use(route, fn?: any) {
-    var handle = fn
-    var path = route
+    let handle = fn
+    let path = route
 
     // default route to '/'
     if (typeof route !== 'string') {
@@ -62,7 +62,7 @@ export default class Server extends EventEmitter {
 
     // wrap sub-apps
     if (typeof handle.handle === 'function') {
-      var server = handle
+      const server = handle
       server.route = path
       handle = function (req, res, next) {
         server.handle(req, res, next)
@@ -87,14 +87,14 @@ export default class Server extends EventEmitter {
   }
 
   handle(req, res, out) {
-    var index = 0
-    var protohost = getProtohost(req.url) || ''
-    var removed = ''
-    var slashAdded = false
-    var stack = this.stack
+    let index = 0
+    const protohost = getProtohost(req.url) || ''
+    let removed = ''
+    let slashAdded = false
+    const stack = this.stack
 
     // final function handler
-    var done =
+    const done =
       out ||
       finalhandler(req, res, {
         env: env,
@@ -116,7 +116,7 @@ export default class Server extends EventEmitter {
       }
 
       // next callback
-      var layer = stack[index++]
+      const layer = stack[index++]
 
       // all done
       if (!layer) {
@@ -125,8 +125,8 @@ export default class Server extends EventEmitter {
       }
 
       // route data
-      var path = parseUrl(req).pathname || '/'
-      var route = layer.route
+      const path = parseUrl(req).pathname || '/'
+      const route = layer.route
 
       // skip this layer if the route doesn't match
       if (path.toLowerCase().substr(0, route.length) !== route.toLowerCase()) {
@@ -134,7 +134,7 @@ export default class Server extends EventEmitter {
       }
 
       // skip if route match does not border "/", ".", or end
-      var c = path.length > route.length && path[route.length]
+      const c = path.length > route.length && path[route.length]
       if (c && c !== '/' && c !== '.') {
         return next(err)
       }
@@ -159,15 +159,15 @@ export default class Server extends EventEmitter {
   }
 
   listen() {
-    var server = http.createServer(this)
+    const server = http.createServer(this)
     return server.listen.apply(server, arguments)
   }
 }
 
 function call(handle, route, err, req, res, next) {
-  var arity = handle.length
-  var error = err
-  var hasError = Boolean(err)
+  const arity = handle.length
+  let error = err
+  const hasError = Boolean(err)
 
   debug('%s %s : %s', handle.name || '<anonymous>', route, req.originalUrl)
 
@@ -199,7 +199,7 @@ function getProtohost(url) {
     return undefined
   }
 
-  var fqdnIndex = url.indexOf('://')
+  const fqdnIndex = url.indexOf('://')
 
   return fqdnIndex !== -1 && url.lastIndexOf('?', fqdnIndex) === -1
     ? url.substr(0, url.indexOf('/', 3 + fqdnIndex))

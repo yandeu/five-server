@@ -1,4 +1,5 @@
 {
   "extends": "@yandeu/eslint-config",
+  "rules": { "no-var": "warn" },
   "env": { "jest": true }
 }

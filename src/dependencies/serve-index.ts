@@ -37,7 +37,7 @@ const mediaType = {
 }
 
 const serveIndex = (root, options?: any) => {
-  var opts = options || {}
+  const opts = options || {}
 
   // root required
   if (!root) {
@@ -45,14 +45,14 @@ const serveIndex = (root, options?: any) => {
   }
 
   // resolve root to absolute and normalize
-  var rootPath = normalize(resolve(root) + sep)
+  const rootPath = normalize(resolve(root) + sep)
 
-  var filter = opts.filter
-  var hidden = opts.hidden
-  var icons = opts.icons
-  var stylesheet = opts.stylesheet || defaultStylesheet
-  var template = opts.template || defaultTemplate
-  var view = opts.view || 'tiles'
+  const filter = opts.filter
+  const hidden = opts.hidden
+  const icons = opts.icons
+  const stylesheet = opts.stylesheet || defaultStylesheet
+  const template = opts.template || defaultTemplate
+  const view = opts.view || 'tiles'
 
   return function (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -64,17 +64,17 @@ const serveIndex = (root, options?: any) => {
     }
 
     // get dir
-    var dir = getRequestedDir(req)
+    const dir = getRequestedDir(req)
 
     // bad request
     if (dir === null) return next(createError(400))
 
     // parse URLs
-    var originalUrl = parseUrl.original(req)
-    var originalDir = decodeURIComponent(originalUrl.pathname)
+    const originalUrl = parseUrl.original(req)
+    const originalDir = decodeURIComponent(originalUrl.pathname)
 
     // join / normalize from root dir
-    var path = normalize(join(rootPath, dir))
+    const path = normalize(join(rootPath, dir))
 
     // null byte(s), bad request
     if (~path.indexOf('\0')) return next(createError(400))
@@ -86,7 +86,7 @@ const serveIndex = (root, options?: any) => {
     }
 
     // determine ".." display
-    var showUp = normalize(resolve(path) + sep) !== rootPath
+    const showUp = normalize(resolve(path) + sep) !== rootPath
 
     // check if we have a directory
     debug('stat "%s"', path)
@@ -114,8 +114,8 @@ const serveIndex = (root, options?: any) => {
         files.sort()
 
         // content-negotiation
-        var accept = accepts(req)
-        var type = accept.type(mediaTypes)
+        const accept = accepts(req)
+        const type = accept.type(mediaTypes)
 
         // not acceptable
         if (!type) return next(createError(406))
@@ -127,7 +127,7 @@ const serveIndex = (root, options?: any) => {
 export default serveIndex
 
 serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
-  var render = typeof template !== 'function' ? createHtmlRender(template) : template
+  const render = typeof template !== 'function' ? createHtmlRender(template) : template
 
   if (showUp) {
     files.unshift('..')
@@ -145,7 +145,7 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
       if (err) return next(err)
 
       // create locals for rendering
-      var locals = {
+      const locals = {
         directory: dir,
         displayIcons: Boolean(icons),
         fileList: fileList,
@@ -172,7 +172,7 @@ serveIndex.json = function _json(req, res, files, next, dir, showUp, icons, path
     fileList.sort(fileSort)
 
     // serialize
-    var body = JSON.stringify(
+    const body = JSON.stringify(
       fileList.map(function (file) {
         return file.name
       })
@@ -191,7 +191,7 @@ serveIndex.plain = function _plain(req, res, files, next, dir, showUp, icons, pa
     fileList.sort(fileSort)
 
     // serialize
-    var body =
+    const body =
       fileList
         .map(function (file) {
           return file.name
@@ -203,7 +203,7 @@ serveIndex.plain = function _plain(req, res, files, next, dir, showUp, icons, pa
 }
 
 function createHtmlFileList(files, dir, useIcons, view) {
-  var html =
+  let html =
     '<ul id="files" class="view-' +
     escapeHtml(view) +
     '">' +
@@ -217,9 +217,9 @@ function createHtmlFileList(files, dir, useIcons, view) {
 
   html += files
     .map(function (file) {
-      var classes: string[] = []
-      var isDir = file.stat && file.stat.isDirectory()
-      var path = dir.split('/').map(function (c) {
+      const classes: string[] = []
+      const isDir = file.stat && file.stat.isDirectory()
+      const path = dir.split('/').map(function (c) {
         return encodeURIComponent(c)
       })
 
@@ -229,8 +229,8 @@ function createHtmlFileList(files, dir, useIcons, view) {
         if (isDir) {
           classes.push('icon-directory')
         } else {
-          var ext = extname(file.name)
-          var icon = iconLookup(file.name)
+          const ext = extname(file.name)
+          const icon = iconLookup(file.name)
 
           classes.push('icon')
           classes.push('icon-' + ext.substring(1))
@@ -243,11 +243,11 @@ function createHtmlFileList(files, dir, useIcons, view) {
 
       path.push(encodeURIComponent(file.name))
 
-      var date =
+      const date =
         file.stat && file.name !== '..'
           ? file.stat.mtime.toLocaleDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
           : ''
-      var size = file.stat && !isDir ? file.stat.size : ''
+      const size = file.stat && !isDir ? file.stat.size : ''
 
       return (
         '<li><a href="' +
@@ -283,7 +283,7 @@ function createHtmlRender(template) {
     fs.readFile(template, 'utf8', function (err, str) {
       if (err) return callback(err)
 
-      var body = str
+      const body = str
         .replace(/\{style\}/g, locals.style.concat(iconStyle(locals.fileList, locals.displayIcons)))
         .replace(
           /\{files\}/g,
@@ -318,11 +318,11 @@ function getRequestedDir(req) {
 }
 
 function htmlPath(dir) {
-  var parts = dir.split('/')
-  var crumb = new Array(parts.length)
+  const parts = dir.split('/')
+  const crumb = new Array(parts.length)
 
-  for (var i = 0; i < parts.length; i++) {
-    var part = parts[i]
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i]
 
     if (part) {
       parts[i] = encodeURIComponent(part)
@@ -334,7 +334,7 @@ function htmlPath(dir) {
 }
 
 function iconLookup(filename) {
-  var ext = extname(filename)
+  const ext = extname(filename)
 
   // try by extension
   if (icons[ext]) {
@@ -344,7 +344,7 @@ function iconLookup(filename) {
     }
   }
 
-  var mimetype = mime.lookup(ext)
+  const mimetype = mime.lookup(ext)
 
   // default if no mime type
   if (mimetype === false) {
@@ -362,7 +362,7 @@ function iconLookup(filename) {
     }
   }
 
-  var suffix = mimetype.split('+')[1]
+  const suffix = mimetype.split('+')[1]
 
   if (suffix && icons['+' + suffix]) {
     return {
@@ -371,7 +371,7 @@ function iconLookup(filename) {
     }
   }
 
-  var type = mimetype.split('/')[0]
+  const type = mimetype.split('/')[0]
 
   // try by type only
   if (icons[type]) {
@@ -389,19 +389,20 @@ function iconLookup(filename) {
 
 function iconStyle(files, useIcons) {
   if (!useIcons) return ''
-  var i
-  var list: any[] = []
-  var rules = {}
-  var selector
-  var selectors = {}
-  var style = ''
+  let i
+  const list: any[] = []
+  const rules = {}
+  let selector
+  const selectors = {}
+  let style = ''
+  let iconName
 
   for (i = 0; i < files.length; i++) {
-    var file = files[i]
+    const file = files[i]
 
-    var isDir = file.stat && file.stat.isDirectory()
-    var icon = isDir ? { className: 'icon-directory', fileName: icons.folder } : iconLookup(file.name)
-    var iconName = icon.fileName
+    const isDir = file.stat && file.stat.isDirectory()
+    const icon = isDir ? { className: 'icon-directory', fileName: icons.folder } : iconLookup(file.name)
+    iconName = icon.fileName
 
     selector = '#files .' + icon.className + ' .name'
 
@@ -452,7 +453,7 @@ function send(res, type, body) {
 }
 
 function stat(dir, files, cb) {
-  var batch = new Batch()
+  const batch = new Batch()
 
   batch.concurrency(10)
 
@@ -473,7 +474,7 @@ function stat(dir, files, cb) {
   batch.end(cb)
 }
 
-var icons = {
+const icons = {
   // base icons
   default: 'page_white.png',
   folder: 'folder.png',

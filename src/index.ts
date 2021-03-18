@@ -38,7 +38,7 @@ const escape = html => {
 
 // Based on connect.static(), but streamlined and with added code injecter
 const staticServer = root => {
-  var isFile = false
+  let isFile = false
   try {
     // For supporting mounting files instead of just directories
     isFile = fs.statSync(root).isFile()
@@ -47,26 +47,27 @@ const staticServer = root => {
   }
   return function (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') return next()
-    var reqpath = isFile ? '' : url.parse(req.url).pathname
-    var hasNoOrigin = !req.headers.origin
-    var injectCandidates = [new RegExp('</body>', 'i'), new RegExp('</svg>'), new RegExp('</head>', 'i')]
-    var injectTag: any = null
+    const reqpath = isFile ? '' : url.parse(req.url).pathname
+    const hasNoOrigin = !req.headers.origin
+    const injectCandidates = [new RegExp('</body>', 'i'), new RegExp('</svg>'), new RegExp('</head>', 'i')]
+    let injectTag: any = null
 
     function directory() {
-      var pathname = url.parse(req.originalUrl).pathname
+      const pathname = url.parse(req.originalUrl).pathname
       res.statusCode = 301
       res.setHeader('Location', `${pathname}/`)
       res.end(`Redirecting to ${escape(pathname)}/`)
     }
 
     function file(filepath /*, stat*/) {
-      var x = path.extname(filepath).toLocaleLowerCase(),
-        match,
-        possibleExtensions = ['', '.html', '.htm', '.xhtml', '.php', '.svg']
+      const x = path.extname(filepath).toLocaleLowerCase()
+      const possibleExtensions = ['', '.html', '.htm', '.xhtml', '.php', '.svg']
+      let match
+
       if (hasNoOrigin && possibleExtensions.indexOf(x) > -1) {
         // TODO: Sync file read here is not nice, but we need to determine if the html should be injected or not
-        var contents = fs.readFileSync(filepath, 'utf8')
-        for (var i = 0; i < injectCandidates.length; ++i) {
+        const contents = fs.readFileSync(filepath, 'utf8')
+        for (let i = 0; i < injectCandidates.length; ++i) {
           match = injectCandidates[i].exec(contents)
           if (match) {
             injectTag = match[0]
@@ -93,9 +94,9 @@ const staticServer = root => {
     function inject(stream) {
       if (injectTag) {
         // We need to modify the length given to browser
-        var len = INJECTED_CODE.length + res.getHeader('Content-Length')
+        const len = INJECTED_CODE.length + res.getHeader('Content-Length')
         res.setHeader('Content-Length', len)
-        var originalPipe = stream.pipe
+        const originalPipe = stream.pipe
         stream.pipe = function (resp) {
           originalPipe.call(stream, es.replace(new RegExp(injectTag, 'i'), INJECTED_CODE + injectTag)).pipe(resp)
         }
@@ -152,30 +153,30 @@ export default class LiveServer {
    */
   public static start(options) {
     options = options || {}
-    var host = options.host || '0.0.0.0'
-    var port = options.port !== undefined ? options.port : 8080 // 0 means random
-    var root = options.root || process.cwd()
-    var mount = options.mount || []
-    var watchPaths = options.watch || [root]
+    const host = options.host || '0.0.0.0'
+    const port = options.port !== undefined ? options.port : 8080 // 0 means random
+    const root = options.root || process.cwd()
+    const mount = options.mount || []
+    const watchPaths = options.watch || [root]
     LiveServer.logLevel = options.logLevel === undefined ? 2 : options.logLevel
-    var openPath =
+    let openPath =
       options.open === undefined || options.open === true
         ? ''
         : options.open === null || options.open === false
         ? null
         : options.open
     if (options.noBrowser) openPath = null // Backwards compatibility with 0.7.0
-    var file = options.file
-    var staticServerHandler = staticServer(root)
-    var wait = options.wait === undefined ? 100 : options.wait
-    var browser = options.browser || null
-    var htpasswd = options.htpasswd || null
-    var cors = options.cors || false
-    var https = options.https || null
-    var proxy = options.proxy || []
-    var middleware = options.middleware || []
-    var noCssInject = options.noCssInject
-    var httpsModule = options.httpsModule
+    const file = options.file
+    const staticServerHandler = staticServer(root)
+    const wait = options.wait === undefined ? 100 : options.wait
+    const browser = options.browser || null
+    const htpasswd = options.htpasswd || null
+    const cors = options.cors || false
+    const https = options.https || null
+    const proxy = options.proxy || []
+    const middleware = options.middleware || []
+    const noCssInject = options.noCssInject
+    let httpsModule = options.httpsModule
 
     if (httpsModule) {
       try {
@@ -211,7 +212,7 @@ export default class LiveServer {
     // Add middleware
     middleware.map(function (mw) {
       if (typeof mw === 'string') {
-        var ext = path.extname(mw).toLocaleLowerCase()
+        const ext = path.extname(mw).toLocaleLowerCase()
         // TODO: Try to use a better import syntax
         // require().default does just not look right :/
         if (ext !== '.js') {
@@ -243,7 +244,7 @@ export default class LiveServer {
       )
     }
     mount.forEach(function (mountRule) {
-      var mountPath = path.resolve(process.cwd(), mountRule[1])
+      const mountPath = path.resolve(process.cwd(), mountRule[1])
       if (!options.watch)
         // Auto add mount paths to wathing but only if exclusive path option is not given
         watchPaths.push(mountPath)
@@ -252,8 +253,8 @@ export default class LiveServer {
     })
     proxy.forEach(function (proxyRule) {
       // MOD: Not sure if this mod works :/
-      var proxyOpts: any = url.parse(proxyRule[1])
-      // var proxyOpts:any = new URL(proxyRule[1])
+      const proxyOpts: any = url.parse(proxyRule[1])
+      // let proxyOpts:any = new URL(proxyRule[1])
       proxyOpts.via = true
       proxyOpts.preserveHost = true
       app.use(proxyRule[0], require('proxy-middleware')(proxyOpts))
@@ -267,7 +268,7 @@ export default class LiveServer {
     let server: http.Server
     let protocol
     if (https !== null) {
-      var httpsConfig = https
+      let httpsConfig = https
       if (typeof https === 'string') {
         httpsConfig = require(path.resolve(process.cwd(), https))
       }
@@ -282,7 +283,7 @@ export default class LiveServer {
     server.addListener('error', function (e) {
       // @ts-ignore
       if (e.message === 'EADDRINUSE' || (e.code && e.code === 'EADDRINUSE')) {
-        var serveURL = `${protocol}://${host}:${port}`
+        const serveURL = `${protocol}://${host}:${port}`
         console.log('%s is already in use. Trying another port.'.yellow, serveURL)
         setTimeout(function () {
           server.listen(0, host)
@@ -297,16 +298,16 @@ export default class LiveServer {
     server.addListener('listening', function (/*e*/) {
       LiveServer.server = server
 
-      var address = server.address() as any
-      var serveHost = address.address === '0.0.0.0' ? '127.0.0.1' : address.address
-      var openHost = host === '0.0.0.0' ? '127.0.0.1' : host
+      const address = server.address() as any
+      const serveHost = address.address === '0.0.0.0' ? '127.0.0.1' : address.address
+      const openHost = host === '0.0.0.0' ? '127.0.0.1' : host
 
-      var serveURL = `${protocol}://${serveHost}:${address.port}`
-      var openURL = `${protocol}://${openHost}:${address.port}`
+      const serveURL = `${protocol}://${serveHost}:${address.port}`
+      const openURL = `${protocol}://${openHost}:${address.port}`
 
-      var serveURLs: any = [serveURL]
+      let serveURLs: any = [serveURL]
       if (LiveServer.logLevel > 2 && address.address === '0.0.0.0') {
-        var ifaces = os.networkInterfaces()
+        const ifaces = os.networkInterfaces()
 
         serveURLs = Object.keys(ifaces).map(iface => {
           return ifaces[iface]
@@ -355,7 +356,7 @@ export default class LiveServer {
     server.listen(port, host)
 
     // WebSocket
-    var clients: any[] = []
+    let clients: any[] = []
     // server.addListener('upgrade', function (request, socket, head) {
     //   let ws: any = new WebSocket(request, socket, head)
 
@@ -388,7 +389,7 @@ export default class LiveServer {
       clients.push(ws)
     })
 
-    var ignored = [
+    let ignored = [
       function (testPath) {
         // Always ignore dotfiles (important e.g. because editor hidden temp files)
         return testPath !== '.' && /(^[.#]|(?:__|~)$)/.test(path.basename(testPath))
@@ -406,7 +407,7 @@ export default class LiveServer {
       ignoreInitial: true
     })
     function handleChange(changePath) {
-      var cssChange = path.extname(changePath) === '.css' && !noCssInject
+      const cssChange = path.extname(changePath) === '.css' && !noCssInject
       if (LiveServer.logLevel >= 1) {
         if (cssChange) console.log('CSS change detected'.magenta, changePath)
         else console.log('Change detected'.cyan, changePath)
@@ -432,11 +433,11 @@ export default class LiveServer {
   }
 
   public static shutdown() {
-    var watcher = LiveServer.watcher
+    const watcher = LiveServer.watcher
     if (watcher) {
       watcher.close()
     }
-    var server = LiveServer.server
+    const server = LiveServer.server
     if (server) server.close()
   }
 }

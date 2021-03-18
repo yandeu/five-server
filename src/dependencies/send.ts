@@ -10,17 +10,16 @@
 
 // modified version of send@0.17.1 (https://github.com/pillarjs/send/blob/master/index.js)
 
-var createError = require('http-errors')
-var debug = require('debug')('send')
-// var deprecate = require('depd')('send')
-var destroy = require('destroy')
-var encodeUrl = require('encodeurl')
-var escapeHtml = require('escape-html')
-var etag = require('etag')
-var fresh = require('fresh')
-var onFinished = require('on-finished')
-var parseRange = require('range-parser')
-var Stream = require('stream')
+const createError = require('http-errors')
+const debug = require('debug')('send')
+const destroy = require('destroy')
+const encodeUrl = require('encodeurl')
+const escapeHtml = require('escape-html')
+const etag = require('etag')
+const fresh = require('fresh')
+const onFinished = require('on-finished')
+const parseRange = require('range-parser')
+const Stream = require('stream')
 
 import { charsets } from '../misc'
 import fs from 'fs'
@@ -35,11 +34,9 @@ const normalize = path.normalize
 const resolve = path.resolve
 const sep = path.sep
 
-var BYTES_RANGE_REGEXP = /^ *bytes=/
-
-var MAX_MAXAGE = 60 * 60 * 24 * 365 * 1000 // 1 year
-
-var UP_PATH_REGEXP = /(?:^|[\\/])\.\.(?:[\\/]|$)/
+const BYTES_RANGE_REGEXP = /^ *bytes=/
+const MAX_MAXAGE = 60 * 60 * 24 * 365 * 1000 // 1 year
+const UP_PATH_REGEXP = /(?:^|[\\/])\.\.(?:[\\/]|$)/
 
 const send = (req, path, options) => {
   return new SendStream(req, path, options)
@@ -69,18 +66,15 @@ class SendStream extends Stream {
     }
   ) {
     super()
-    var opts = options || {}
+    const opts = options || {}
 
     this.options = opts
     this.path = path
     this.req = req
 
     this._acceptRanges = opts.acceptRanges !== undefined ? Boolean(opts.acceptRanges) : true
-
     this._cacheControl = opts.cacheControl !== undefined ? Boolean(opts.cacheControl) : true
-
     this._etag = opts.etag !== undefined ? Boolean(opts.etag) : true
-
     this._dotfiles = opts.dotfiles !== undefined ? opts.dotfiles : 'ignore'
 
     if (this._dotfiles !== 'ignore' && this._dotfiles !== 'allow' && this._dotfiles !== 'deny') {
@@ -99,11 +93,8 @@ class SendStream extends Stream {
     }
 
     this._extensions = opts.extensions !== undefined ? normalizeList(opts.extensions, 'extensions option') : []
-
     this._immutable = opts.immutable !== undefined ? Boolean(opts.immutable) : false
-
     this._index = opts.index !== undefined ? normalizeList(opts.index, 'index option') : ['index.html']
-
     this._lastModified = opts.lastModified !== undefined ? Boolean(opts.lastModified) : true
 
     this._maxage = opts.maxAge || opts.maxage
@@ -134,9 +125,9 @@ class SendStream extends Stream {
       )
     }
 
-    var res = this.res
-    var msg = statuses[status] || String(status)
-    var doc = createHtmlDocument('Error', escapeHtml(msg))
+    const res = this.res
+    const msg = statuses[status] || String(status)
+    const doc = createHtmlDocument('Error', escapeHtml(msg))
 
     // clear existing headers
     clearHeaders(res)
@@ -169,13 +160,13 @@ class SendStream extends Stream {
   }
 
   isPreconditionFailure() {
-    var req = this.req
-    var res = this.res
+    const req = this.req
+    const res = this.res
 
     // if-match
-    var match = req.headers['if-match']
+    const match = req.headers['if-match']
     if (match) {
-      var etag = res.getHeader('ETag')
+      const etag = res.getHeader('ETag')
       return (
         !etag ||
         (match !== '*' &&
@@ -186,9 +177,9 @@ class SendStream extends Stream {
     }
 
     // if-unmodified-since
-    var unmodifiedSince = parseHttpDate(req.headers['if-unmodified-since'])
+    const unmodifiedSince = parseHttpDate(req.headers['if-unmodified-since'])
     if (!isNaN(unmodifiedSince)) {
-      var lastModified = parseHttpDate(res.getHeader('Last-Modified'))
+      const lastModified = parseHttpDate(res.getHeader('Last-Modified'))
       return isNaN(lastModified) || lastModified > unmodifiedSince
     }
 
@@ -196,11 +187,11 @@ class SendStream extends Stream {
   }
 
   removeContentHeaderFields() {
-    var res = this.res
-    var headers = getHeaderNames(res)
+    const res = this.res
+    const headers = getHeaderNames(res)
 
-    for (var i = 0; i < headers.length; i++) {
-      var header = headers[i]
+    for (let i = 0; i < headers.length; i++) {
+      const header = headers[i]
       if (header.substr(0, 8) === 'content-' && header !== 'content-location') {
         res.removeHeader(header)
       }
@@ -208,7 +199,7 @@ class SendStream extends Stream {
   }
 
   notModified() {
-    var res = this.res
+    const res = this.res
     debug('not modified')
     this.removeContentHeaderFields()
     res.statusCode = 304
@@ -216,13 +207,13 @@ class SendStream extends Stream {
   }
 
   headersAlreadySent() {
-    var err = new Error("Can't set headers after they are sent.")
+    const err = new Error("Can't set headers after they are sent.")
     debug('headers already sent')
     this.error(500, err)
   }
 
   isCachable() {
-    var statusCode = this.res.statusCode
+    const statusCode = this.res.statusCode
     return (statusCode >= 200 && statusCode < 300) || statusCode === 304
   }
 
@@ -247,7 +238,7 @@ class SendStream extends Stream {
   }
 
   isRangeFresh() {
-    var ifRange = this.req.headers['if-range']
+    const ifRange = this.req.headers['if-range']
 
     if (!ifRange) {
       return true
@@ -255,17 +246,17 @@ class SendStream extends Stream {
 
     // if-range as etag
     if (ifRange.indexOf('"') !== -1) {
-      var etag = this.res.getHeader('ETag')
+      const etag = this.res.getHeader('ETag')
       return Boolean(etag && ifRange.indexOf(etag) !== -1)
     }
 
     // if-range as modified date
-    var lastModified = this.res.getHeader('Last-Modified')
+    const lastModified = this.res.getHeader('Last-Modified')
     return parseHttpDate(lastModified) <= parseHttpDate(ifRange)
   }
 
   redirect(path) {
-    var res = this.res
+    const res = this.res
 
     if (hasListeners(this, 'directory')) {
       this.emit('directory', res, path)
@@ -277,8 +268,8 @@ class SendStream extends Stream {
       return
     }
 
-    var loc = encodeUrl(collapseLeadingSlashes(this.path + '/'))
-    var doc = createHtmlDocument(
+    const loc = encodeUrl(collapseLeadingSlashes(this.path + '/'))
+    const doc = createHtmlDocument(
       'Redirecting',
       'Redirecting to <a href="' + escapeHtml(loc) + '">' + escapeHtml(loc) + '</a>'
     )
@@ -295,7 +286,7 @@ class SendStream extends Stream {
 
   pipe(res) {
     // root path
-    var root = this._root
+    const root = this._root
 
     // references
     this.res = res
@@ -315,7 +306,7 @@ class SendStream extends Stream {
       return res
     }
 
-    var parts
+    let parts
     if (root !== null) {
       // normalize
       if (path) {
@@ -351,7 +342,7 @@ class SendStream extends Stream {
 
     // dotfile handling
     if (containsDotFile(parts)) {
-      var access = this._dotfiles
+      let access = this._dotfiles
 
       // legacy support
       if (access === undefined) {
@@ -383,13 +374,13 @@ class SendStream extends Stream {
   }
 
   send(path, stat) {
-    var len = stat.size
-    var options = this.options
-    var opts: any = {}
-    var res = this.res
-    var req = this.req
-    var ranges = req.headers.range
-    var offset = options.start || 0
+    let len = stat.size
+    const options = this.options
+    const opts: any = {}
+    const res = this.res
+    const req = this.req
+    let ranges = req.headers.range
+    let offset = options.start || 0
 
     if (headersSent(res)) {
       // impossible to send now
@@ -421,7 +412,7 @@ class SendStream extends Stream {
     // adjust len to start/end options
     len = Math.max(0, len - offset)
     if (options.end !== undefined) {
-      var bytes = options.end - offset + 1
+      const bytes = options.end - offset + 1
       if (len > bytes) len = bytes
     }
 
@@ -466,7 +457,7 @@ class SendStream extends Stream {
     }
 
     // clone options
-    for (var prop in options) {
+    for (const prop in options) {
       opts[prop] = options[prop]
     }
 
@@ -487,8 +478,8 @@ class SendStream extends Stream {
   }
 
   sendFile(path) {
-    var i = 0
-    var self = this
+    let i = 0
+    const self = this
 
     debug('stat "%s"', path)
     fs.stat(path, function onstat(err, stat) {
@@ -507,7 +498,7 @@ class SendStream extends Stream {
         return err ? self.onStatError(err) : self.error(404)
       }
 
-      var p = path + '.' + self._extensions[i++]
+      const p = path + '.' + self._extensions[i++]
 
       debug('stat "%s"', p)
       fs.stat(p, function (err, stat) {
@@ -520,8 +511,8 @@ class SendStream extends Stream {
   }
 
   sendIndex(path) {
-    var i = -1
-    var self = this
+    let i = -1
+    const self = this
 
     function next(err?) {
       if (++i >= self._index.length) {
@@ -529,7 +520,7 @@ class SendStream extends Stream {
         return self.error(404)
       }
 
-      var p = join(path, self._index[i])
+      const p = join(path, self._index[i])
 
       debug('stat "%s"', p)
       fs.stat(p, function (err, stat) {
@@ -545,12 +536,12 @@ class SendStream extends Stream {
 
   stream(path, options) {
     // TODO: this is all lame, refactor meeee
-    var finished = false
-    var self = this
-    var res = this.res
+    let finished = false
+    const self = this
+    const res = this.res
 
     // pipe
-    var stream = fs.createReadStream(path, options)
+    const stream = fs.createReadStream(path, options)
     this.emit('stream', stream)
     stream.pipe(res)
 
@@ -580,25 +571,25 @@ class SendStream extends Stream {
   }
 
   type(path) {
-    var res = this.res
+    const res = this.res
 
     if (res.getHeader('Content-Type')) return
 
-    var type = mime.getType(path)
+    const type = mime.getType(path)
 
     if (!type) {
       debug('no content-type')
       return
     }
 
-    var charset = charsets.lookup(type)
+    const charset = charsets.lookup(type)
 
     debug('content-type %s', type)
     res.setHeader('Content-Type', type + (charset ? '; charset=' + charset : ''))
   }
 
   setHeader(path, stat) {
-    var res = this.res
+    const res = this.res
 
     this.emit('headers', res, path, stat)
 
@@ -608,7 +599,7 @@ class SendStream extends Stream {
     }
 
     if (this._cacheControl && !res.getHeader('Cache-Control')) {
-      var cacheControl = 'public, max-age=' + Math.floor(this._maxage / 1000)
+      let cacheControl = 'public, max-age=' + Math.floor(this._maxage / 1000)
 
       if (this._immutable) {
         cacheControl += ', immutable'
@@ -619,13 +610,13 @@ class SendStream extends Stream {
     }
 
     if (this._lastModified && !res.getHeader('Last-Modified')) {
-      var modified = stat.mtime.toUTCString()
+      const modified = stat.mtime.toUTCString()
       debug('modified %s', modified)
       res.setHeader('Last-Modified', modified)
     }
 
     if (this._etag && !res.getHeader('ETag')) {
-      var val = etag(stat)
+      const val = etag(stat)
       debug('etag %s', val)
       res.setHeader('ETag', val)
     }
@@ -646,7 +637,7 @@ class SendStream extends Stream {
 // }, 'send.hidden: use dotfiles option')
 
 // SendStream.prototype.index = deprecate.function(function index(paths) {
-//   var index = !paths ? [] : normalizeList(paths, 'paths argument')
+//   let index = !paths ? [] : normalizeList(paths, 'paths argument')
 //   debug('index %o', paths)
 //   this._index = index
 //   return this
@@ -664,15 +655,16 @@ class SendStream extends Stream {
 // }, 'send.maxage: pass maxAge as option')
 
 function clearHeaders(res) {
-  var headers = getHeaderNames(res)
+  const headers = getHeaderNames(res)
 
-  for (var i = 0; i < headers.length; i++) {
+  for (let i = 0; i < headers.length; i++) {
     res.removeHeader(headers[i])
   }
 }
 
 function collapseLeadingSlashes(str) {
-  for (var i = 0; i < str.length; i++) {
+  let i = 0
+  for (i; i < str.length; i++) {
     if (str[i] !== '/') {
       break
     }
@@ -682,8 +674,8 @@ function collapseLeadingSlashes(str) {
 }
 
 function containsDotFile(parts) {
-  for (var i = 0; i < parts.length; i++) {
-    var part = parts[i]
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i]
     if (part.length > 1 && part[0] === '.') {
       return true
     }
@@ -728,7 +720,8 @@ function getHeaderNames(res) {
 }
 
 function hasListeners(emitter, type) {
-  var count = typeof emitter.listenerCount !== 'function' ? emitter.listeners(type).length : emitter.listenerCount(type)
+  const count =
+    typeof emitter.listenerCount !== 'function' ? emitter.listeners(type).length : emitter.listenerCount(type)
 
   return count > 0
 }
@@ -738,9 +731,9 @@ function headersSent(res) {
 }
 
 function normalizeList(val, name) {
-  var list = [].concat(val || [])
+  const list = [].concat(val || [])
 
-  for (var i = 0; i < list.length; i++) {
+  for (let i = 0; i < list.length; i++) {
     if (typeof list[i] !== 'string') {
       throw new TypeError(name + ' must be array of strings or false')
     }
@@ -750,7 +743,7 @@ function normalizeList(val, name) {
 }
 
 function parseHttpDate(date) {
-  var timestamp = date && Date.parse(date)
+  const timestamp = date && Date.parse(date)
 
   return typeof timestamp === 'number' ? timestamp : NaN
 }
@@ -761,7 +754,7 @@ function parseTokenList(str: string) {
   let start = 0
 
   // gather tokens
-  for (var i = 0, len = str.length; i < len; i++) {
+  for (let i = 0, len = str.length; i < len; i++) {
     switch (str.charCodeAt(i)) {
       case 0x20 /*   */:
         if (start === end) {
@@ -785,10 +778,10 @@ function parseTokenList(str: string) {
 }
 
 function setHeaders(res, headers) {
-  var keys = Object.keys(headers)
+  const keys = Object.keys(headers)
 
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i]
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i]
     res.setHeader(key, headers[key])
   }
 }
