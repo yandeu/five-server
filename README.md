@@ -41,6 +41,12 @@ $ npm -g i five-server@latest
 
 Same as for [Live-Server](https://www.npmjs.com/package/live-server).
 
+## Logo
+
+![logo](https://raw.githubusercontent.com/yandeu/five-server/main/img/logo.png)
+
+_Inspired by [vscode-live-server](https://github.com/ritwickdey/vscode-live-server/blob/master/images/icon.png)_
+
 ## License
 
 [MIT](https://github.com/yandeu/five-server/blob/main/LICENSE)
