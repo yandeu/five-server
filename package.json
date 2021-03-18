@@ -31,6 +31,9 @@
     "extract": "extract version name src/const.ts",
     "test": "jest --forceExit --silent",
     "live-server": "node ./lib/live-server.js --no-browser",
+    "publish": "publish",
+    "push": "npm run publish",
+    "preReleaseHook": "clean build format:write lint:fix test",
     "prepublishOnly": "npm run clean && npm run build && npm run format:write && npm run lint:fix && npm test"
   },
   "repository": {
@@ -86,6 +89,7 @@
     "eslint": "^7.22.0",
     "jest": "^26.6.3",
     "prettier": "^2.2.1",
+    "publish-cli": "^1.7.0",
     "rimraf": "^3.0.2",
     "supertest": "^6.1.3",
     "typescript": "^4.2.3"
