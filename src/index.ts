@@ -221,13 +221,15 @@ export default class LiveServer {
 
     // Use http-auth if configured
     if (htpasswd !== null) {
-      const auth = require('http-auth')
-      const authConnect = require('http-auth-connect')
-      const basic = auth.basic({
-        realm: 'Please authorize',
-        file: htpasswd
-      })
-      app.use(authConnect(basic))
+      // TODO: Replace http-auth with a lib that does not have native code
+      error('Sorry htpasswd does not work yet.')
+      // const auth = require('http-auth')
+      // const authConnect = require('http-auth-connect')
+      // const basic = auth.basic({
+      //   realm: 'Please authorize',
+      //   file: htpasswd
+      // })
+      // app.use(authConnect(basic))
     }
     if (cors) {
       app.use(

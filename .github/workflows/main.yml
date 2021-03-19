@@ -22,11 +22,6 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Install PeerDependencies
-        run: |
-          npm i http-auth@4
-          npm i http-auth-connect@1
-
       - name: Run Prettier
         run: npm run format
 

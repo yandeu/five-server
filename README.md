@@ -59,7 +59,7 @@ _\*`C:\\Users\\USER` on Windows and `/home/USER` on Linux and Mac_
 
 ---
 
-`http-auth` and `http-auth-connect` are now peerDependencies. They are needed if you use `htpasswd`.
+`htpasswd` does not work yet.
 
 ---
 
