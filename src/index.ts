@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /* eslint-disable sort-imports */
 
 import 'colors'
