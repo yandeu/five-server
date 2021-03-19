@@ -1,8 +1,60 @@
+import fs from 'fs'
+import path from 'path'
+
+// FIX: Package is not maintained anymore
+const assign = require('object-assign')
+
 export const error = (msg: string) => {
   if (msg) console.log(msg)
   else console.log('ERROR: Unknown :/')
 
   process.exit(1)
+}
+
+export const escape = html => {
+  return String(html)
+    .replace(/&(?!\w+;)/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+export const getConfigFile = (configFile: string | boolean = true) => {
+  const options: any = {
+    host: process.env.IP,
+    port: process.env.PORT,
+    open: true,
+    mount: [],
+    proxy: [],
+    middleware: [],
+    logLevel: 2
+  }
+
+  if (configFile === false) return options
+  if (typeof configFile === 'string') {
+    console.log(`configFile can't be a string yet`)
+    return options
+  }
+
+  const dirs = [path.resolve()]
+  const files = ['.fiveserverrc', '.prettierrc.json', '.live-server.json']
+
+  const homeDir = process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME']
+  if (homeDir) dirs.push(homeDir)
+
+  loop: for (const d of dirs) {
+    for (const f of files) {
+      const configPath = path.join(d, f)
+      if (fs.existsSync(configPath)) {
+        const userConfig = fs.readFileSync(configPath, 'utf8')
+        assign(options, JSON.parse(userConfig))
+        if (options.ignorePattern) options.ignorePattern = new RegExp(options.ignorePattern)
+        break loop
+      }
+    }
+  }
+
+  return options
 }
 
 /**

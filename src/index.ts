@@ -4,7 +4,7 @@
 
 import 'colors'
 import chokidar from 'chokidar'
-import { error } from './misc'
+import { error, escape, getConfigFile } from './misc'
 import fs from 'fs'
 import http from 'http'
 import logger from 'morgan'
@@ -27,14 +27,6 @@ import WebSocket from 'ws' // eslint-disable-line sort-imports
 import open from 'open'
 
 const INJECTED_CODE = fs.readFileSync(path.join(__dirname, '../injected.html'), 'utf8')
-
-const escape = html => {
-  return String(html)
-    .replace(/&(?!\w+;)/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}
 
 // Based on connect.static(), but streamlined and with added code injecter
 const staticServer = root => {
@@ -151,8 +143,12 @@ export default class LiveServer {
    * @param htpasswd {string} Path to htpasswd file to enable HTTP Basic authentication
    * @param middleware {array} Append middleware to stack, e.g. [function(req, res, next) { next(); }].
    */
-  public static start(options) {
-    options = options || {}
+  public static start(options: any = {}) {
+    if (!options._cli) {
+      const opts = getConfigFile(options.configFile)
+      options = { ...opts, ...options }
+    }
+
     const host = options.host || '0.0.0.0'
     const port = options.port !== undefined ? options.port : 8080 // 0 means random
     const root = options.root || process.cwd()

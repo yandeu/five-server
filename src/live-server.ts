@@ -1,36 +1,11 @@
 #!/usr/bin/env node
 import { NAME, VERSION } from './const'
-import { error } from './misc'
-import fs from 'fs'
+import { error, getConfigFile } from './misc'
 import liveServer from './index'
 import path from 'path'
 
-// FIX: Package is not maintained anymore
-const assign = require('object-assign')
-
-const opts: any = {
-  host: process.env.IP,
-  port: process.env.PORT,
-  open: true,
-  mount: [],
-  proxy: [],
-  middleware: [],
-  logLevel: 2
-}
-
-const getConfigFile = () => {
-  const homeDir = process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME']
-  if (!homeDir) return
-
-  const configPath = path.join(homeDir, '.live-server.json')
-
-  if (fs.existsSync(configPath)) {
-    const userConfig = fs.readFileSync(configPath, 'utf8')
-    assign(opts, JSON.parse(userConfig))
-    if (opts.ignorePattern) opts.ignorePattern = new RegExp(opts.ignorePattern)
-  }
-}
-getConfigFile()
+const opts = getConfigFile()
+opts._cli = true
 
 for (let i = process.argv.length - 1; i >= 2; --i) {
   const arg = process.argv[i]

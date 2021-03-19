@@ -47,6 +47,20 @@ Same as for [Live-Server](https://www.npmjs.com/package/live-server).
 
 _Inspired by [vscode-live-server](https://github.com/ritwickdey/vscode-live-server/blob/master/images/icon.png)_
 
+## Changes since fork
+
+### All notable changes since the fork.
+
+---
+
+You can now use a config file in your home directory\* or the root directory of your project.
+
+Allowed file names are `.fiveserverrc` and `.fiveserverrc.json` written in JSON.
+
+_\*`C:\\Users\\USER` on Windows and `/home/USER` on Linux and Mac_
+
+---
+
 ## License
 
 [MIT](https://github.com/yandeu/five-server/blob/main/LICENSE)
