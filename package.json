@@ -35,8 +35,7 @@
     "live-server": "node ./lib/live-server.js --no-browser",
     "publish": "publish",
     "push": "npm run publish",
-    "preReleaseHook": "clean build format:write lint:fix test",
-    "prepublishOnly": "npm run clean && npm run build && npm run format:write && npm run lint:fix && npm test"
+    "preReleaseHook": "clean build format:write lint:fix test"
   },
   "repository": {
     "type": "git",
