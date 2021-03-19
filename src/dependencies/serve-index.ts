@@ -21,10 +21,12 @@ const fs = require('fs'),
   sep = path.sep,
   extname = path.extname,
   join = path.join
-const Batch = require('batch')
 const mime = require('mime-types')
 const parseUrl = require('parseurl')
 const resolve = require('path').resolve
+
+// FIX: Replaced batch by forking it
+const Batch = require('./batch') // const Batch = require('batch')
 
 const cache = {}
 const defaultTemplate = join(__dirname, 'public', 'directory.html')
