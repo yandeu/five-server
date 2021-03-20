@@ -117,6 +117,9 @@ class SendStream extends Stream {
   error(status, err?: any) {
     // emit if listeners instead of responding
     if (hasListeners(this, 'error')) {
+      // the favicon is missing a lot (but this is ok issue)
+      if (err && err.path && /favicon\.ico/.test(err.path)) return
+
       return this.emit(
         'error',
         createError(status, err, {
