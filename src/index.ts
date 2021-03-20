@@ -10,7 +10,7 @@ import path from 'path'
 import url from 'url'
 
 // FIX: Packages are not maintained anymore (replace them!)
-import connect from './dependencies/connect' // const connect = require('connect')
+import express from 'express' // const connect = require('connect')
 import serveIndex from './dependencies/serve-index' // const serveIndex = require('serve-index')
 import send from './dependencies/send'
 const es = require('event-stream') // looks ok for now (https://david-dm.org/dominictarr/event-stream)
@@ -185,7 +185,7 @@ export default class LiveServer {
     }
 
     // Setup a web server
-    const app = connect.create()
+    const app = express()
 
     // Add logger. Level 2 logs only errors
     if (LiveServer.logLevel === 2) {

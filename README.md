@@ -6,8 +6,6 @@ Development Server with **Live Reload** Capability.
 - Rewritten in TypeScript
 - Up-to-date dependencies
 
-Not only are the dependencies of **Five-Server** up-to-date, but the repository also contains [modified forks](https://github.com/yandeu/five-server/tree/main/src/dependencies) of **connect**, **send**, **serve-index** and **batch**, since they all had outdated dependencies as well.
-
 ---
 
 [![NPM version](https://img.shields.io/npm/v/five-server.svg?style=flat-square)](https://www.npmjs.com/package/five-server)
