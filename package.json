@@ -22,6 +22,7 @@
     "live server"
   ],
   "scripts": {
+    "depcheck": "npx depcheck",
     "start": "npm run dev",
     "dev": "npm run clean && tsc --watch",
     "build": "npm run extract && tsc",
