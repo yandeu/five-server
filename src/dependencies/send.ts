@@ -17,7 +17,7 @@ const encodeUrl = require('encodeurl')
 const escapeHtml = require('escape-html')
 const etag = require('etag')
 const fresh = require('fresh')
-const onFinished = require('on-finished')
+// const onFinished = require('on-finished')
 const parseRange = require('range-parser')
 const Stream = require('stream')
 
@@ -546,7 +546,25 @@ class SendStream extends Stream {
     stream.pipe(res)
 
     // response finished, done with the fd
-    onFinished(res, function onfinished() {
+
+    // MOD(yandeu): use on('finished') and on('end') instead of onFinished()
+    // onFinished(res, function onfinished() {
+    //   finished = true
+    //   destroy(stream)
+    // })
+
+    stream.on('finished', function () {
+      // request already finished
+      if (finished) return
+      // clean up stream
+      finished = true
+      destroy(stream)
+    })
+
+    stream.on('end', function () {
+      // request already finished
+      if (finished) return
+      // clean up stream
       finished = true
       destroy(stream)
     })
@@ -555,11 +573,9 @@ class SendStream extends Stream {
     stream.on('error', function onerror(err) {
       // request already finished
       if (finished) return
-
       // clean up stream
       finished = true
       destroy(stream)
-
       // error
       self.onStatError(err)
     })
