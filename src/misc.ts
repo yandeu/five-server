@@ -11,6 +11,11 @@ export const error = (msg: string) => {
   process.exit(1)
 }
 
+// just a fallback for removing http-errors dependency
+export const createError = (code: number, msg: string = 'unknown', _nothing?: any) => {
+  return new Error(`${code.toString()}: ${msg}`)
+}
+
 export const escape = html => {
   return String(html)
     .replace(/&(?!\w+;)/g, '&amp;')

@@ -12,7 +12,7 @@
 // modified version of serve-index@1.9.1 (https://github.com/expressjs/serve-index/blob/master/index.js)
 
 const accepts = require('accepts')
-const createError = require('http-errors')
+import { createError } from '../misc' // const createError = require('http-errors')
 const debug = require('debug')('serve-index')
 const escapeHtml = require('escape-html')
 const fs = require('fs'),

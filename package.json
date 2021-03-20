@@ -61,7 +61,6 @@
     "event-stream": "^4.0.1",
     "express": "^4.17.1",
     "fresh": "0.5.2",
-    "http-errors": "^1.8.0",
     "mime": "^2.5.2",
     "mime-types": "~2.1.24",
     "morgan": "^1.9.1",

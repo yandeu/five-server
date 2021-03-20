@@ -10,7 +10,8 @@
 
 // modified version of send@0.17.1 (https://github.com/pillarjs/send/blob/master/index.js)
 
-const createError = require('http-errors')
+import { charsets } from '../misc'
+import { createError } from '../misc' // const createError = require('http-errors')
 const debug = require('debug')('send')
 const destroy = require('destroy')
 const encodeUrl = require('encodeurl')
@@ -21,7 +22,6 @@ const fresh = require('fresh')
 const parseRange = require('range-parser')
 const Stream = require('stream')
 
-import { charsets } from '../misc'
 import fs from 'fs'
 import mime from 'mime'
 import ms from 'ms'
