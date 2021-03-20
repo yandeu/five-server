@@ -1,27 +1,34 @@
 var request = require('supertest')
 var path = require('path')
-var liveServer1 = require('../lib').default.start({
-  root: path.join(__dirname, 'data'),
-  port: 0,
-  open: false,
-  middleware: [
-    function setStatus(req, res, next) {
-      res.statusCode = 201
-      next()
-    }
-  ]
-})
-var liveServer2 = require('../lib').default.start({
-  root: path.join(__dirname, 'data'),
-  port: 0,
-  open: false,
-  middleware: ['example']
-})
-var liveServer3 = require('../lib').default.start({
-  root: path.join(__dirname, 'data'),
-  port: 0,
-  open: false,
-  middleware: [path.join(__dirname, 'data', 'middleware.js')]
+
+var liveServer1
+var liveServer2
+var liveServer3
+
+beforeAll(async () => {
+  liveServer1 = await require('../lib').default.start({
+    root: path.join(__dirname, 'data'),
+    port: 0,
+    open: false,
+    middleware: [
+      function setStatus(req, res, next) {
+        res.statusCode = 201
+        next()
+      }
+    ]
+  })
+  liveServer2 = await require('../lib').default.start({
+    root: path.join(__dirname, 'data'),
+    port: 0,
+    open: false,
+    middleware: ['example']
+  })
+  liveServer3 = await require('../lib').default.start({
+    root: path.join(__dirname, 'data'),
+    port: 0,
+    open: false,
+    middleware: [path.join(__dirname, 'data', 'middleware.js')]
+  })
 })
 
 describe('middleware tests', function () {

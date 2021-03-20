@@ -1,11 +1,16 @@
 var request = require('supertest')
 var path = require('path')
-var liveServer = require('../lib').default.start({
-  root: path.join(__dirname, 'data'),
-  port: 0,
-  open: false
-  // TODO: Does not work yet
-  // htpasswd: path.join(__dirname, 'data', 'htpasswd-test')
+
+var liveServer
+
+beforeAll(async () => {
+  liveServer = await require('../lib').default.start({
+    root: path.join(__dirname, 'data'),
+    port: 0,
+    open: false
+    // TODO: Does not work yet
+    // htpasswd: path.join(__dirname, 'data', 'htpasswd-test')
+  })
 })
 
 describe('htpasswd tests', function () {

@@ -141,7 +141,7 @@ export default class LiveServer {
    * @param htpasswd {string} Path to htpasswd file to enable HTTP Basic authentication
    * @param middleware {array} Append middleware to stack, e.g. [function(req, res, next) { next(); }].
    */
-  public static start(options: any = {}) {
+  public static async start(options: any = {}) {
     if (!options._cli) {
       const opts = getConfigFile(options.configFile)
       options = { ...opts, ...options }
@@ -349,7 +349,7 @@ export default class LiveServer {
     })
 
     // Setup server to listen at port
-    server.listen(port, host)
+    await server.listen(port, host)
 
     // WebSocket
     let clients: any[] = []
@@ -371,6 +371,10 @@ export default class LiveServer {
           { once: true }
         )
       }
+
+      // ws.on('error', err => {
+      //   console.log('WS ERROR:', err)
+      // })
 
       ws.on('open', () => {
         ws.send('connected')

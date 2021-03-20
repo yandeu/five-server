@@ -1,16 +1,22 @@
 var request = require('supertest')
 var path = require('path')
 var port = 40200
-var server1 = require('../lib').default.start({
-  root: path.join(__dirname, 'data'),
-  port: port,
-  open: false
-})
-var server2 = require('../lib').default.start({
-  root: path.join(__dirname, 'data'),
-  port: 0,
-  open: false,
-  proxy: [['/server1', 'http://localhost:' + port]]
+
+var server1
+var server2
+
+beforeAll(async () => {
+  server1 = await require('../lib').default.start({
+    root: path.join(__dirname, 'data'),
+    port: port,
+    open: false
+  })
+  server2 = await require('../lib').default.start({
+    root: path.join(__dirname, 'data'),
+    port: 0,
+    open: false,
+    proxy: [['/server1', 'http://localhost:' + port]]
+  })
 })
 
 describe('proxy tests', function () {

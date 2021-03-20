@@ -1,16 +1,22 @@
 var request = require('supertest')
 var path = require('path')
-var liveServerSpa = require('../lib').default.start({
-  root: path.join(__dirname, 'data'),
-  port: 0,
-  open: false,
-  middleware: ['spa']
-})
-var liveServerSpaIgnoreAssets = require('../lib').default.start({
-  root: path.join(__dirname, 'data'),
-  port: 0,
-  open: false,
-  middleware: ['spa-ignore-assets']
+
+var liveServerSpa
+var liveServerSpaIgnoreAssets
+
+beforeAll(async () => {
+  liveServerSpa = await require('../lib').default.start({
+    root: path.join(__dirname, 'data'),
+    port: 0,
+    open: false,
+    middleware: ['spa']
+  })
+  liveServerSpaIgnoreAssets = await require('../lib').default.start({
+    root: path.join(__dirname, 'data'),
+    port: 0,
+    open: false,
+    middleware: ['spa-ignore-assets']
+  })
 })
 
 describe('spa tests', function () {

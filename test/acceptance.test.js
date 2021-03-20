@@ -1,9 +1,13 @@
 var request = require('supertest')
 var path = require('path')
-var liveServer = require('../lib').default.start({
-  root: path.join(__dirname, 'data'),
-  port: 0,
-  open: false
+var liveServer
+
+beforeAll(async () => {
+  liveServer = await require('../lib').default.start({
+    root: path.join(__dirname, 'data'),
+    port: 0,
+    open: false
+  })
 })
 
 describe('basic functional tests', function () {

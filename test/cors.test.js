@@ -1,10 +1,15 @@
 var request = require('supertest')
 var path = require('path')
-var liveServer = require('../lib').default.start({
-  root: path.join(__dirname, 'data'),
-  port: 0,
-  open: false,
-  cors: true
+
+var liveServer
+
+beforeAll(async () => {
+  liveServer = await require('../lib').default.start({
+    root: path.join(__dirname, 'data'),
+    port: 0,
+    open: false,
+    cors: true
+  })
 })
 
 describe('cors tests', function () {

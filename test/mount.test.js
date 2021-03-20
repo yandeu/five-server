@@ -1,13 +1,18 @@
 var request = require('supertest')
 var path = require('path')
-var liveServer = require('../lib').default.start({
-  root: path.join(__dirname, 'data'),
-  port: 0,
-  open: false,
-  mount: [
-    ['/mounted', path.join(__dirname, 'data', 'sub')],
-    ['/style', path.join(__dirname, 'data', 'style.css')]
-  ]
+
+var liveServer
+
+beforeAll(async () => {
+  liveServer = await require('../lib').default.start({
+    root: path.join(__dirname, 'data'),
+    port: 0,
+    open: false,
+    mount: [
+      ['/mounted', path.join(__dirname, 'data', 'sub')],
+      ['/style', path.join(__dirname, 'data', 'style.css')]
+    ]
+  })
 })
 
 describe('mount tests', function () {
