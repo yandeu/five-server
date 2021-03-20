@@ -141,7 +141,7 @@ export default class LiveServer {
    * @param htpasswd {string} Path to htpasswd file to enable HTTP Basic authentication
    * @param middleware {array} Append middleware to stack, e.g. [function(req, res, next) { next(); }].
    */
-  public static async start(options: any = {}) {
+  public static async start(options: any = {}): Promise<http.Server> {
     if (!options._cli) {
       const opts = getConfigFile(options.configFile)
       options = { ...opts, ...options }
@@ -178,6 +178,7 @@ export default class LiveServer {
       } catch (e) {
         console.error(colors(`HTTPS module "${httpsModule}" you've provided was not found.`, 'red'))
         console.error('Did you do', `"npm install ${httpsModule}"?`)
+        // @ts-ignore
         return
       }
     } else {
@@ -275,161 +276,165 @@ export default class LiveServer {
       protocol = 'http'
     }
 
-    // Handle server startup errors
-    server.addListener('error', function (e) {
-      // @ts-ignore
-      if (e.message === 'EADDRINUSE' || (e.code && e.code === 'EADDRINUSE')) {
-        const serveURL = `${protocol}://${host}:${port}`
-        console.log(colors('%s is already in use. Trying another port.', 'yellow'), serveURL)
-        setTimeout(function () {
-          server.listen(0, host)
-        }, 1000)
-      } else {
-        console.error(colors(e.toString(), 'red'))
-        LiveServer.shutdown()
-      }
-    })
-
-    // Handle successful server
-    server.addListener('listening', function (/*e*/) {
-      LiveServer.server = server
-
-      const address = server.address() as any
-      const serveHost = address.address === '0.0.0.0' ? '127.0.0.1' : address.address
-      const openHost = host === '0.0.0.0' ? '127.0.0.1' : host
-
-      const serveURL = `${protocol}://${serveHost}:${address.port}`
-      const openURL = `${protocol}://${openHost}:${address.port}`
-
-      let serveURLs: any = [serveURL]
-      if (LiveServer.logLevel > 2 && address.address === '0.0.0.0') {
-        const ifaces = os.networkInterfaces()
-
-        serveURLs = Object.keys(ifaces).map(iface => {
-          return ifaces[iface]
-        })
-
-        serveURLs = serveURLs
-          // flatten address data, use only IPv4
-          .reduce(function (data, addresses) {
-            addresses
-              .filter(function (addr) {
-                return addr.family === 'IPv4'
-              })
-              .forEach(function (addr) {
-                data.push(addr)
-              })
-            return data
-          }, [])
-          .map(function (addr) {
-            return `${protocol}://${addr.address}:${address.port}`
-          })
-      }
-
-      // Output
-      if (LiveServer.logLevel >= 1) {
-        if (serveURL === openURL)
-          if (serveURLs.length === 1) {
-            console.log(colors('Serving "%s" at %s', 'green'), root, serveURLs[0])
-          } else {
-            console.log(colors('Serving "%s" at\n\t%s', 'green'), root, serveURLs.join('\n\t'))
-          }
-        else console.log(colors('Serving "%s" at %s (%s)', 'green'), root, openURL, serveURL)
-      }
-
-      // Launch browser
-      if (openPath !== null)
-        if (typeof openPath === 'object') {
-          openPath.forEach(function (p) {
-            open(openURL + p, { app: browser })
-          })
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async (resolve, reject) => {
+      // Handle server startup errors
+      server.addListener('error', function (e) {
+        // @ts-ignore
+        if (e.message === 'EADDRINUSE' || (e.code && e.code === 'EADDRINUSE')) {
+          const serveURL = `${protocol}://${host}:${port}`
+          console.log(colors('%s is already in use. Trying another port.', 'yellow'), serveURL)
+          setTimeout(function () {
+            server.listen(0, host)
+          }, 1000)
         } else {
-          open(openURL + openPath, { app: browser })
+          console.error(colors(e.toString(), 'red'))
+          LiveServer.shutdown()
+          return reject(colors(e.toString(), 'red'))
         }
-    })
+      })
 
-    // Setup server to listen at port
-    await server.listen(port, host)
+      // Handle successful server
+      server.addListener('listening', function (/*e*/) {
+        LiveServer.server = server
 
-    // WebSocket
-    let clients: any[] = []
-    // server.addListener('upgrade', function (request, socket, head) {
-    //   let ws: any = new WebSocket(request, socket, head)
+        const address = server.address() as any
+        const serveHost = address.address === '0.0.0.0' ? '127.0.0.1' : address.address
+        const openHost = host === '0.0.0.0' ? '127.0.0.1' : host
 
-    const wss = new WebSocket.Server({ server })
+        const serveURL = `${protocol}://${serveHost}:${address.port}`
+        const openURL = `${protocol}://${openHost}:${address.port}`
 
-    wss.on('connection', ws => {
-      // @ts-ignore
-      ws.sendWithDelay = (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => {
-        setTimeout(
-          () => {
-            ws.send(data, e => {
-              if (cb) cb(e)
+        resolve(server)
+
+        let serveURLs: any = [serveURL]
+        if (LiveServer.logLevel > 2 && address.address === '0.0.0.0') {
+          const ifaces = os.networkInterfaces()
+
+          serveURLs = Object.keys(ifaces).map(iface => {
+            return ifaces[iface]
+          })
+
+          serveURLs = serveURLs
+            // flatten address data, use only IPv4
+            .reduce(function (data, addresses) {
+              addresses
+                .filter(function (addr) {
+                  return addr.family === 'IPv4'
+                })
+                .forEach(function (addr) {
+                  data.push(addr)
+                })
+              return data
+            }, [])
+            .map(function (addr) {
+              return `${protocol}://${addr.address}:${address.port}`
             })
-          },
-          wait,
-          { once: true }
-        )
-      }
+        }
 
-      // ws.on('error', err => {
-      //   console.log('WS ERROR:', err)
-      // })
+        // Output
+        if (LiveServer.logLevel >= 1) {
+          if (serveURL === openURL)
+            if (serveURLs.length === 1) {
+              console.log(colors('Serving "%s" at %s', 'green'), root, serveURLs[0])
+            } else {
+              console.log(colors('Serving "%s" at\n\t%s', 'green'), root, serveURLs.join('\n\t'))
+            }
+          else console.log(colors('Serving "%s" at %s (%s)', 'green'), root, openURL, serveURL)
+        }
 
-      ws.on('open', () => {
-        ws.send('connected')
+        // Launch browser
+        if (openPath !== null)
+          if (typeof openPath === 'object') {
+            openPath.forEach(function (p) {
+              open(openURL + p, { app: browser })
+            })
+          } else {
+            open(openURL + openPath, { app: browser })
+          }
       })
 
-      ws.on('close', () => {
-        clients = clients.filter(function (x) {
-          return x !== ws
+      // Setup server to listen at port
+      await server.listen(port, host)
+
+      // WebSocket
+      let clients: any[] = []
+      // server.addListener('upgrade', function (request, socket, head) {
+      //   let ws: any = new WebSocket(request, socket, head)
+
+      const wss = new WebSocket.Server({ server })
+
+      wss.on('connection', ws => {
+        // @ts-ignore
+        ws.sendWithDelay = (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => {
+          setTimeout(
+            () => {
+              ws.send(data, e => {
+                if (cb) cb(e)
+              })
+            },
+            wait,
+            { once: true }
+          )
+        }
+
+        // ws.on('error', err => {
+        //   console.log('WS ERROR:', err)
+        // })
+
+        ws.on('open', () => {
+          ws.send('connected')
         })
+
+        ws.on('close', () => {
+          clients = clients.filter(function (x) {
+            return x !== ws
+          })
+        })
+
+        clients.push(ws)
       })
 
-      clients.push(ws)
-    })
-
-    let ignored = [
-      function (testPath) {
-        // Always ignore dotfiles (important e.g. because editor hidden temp files)
-        return testPath !== '.' && /(^[.#]|(?:__|~)$)/.test(path.basename(testPath))
+      let ignored = [
+        function (testPath) {
+          // Always ignore dotfiles (important e.g. because editor hidden temp files)
+          return testPath !== '.' && /(^[.#]|(?:__|~)$)/.test(path.basename(testPath))
+        }
+      ]
+      if (options.ignore) {
+        ignored = ignored.concat(options.ignore)
       }
-    ]
-    if (options.ignore) {
-      ignored = ignored.concat(options.ignore)
-    }
-    if (options.ignorePattern) {
-      ignored.push(options.ignorePattern)
-    }
-    // Setup file watcher
-    LiveServer.watcher = chokidar.watch(watchPaths, {
-      ignored: ignored,
-      ignoreInitial: true
-    })
-    function handleChange(changePath) {
-      const cssChange = path.extname(changePath) === '.css' && !noCssInject
-      if (LiveServer.logLevel >= 1) {
-        if (cssChange) console.log(colors('CSS change detected', 'magenta'), changePath)
-        else console.log(colors('Change detected', 'cyan'), changePath)
+      if (options.ignorePattern) {
+        ignored.push(options.ignorePattern)
       }
-      clients.forEach(function (ws) {
-        if (ws) ws.sendWithDelay(cssChange ? 'refreshcss' : 'reload')
+      // Setup file watcher
+      LiveServer.watcher = chokidar.watch(watchPaths, {
+        ignored: ignored,
+        ignoreInitial: true
       })
-    }
-    LiveServer.watcher
-      .on('change', handleChange)
-      .on('add', handleChange)
-      .on('unlink', handleChange)
-      .on('addDir', handleChange)
-      .on('unlinkDir', handleChange)
-      .on('ready', function () {
-        if (LiveServer.logLevel >= 1) console.log(colors('Ready for changes', 'cyan'))
-      })
-      .on('error', function (err) {
-        console.log(colors('ERROR:', 'red'), err)
-      })
-
-    return server
+      function handleChange(changePath) {
+        const cssChange = path.extname(changePath) === '.css' && !noCssInject
+        if (LiveServer.logLevel >= 1) {
+          if (cssChange) console.log(colors('CSS change detected', 'magenta'), changePath)
+          else console.log(colors('Change detected', 'cyan'), changePath)
+        }
+        clients.forEach(function (ws) {
+          if (ws) ws.sendWithDelay(cssChange ? 'refreshcss' : 'reload')
+        })
+      }
+      LiveServer.watcher
+        .on('change', handleChange)
+        .on('add', handleChange)
+        .on('unlink', handleChange)
+        .on('addDir', handleChange)
+        .on('unlinkDir', handleChange)
+        .on('ready', function () {
+          if (LiveServer.logLevel >= 1) console.log(colors('Ready for changes', 'cyan'))
+        })
+        .on('error', function (err) {
+          console.log(colors('ERROR:', 'red'), err)
+        })
+    })
   }
 
   public static shutdown() {
