@@ -1,6 +1,5 @@
 /* eslint-disable sort-imports */
 
-import 'colors'
 import chokidar from 'chokidar'
 import { error, escape, getConfigFile } from './misc'
 import fs from 'fs'
@@ -23,6 +22,7 @@ import WebSocket from 'ws' // eslint-disable-line sort-imports
 // MOD: Replaced "opn" by "open"
 // const open = require('opn')
 import open from 'open'
+import { colors } from './colors'
 
 const INJECTED_CODE = fs.readFileSync(path.join(__dirname, '../injected.html'), 'utf8')
 
@@ -66,7 +66,7 @@ const staticServer = root => {
         }
         if (injectTag === null && LiveServer.logLevel >= 3) {
           console.warn(
-            'Failed to inject refresh script!'.yellow,
+            colors('Failed to inject refresh script!', 'yellow'),
             "Couldn't find any of the tags ",
             injectCandidates,
             'from',
@@ -176,7 +176,7 @@ export default class LiveServer {
       try {
         require.resolve(httpsModule)
       } catch (e) {
-        console.error(`HTTPS module "${httpsModule}" you've provided was not found.`.red)
+        console.error(colors(`HTTPS module "${httpsModule}" you've provided was not found.`, 'red'))
         console.error('Did you do', `"npm install ${httpsModule}"?`)
         return
       }
@@ -280,12 +280,12 @@ export default class LiveServer {
       // @ts-ignore
       if (e.message === 'EADDRINUSE' || (e.code && e.code === 'EADDRINUSE')) {
         const serveURL = `${protocol}://${host}:${port}`
-        console.log('%s is already in use. Trying another port.'.yellow, serveURL)
+        console.log(colors('%s is already in use. Trying another port.', 'yellow'), serveURL)
         setTimeout(function () {
           server.listen(0, host)
         }, 1000)
       } else {
-        console.error(e.toString().red)
+        console.error(colors(e.toString(), 'red'))
         LiveServer.shutdown()
       }
     })
@@ -330,11 +330,11 @@ export default class LiveServer {
       if (LiveServer.logLevel >= 1) {
         if (serveURL === openURL)
           if (serveURLs.length === 1) {
-            console.log('Serving "%s" at %s'.green, root, serveURLs[0])
+            console.log(colors('Serving "%s" at %s', 'green'), root, serveURLs[0])
           } else {
-            console.log('Serving "%s" at\n\t%s'.green, root, serveURLs.join('\n\t'))
+            console.log(colors('Serving "%s" at\n\t%s', 'green'), root, serveURLs.join('\n\t'))
           }
-        else console.log('Serving "%s" at %s (%s)'.green, root, openURL, serveURL)
+        else console.log(colors('Serving "%s" at %s (%s)', 'green'), root, openURL, serveURL)
       }
 
       // Launch browser
@@ -405,8 +405,8 @@ export default class LiveServer {
     function handleChange(changePath) {
       const cssChange = path.extname(changePath) === '.css' && !noCssInject
       if (LiveServer.logLevel >= 1) {
-        if (cssChange) console.log('CSS change detected'.magenta, changePath)
-        else console.log('Change detected'.cyan, changePath)
+        if (cssChange) console.log(colors('CSS change detected', 'magenta'), changePath)
+        else console.log(colors('Change detected', 'cyan'), changePath)
       }
       clients.forEach(function (ws) {
         if (ws) ws.sendWithDelay(cssChange ? 'refreshcss' : 'reload')
@@ -419,10 +419,10 @@ export default class LiveServer {
       .on('addDir', handleChange)
       .on('unlinkDir', handleChange)
       .on('ready', function () {
-        if (LiveServer.logLevel >= 1) console.log('Ready for changes'.cyan)
+        if (LiveServer.logLevel >= 1) console.log(colors('Ready for changes', 'cyan'))
       })
       .on('error', function (err) {
-        console.log('ERROR:'.red, err)
+        console.log(colors('ERROR:', 'red'), err)
       })
 
     return server

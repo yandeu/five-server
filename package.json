@@ -32,6 +32,7 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx",
     "extract": "extract version name src/const.ts",
     "test": "jest --forceExit --silent",
+    "test:big": "npm run clean && npm run build && npm run format:write && npm run lint:fix && npm run test",
     "live-server": "node ./lib/live-server.js --no-browser",
     "publish": "publish",
     "push": "npm run publish",
@@ -50,7 +51,6 @@
   "dependencies": {
     "accepts": "~1.3.7",
     "chokidar": "^3.5.1",
-    "colors": "^1.4.0",
     "cors": "^2.8.5",
     "debug": "^4.3.1",
     "destroy": "~1.0.4",
