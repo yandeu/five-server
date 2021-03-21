@@ -5,7 +5,7 @@ var path = require('path')
 // https://github.com/actions/toolkit/tree/main/packages/exec
 const exec = require('@actions/exec').exec
 
-var cmd = path.join(__dirname, '../lib', 'live-server.js')
+var cmd = path.join(__dirname, '../lib', 'bin.js')
 
 let stdout = ''
 let stderr = ''
