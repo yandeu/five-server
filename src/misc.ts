@@ -56,6 +56,8 @@ export const getConfigFile = (configFile: string | boolean = true) => {
     }
   }
 
+  if (options.root) options.root = options.root.replace(/^\/+/, '')
+
   return options
 }
 

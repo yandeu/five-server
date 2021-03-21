@@ -127,16 +127,16 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
 }
 
 // Patch paths
-const dir = (opts.root = process.argv[2] || '')
+opts.root = process.argv[2]?.replace(/^\/+/, '') || opts.root
 
 if (opts.watch) {
   opts.watch = opts.watch.map(function (relativePath) {
-    return path.join(dir, relativePath)
+    return path.join(opts.root, relativePath)
   })
 }
 if (opts.ignore) {
   opts.ignore = opts.ignore.map(function (relativePath) {
-    return path.join(dir, relativePath)
+    return path.join(opts.root, relativePath)
   })
 }
 
