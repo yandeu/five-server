@@ -37,13 +37,17 @@ const staticServer = root => {
   }
   return function (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') return next()
-    const reqpath = isFile ? '' : url.parse(req.url).pathname
+    const baseURL = `http://${req.headers.host}/`
+    const reqUrl = new URL(req.url, baseURL)
+    const reqpath = isFile ? '' : reqUrl.pathname
     const hasNoOrigin = !req.headers.origin
     const injectCandidates = [new RegExp('</body>', 'i'), new RegExp('</head>', 'i'), new RegExp('</svg>')]
     let injectTag: any = null
 
     function directory() {
-      const pathname = url.parse(req.originalUrl).pathname
+      const baseURL = `http://${req.headers.host}/`
+      const reqUrl = new URL(req.url, baseURL)
+      const pathname = reqUrl.pathname
       res.statusCode = 301
       res.setHeader('Location', `${pathname}/`)
       res.end(`Redirecting to ${escape(pathname)}/`)
@@ -288,9 +292,8 @@ export default class LiveServer {
       if (LiveServer.logLevel >= 1) console.log('Mapping %s to "%s"', mountRule[0], mountPath)
     })
     proxy.forEach(function (proxyRule) {
-      // MOD: Not sure if this mod works :/
+      // TODO: Replace deprecated url.parse()
       const proxyOpts: any = url.parse(proxyRule[1])
-      // let proxyOpts:any = new URL(proxyRule[1])
       proxyOpts.via = true
       proxyOpts.preserveHost = true
       app.use(proxyRule[0], require('proxy-middleware')(proxyOpts))
