@@ -39,7 +39,7 @@ const staticServer = root => {
     if (req.method !== 'GET' && req.method !== 'HEAD') return next()
     const reqpath = isFile ? '' : url.parse(req.url).pathname
     const hasNoOrigin = !req.headers.origin
-    const injectCandidates = [new RegExp('</body>', 'i'), new RegExp('</svg>'), new RegExp('</head>', 'i')]
+    const injectCandidates = [new RegExp('</body>', 'i'), new RegExp('</head>', 'i'), new RegExp('</svg>')]
     let injectTag: any = null
 
     function directory() {
