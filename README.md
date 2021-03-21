@@ -37,6 +37,24 @@ $ npm -g i five-server@latest
 
 Same as for [Live-Server](https://www.npmjs.com/package/live-server).
 
+## Config File
+
+A simple example of a `.fiveserverrc` config file:  
+Your browser will open the about page of your portfolio project at `http://127.0.0.1:8085/about.html`.
+
+```json
+// .fiveserverrc
+{
+  "port": 8085,
+  "root": "src/portfolio",
+  "open": "/about.html"
+}
+```
+
+## VSCode Extension
+
+Download it from [marketplace.visualstudio.com](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server).
+
 ## Logo
 
 ![logo](https://raw.githubusercontent.com/yandeu/five-server/main/img/logo.png)
