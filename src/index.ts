@@ -119,29 +119,58 @@ const entryPoint = (staticHandler, file) => {
   }
 }
 
+/** five-server start params */
+export interface LiveServerParams {
+  /** When set, serve this file (server root relative) for every 404 (useful for single-page applications). */
+  file?: string
+  /**  Set the address to bind to. Defaults to 0.0.0.0 or process.env.IP. */
+  host?: string
+  /** Path to htpasswd file to enable HTTP Basic authentication */
+  htpasswd?: string
+  /** Comma-separated string for paths to ignore. */
+  ignore?: string
+  /** Ignore files by RegExp. */
+  ignorePattern?: any
+  /** 0 = errors only, 1 = some, 2 = lots */
+  logLevel?: 0 | 1 | 2
+  /** Mount a directory to a route, e.g. [['/components', './node_modules']].*/
+  mount?: string[][]
+  /** Takes an array of Connect-compatible middleware that are injected into the server middleware stack. */
+  middleware?: Array<(req: any, res: any, next: any) => void>
+  /** Don't inject CSS changes, just reload as with any other file change. */
+  noCssInject?: boolean
+  /** Subpath(s) to open in browser, use false to suppress launch. */
+  open?: string | string[] | boolean
+  /** Set the server port. Defaults to 8080. */
+  port?: number
+  /** Set root directory that's being served. Defaults to cwd. */
+  root?: string
+  /** Waits for all changes, before reloading. Defaults to 0 sec. */
+  wait?: number
+  /** Paths to exclusively watch for changes */
+  watch?: string[]
+
+  /** @deprecated Use open instead */
+  noBrowser?: boolean
+
+  spa?: boolean
+  browser?: string
+  cors?: boolean
+  https?: any
+  proxy?: any
+  httpsModule?: any
+  configFile?: any
+
+  _cli?: boolean
+}
+
 export default class LiveServer {
   static server: http.Server
   static watcher: chokidar.FSWatcher
   static logLevel = 2
 
-  /**
-   * Start a live server with parameters given as an object
-   * @param host {string} Address to bind to (default: 0.0.0.0)
-   * @param port {number} Port number (default: 8080)
-   * @param root {string} Path to root directory (default: cwd)
-   * @param watch {array} Paths to exclusively watch for changes
-   * @param ignore {array} Paths to ignore when watching files for changes
-   * @param ignorePattern {regexp} Ignore files by RegExp
-   * @param noCssInject Don't inject CSS changes, just reload as with any other file change
-   * @param open {(string|string[])} Subpath(s) to open in browser, use false to suppress launch (default: server root)
-   * @param mount {array} Mount directories onto a route, e.g. [['/components', './node_modules']].
-   * @param logLevel {number} 0 = errors only, 1 = some, 2 = lots
-   * @param file {string} Path to the entry point file
-   * @param wait {number} Server will wait for all changes, before reloading
-   * @param htpasswd {string} Path to htpasswd file to enable HTTP Basic authentication
-   * @param middleware {array} Append middleware to stack, e.g. [function(req, res, next) { next(); }].
-   */
-  public static async start(options: any = {}): Promise<http.Server> {
+  /** Start five-server */
+  public static async start(options: LiveServerParams = {}): Promise<http.Server> {
     if (!options._cli) {
       const opts = getConfigFile(options.configFile)
       options = { ...opts, ...options }
@@ -202,6 +231,7 @@ export default class LiveServer {
       app.use(logger('dev'))
     }
     if (options.spa) {
+      // @ts-expect-error
       middleware.push('spa')
     }
     // Add middleware
@@ -347,10 +377,12 @@ export default class LiveServer {
         if (openPath !== null)
           if (typeof openPath === 'object') {
             openPath.forEach(function (p) {
-              open(openURL + p, { app: browser })
+              if (browser) open(openURL + p, { app: { name: browser } })
+              else open(openURL + p)
             })
           } else {
-            open(openURL + openPath, { app: browser })
+            if (browser) open(openURL + openPath, { app: { name: browser } })
+            else open(openURL + openPath)
           }
       })
 
@@ -395,7 +427,7 @@ export default class LiveServer {
         clients.push(ws)
       })
 
-      let ignored = [
+      let ignored: any = [
         function (testPath) {
           // Always ignore dotfiles (important e.g. because editor hidden temp files)
           return testPath !== '.' && /(^[.#]|(?:__|~)$)/.test(path.basename(testPath))
@@ -437,6 +469,7 @@ export default class LiveServer {
     })
   }
 
+  /** Shutdown five-server */
   public static shutdown() {
     const watcher = LiveServer.watcher
     if (watcher) {
