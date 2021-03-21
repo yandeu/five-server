@@ -1,9 +1,6 @@
 import fs from 'fs'
 import path from 'path'
 
-// FIX: Package is not maintained anymore
-const assign = require('object-assign')
-
 export const error = (msg: string) => {
   if (msg) console.log(msg)
   else console.log('ERROR: Unknown :/')
@@ -25,7 +22,7 @@ export const escape = html => {
 }
 
 export const getConfigFile = (configFile: string | boolean = true) => {
-  const options: any = {
+  let options: any = {
     host: process.env.IP,
     port: process.env.PORT,
     open: true,
@@ -52,7 +49,7 @@ export const getConfigFile = (configFile: string | boolean = true) => {
       const configPath = path.join(d, f)
       if (fs.existsSync(configPath)) {
         const userConfig = fs.readFileSync(configPath, 'utf8')
-        assign(options, JSON.parse(userConfig))
+        options = { ...options, ...JSON.parse(userConfig) }
         if (options.ignorePattern) options.ignorePattern = new RegExp(options.ignorePattern)
         break loop
       }
