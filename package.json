@@ -5,8 +5,8 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
-    "live-server": "./lib/live-server.js",
-    "five-server": "./lib/live-server.js"
+    "live-server": "./lib/bin.js",
+    "five-server": "./lib/bin.js"
   },
   "keywords": [
     "browser",
