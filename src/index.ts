@@ -176,29 +176,38 @@ export default class LiveServer {
       options = { ...opts, ...options }
     }
 
-    const host = options.host || '0.0.0.0'
-    const port = options.port !== undefined ? options.port : 8080 // 0 means random
+    const {
+      browser = null,
+      cors = false,
+      file,
+      host = '0.0.0.0',
+      htpasswd = null,
+      https = null,
+      logLevel = 2,
+      middleware = [],
+      mount = [],
+      noCssInject,
+      port = 8080,
+      proxy = [],
+      wait = 100
+    } = options
+
     const root = options.root || process.cwd()
-    const mount = options.mount || []
     const watchPaths = options.watch || [root]
-    LiveServer.logLevel = options.logLevel === undefined ? 2 : options.logLevel
+
+    LiveServer.logLevel = logLevel
+
     let openPath =
       options.open === undefined || options.open === true
         ? ''
         : options.open === null || options.open === false
         ? null
         : options.open
+
     if (options.noBrowser) openPath = null // Backwards compatibility with 0.7.0
-    const file = options.file
+
     const staticServerHandler = staticServer(root)
-    const wait = options.wait === undefined ? 100 : options.wait
-    const browser = options.browser || null
-    const htpasswd = options.htpasswd || null
-    const cors = options.cors || false
-    const https = options.https || null
-    const proxy = options.proxy || []
-    const middleware = options.middleware || []
-    const noCssInject = options.noCssInject
+
     let httpsModule = options.httpsModule
 
     if (httpsModule) {
