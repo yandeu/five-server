@@ -7,7 +7,6 @@ import http from 'http'
 import logger from 'morgan'
 import os from 'os'
 import path from 'path'
-import url from 'url'
 
 // FIX: Packages are not maintained anymore (replace them!)
 import express from 'express' // const connect = require('connect')
@@ -23,6 +22,7 @@ import WebSocket from 'ws' // eslint-disable-line sort-imports
 // const open = require('opn')
 import open from 'open'
 import { colors } from './colors'
+import { ProxyMiddlewareOptions } from './dependencies/proxy-middleware'
 
 const INJECTED_CODE = fs.readFileSync(path.join(__dirname, '../injected.html'), 'utf8')
 
@@ -292,10 +292,26 @@ export default class LiveServer {
       if (LiveServer.logLevel >= 1) console.log('Mapping %s to "%s"', mountRule[0], mountPath)
     })
     proxy.forEach(function (proxyRule) {
-      // TODO: Replace deprecated url.parse()
-      const proxyOpts: any = url.parse(proxyRule[1])
-      proxyOpts.via = true
-      proxyOpts.preserveHost = true
+      const url = new URL(proxyRule[1])
+
+      const proxyOpts: ProxyMiddlewareOptions = {
+        hash: url.hash,
+        host: url.host,
+        hostname: url.hostname,
+        href: url.href,
+        origin: url.origin,
+        password: url.password,
+        path: url.pathname + url.search,
+        pathname: url.pathname,
+        port: url.port,
+        preserveHost: true,
+        protocol: url.protocol,
+        search: url.search,
+        searchParams: url.searchParams,
+        username: url.username,
+        via: true
+      }
+
       app.use(proxyRule[0], require('./dependencies/proxy-middleware')(proxyOpts))
       if (LiveServer.logLevel >= 1) console.log('Mapping %s to "%s"', proxyRule[0], proxyRule[1])
     })

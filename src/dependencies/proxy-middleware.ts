@@ -11,11 +11,23 @@ const http = require('http')
 const https = require('https')
 const owns = {}.hasOwnProperty
 
-module.exports = function proxyMiddleware(options) {
-  //enable ability to quickly pass a url for shorthand setup
-  if (typeof options === 'string') {
-    options = require('url').parse(options)
-  }
+export interface ProxyMiddlewareOptions extends Omit<URL, 'toJSON'> {
+  cookieRewrite?: boolean
+  headers?: any
+  method?: any
+  preserveHost: boolean
+  route?: string
+  via: boolean
+  /** @deprecated The path property is a concatenation of the pathname and search components. */
+  path: string
+}
+
+module.exports = function proxyMiddleware(options: ProxyMiddlewareOptions) {
+  // enable ability to quickly pass a url for shorthand setup
+  // not implemented yet
+  // if (typeof options === 'string') {
+  //   options = require('url').parse(options)
+  // }
 
   const httpLib = options.protocol === 'https:' ? https : http
   const request = httpLib.request
@@ -37,7 +49,7 @@ module.exports = function proxyMiddleware(options) {
     }
 
     //options for this request
-    const opts = extend({}, options)
+    const opts = { ...options }
     if (url && url.charAt(0) === '?') {
       // prevent /api/resource/?offset=0
       if (options.pathname.length > 1 && options.pathname.charAt(options.pathname.length - 1) === '/') {
@@ -92,7 +104,7 @@ module.exports = function proxyMiddleware(options) {
   }
 }
 
-function applyViaHeader(existingHeaders, opts, applyTo) {
+function applyViaHeader(existingHeaders, opts: ProxyMiddlewareOptions, applyTo) {
   if (!opts.via) return
 
   const viaName = true === opts.via ? os.hostname() : opts.via
@@ -104,7 +116,7 @@ function applyViaHeader(existingHeaders, opts, applyTo) {
   applyTo.via = viaHeader
 }
 
-function rewriteCookieHosts(existingHeaders, opts, applyTo, req) {
+function rewriteCookieHosts(existingHeaders, opts: ProxyMiddlewareOptions, applyTo, req) {
   if (!opts.cookieRewrite || !owns.call(existingHeaders, 'set-cookie')) {
     return
   }
