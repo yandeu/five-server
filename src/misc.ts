@@ -21,6 +21,14 @@ export const escape = html => {
     .replace(/"/g, '&quot;')
 }
 
+export const removeLeadingSlash = (str: string) => {
+  return str.replace(/^\/+/g, '')
+}
+
+export const removeTrailingSlash = (str: string) => {
+  return str.replace(/\/+$/g, '')
+}
+
 export const getConfigFile = (configFile: string | boolean = true) => {
   let options: any = {
     host: process.env.IP,

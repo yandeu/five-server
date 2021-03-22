@@ -1,7 +1,7 @@
 /* eslint-disable sort-imports */
 
 import chokidar from 'chokidar'
-import { error, escape, getConfigFile } from './misc'
+import { error, escape, getConfigFile, removeLeadingSlash } from './misc'
 import fs from 'fs'
 import http from 'http'
 import logger from 'morgan'
@@ -26,7 +26,7 @@ import { ProxyMiddlewareOptions } from './dependencies/proxy-middleware'
 
 const INJECTED_CODE = fs.readFileSync(path.join(__dirname, '../injected.html'), 'utf8')
 
-// Based on connect.static(), but streamlined and with added code injecter
+// Based on connect.static(), but streamlined and with added code injector
 const staticServer = root => {
   let isFile = false
   try {
@@ -144,7 +144,7 @@ export interface LiveServerParams {
   /** Don't inject CSS changes, just reload as with any other file change. */
   noCssInject?: boolean
   /** Subpath(s) to open in browser, use false to suppress launch. */
-  open?: string | string[] | boolean
+  open?: string | string[] | boolean | null
   /** Set the server port. Defaults to 8080. */
   port?: number
   /** Set root directory that's being served. Defaults to cwd. */
@@ -199,16 +199,15 @@ export default class LiveServer {
     const root = options.root || process.cwd()
     const watchPaths = options.watch || [root]
 
-    LiveServer.logLevel = logLevel
-
-    let openPath =
-      options.open === undefined || options.open === true
-        ? ''
-        : options.open === null || options.open === false
-        ? null
-        : options.open
+    let openPath = options.open
+    if (typeof openPath === 'string') openPath = removeLeadingSlash(openPath)
+    else if (Array.isArray(openPath)) openPath.map(o => removeLeadingSlash(o))
+    else if (openPath === undefined) openPath = true
+    else if (openPath === false) openPath = null
 
     if (options.noBrowser) openPath = null // Backwards compatibility with 0.7.0
+
+    LiveServer.logLevel = logLevel
 
     const staticServerHandler = staticServer(root)
 
@@ -405,12 +404,12 @@ export default class LiveServer {
         if (openPath !== null)
           if (typeof openPath === 'object') {
             openPath.forEach(function (p) {
-              if (browser) open(openURL + p, { app: { name: browser } })
-              else open(openURL + p)
+              if (browser) open(`${openURL}/${p}`, { app: { name: browser } })
+              else open(`${openURL}/${p}`)
             })
           } else {
-            if (browser) open(openURL + openPath, { app: { name: browser } })
-            else open(openURL + openPath)
+            if (browser) open(`${openURL}/${openPath}`, { app: { name: browser } })
+            else open(`${openURL}/${openPath}`)
           }
       })
 

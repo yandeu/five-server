@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { NAME, VERSION } from './const'
-import { error, getConfigFile } from './misc'
+import { error, getConfigFile, removeLeadingSlash } from './misc'
 import liveServer from './index'
 import path from 'path'
 
@@ -127,7 +127,7 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
 }
 
 // Patch paths
-opts.root = process.argv[2]?.replace(/^\/+/, '') || opts.root
+opts.root = process.argv[2] ? removeLeadingSlash(process.argv[2]) : opts.root
 
 if (opts.watch) {
   opts.watch = opts.watch.map(function (relativePath) {
