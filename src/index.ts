@@ -296,7 +296,7 @@ export default class LiveServer {
       const proxyOpts: any = url.parse(proxyRule[1])
       proxyOpts.via = true
       proxyOpts.preserveHost = true
-      app.use(proxyRule[0], require('proxy-middleware')(proxyOpts))
+      app.use(proxyRule[0], require('./dependencies/proxy-middleware')(proxyOpts))
       if (LiveServer.logLevel >= 1) console.log('Mapping %s to "%s"', proxyRule[0], proxyRule[1])
     })
     app
