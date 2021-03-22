@@ -26,7 +26,8 @@ import fs from 'fs'
 import mime from 'mime'
 // import ms from 'ms'
 import path from 'path'
-import statuses from 'statuses'
+// import statuses from 'statuses'
+import { statusToText } from './statuses'
 
 const extname = path.extname
 const join = path.join
@@ -129,7 +130,7 @@ class SendStream extends Stream {
     }
 
     const res = this.res
-    const msg = statuses[status] || String(status)
+    const msg = statusToText(status) || String(status)
     const doc = createHtmlDocument('Error', escapeHtml(msg))
 
     // clear existing headers
