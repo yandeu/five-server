@@ -24,7 +24,7 @@ const Stream = require('stream')
 
 import fs from 'fs'
 import mime from 'mime'
-import ms from 'ms'
+// import ms from 'ms'
 import path from 'path'
 import statuses from 'statuses'
 
@@ -38,33 +38,33 @@ const BYTES_RANGE_REGEXP = /^ *bytes=/
 const MAX_MAXAGE = 60 * 60 * 24 * 365 * 1000 // 1 year
 const UP_PATH_REGEXP = /(?:^|[\\/])\.\.(?:[\\/]|$)/
 
-const send = (req, path, options) => {
+interface SendStreamOptions {
+  acceptRanges?: any
+  cacheControl?: any
+  dotfiles?: any
+  end?: any
+  etag?: any
+  extensions?: any
+  from?: any
+  hidden?: any
+  immutable?: any
+  index?: any
+  lastModified?: any
+  maxAge?: number
+  maxage?: number
+  root?: any
+  start?: any
+}
+
+const send = (req, path, options: SendStreamOptions) => {
   return new SendStream(req, path, options)
 }
 export default send
 
 class SendStream extends Stream {
-  constructor(
-    public req: any,
-    public path: any,
-    public options: {
-      acceptRanges: any
-      cacheControl: any
-      dotfiles: any
-      end: any
-      etag: any
-      extensions: any
-      from: any
-      hidden: any
-      immutable: any
-      index: any
-      lastModified: any
-      maxAge: any
-      maxage: any
-      root: any
-      start: any
-    }
-  ) {
+  private _maxage: number
+
+  constructor(public req: any, public path: any, public options: SendStreamOptions) {
     super()
     const opts = options || {}
 
@@ -97,8 +97,8 @@ class SendStream extends Stream {
     this._index = opts.index !== undefined ? normalizeList(opts.index, 'index option') : ['index.html']
     this._lastModified = opts.lastModified !== undefined ? Boolean(opts.lastModified) : true
 
-    this._maxage = opts.maxAge || opts.maxage
-    this._maxage = typeof this._maxage === 'string' ? ms(this._maxage) : Number(this._maxage)
+    this._maxage = opts.maxAge || opts.maxage || 0
+    // this._maxage = typeof this._maxage === 'string' ? ms(this._maxage) : Number(this._maxage)
     this._maxage = !isNaN(this._maxage) ? Math.min(Math.max(0, this._maxage), MAX_MAXAGE) : 0
 
     this._root = opts.root ? resolve(opts.root) : null
