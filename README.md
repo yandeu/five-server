@@ -39,7 +39,9 @@ Same as for [Live-Server](https://www.npmjs.com/package/live-server).
 
 ## Config File
 
-A simple example of a `.fiveserverrc` config file:  
+You can use a `.fiveserverrc` or `.fiveserverrc.json` file to configure your server.
+
+A simple example of a config file:  
 Your browser will open the about page of your portfolio project at `http://127.0.0.1:8085/about.html`.
 
 ```json
@@ -47,7 +49,20 @@ Your browser will open the about page of your portfolio project at `http://127.0
 {
   "port": 8085,
   "root": "src/portfolio",
-  "open": "/about.html"
+  "open": "about.html"
+}
+```
+
+Open multiple html files:  
+Your browser will open `http://localhost:8086/about.html` and `http://localhost:8086/contact.html`
+
+```json
+// .fiveserverrc
+{
+  "port": 8086,
+  "root": "src/portfolio",
+  "open": ["about.html", "contact.html"],
+  "host": "localhost"
 }
 ```
 
