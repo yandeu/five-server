@@ -202,8 +202,8 @@ export default class LiveServer {
     let openPath = options.open
     if (typeof openPath === 'string') openPath = removeLeadingSlash(openPath)
     else if (Array.isArray(openPath)) openPath.map(o => removeLeadingSlash(o))
-    else if (openPath === undefined) openPath = true
-    else if (openPath === false) openPath = null
+    else if (openPath === undefined || openPath === true) openPath = ''
+    else if (openPath === null || openPath === false) openPath = null
 
     if (options.noBrowser) openPath = null // Backwards compatibility with 0.7.0
 
