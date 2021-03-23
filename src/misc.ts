@@ -47,7 +47,7 @@ export const getConfigFile = (configFile: string | boolean = true) => {
   }
 
   const dirs = [path.resolve()]
-  const files = ['.fiveserverrc', '.prettierrc.json', '.live-server.json']
+  const files = ['.fiveserverrc', '.fiveserverrc.json', '.live-server.json']
 
   const homeDir = process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME']
   if (homeDir) dirs.push(homeDir)
