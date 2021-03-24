@@ -16,6 +16,7 @@
     "live",
     "server",
     "cli",
+    "preview",
     "reload",
     "refresh",
     "live-server",
