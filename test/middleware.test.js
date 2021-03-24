@@ -1,12 +1,13 @@
-var request = require('supertest')
-var path = require('path')
+const request = require('supertest')
+const path = require('path')
+const LiveServer = require('../lib').default
 
-var liveServer1
-var liveServer2
-var liveServer3
+const liveServer1 = new LiveServer()
+const liveServer2 = new LiveServer()
+const liveServer3 = new LiveServer()
 
 beforeAll(async () => {
-  liveServer1 = await require('../lib').default.start({
+  await liveServer1.start({
     root: path.join(__dirname, 'data'),
     port: 0,
     open: false,
@@ -17,13 +18,13 @@ beforeAll(async () => {
       }
     ]
   })
-  liveServer2 = await require('../lib').default.start({
+  await liveServer2.start({
     root: path.join(__dirname, 'data'),
     port: 0,
     open: false,
     middleware: ['example']
   })
-  liveServer3 = await require('../lib').default.start({
+  await liveServer3.start({
     root: path.join(__dirname, 'data'),
     port: 0,
     open: false,
@@ -33,12 +34,18 @@ beforeAll(async () => {
 
 describe('middleware tests', function () {
   it("should respond with middleware function's status code", function (done) {
-    request(liveServer1).get('/').expect(201, done)
+    request(liveServer1.httpServer).get('/').expect(201, done)
   })
   it("should respond with built-in middleware's status code", function (done) {
-    request(liveServer2).get('/').expect(202, done)
+    request(liveServer2.httpServer).get('/').expect(202, done)
   })
   it("should respond with external middleware's status code", function (done) {
-    request(liveServer3).get('/').expect(203, done)
+    request(liveServer3.httpServer).get('/').expect(203, done)
   })
+})
+
+afterAll(async () => {
+  await liveServer1.shutdown()
+  await liveServer2.shutdown()
+  await liveServer3.shutdown()
 })

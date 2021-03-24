@@ -1,7 +1,7 @@
 /* eslint-disable sort-imports */
 
 import chokidar from 'chokidar'
-import { error, escape, getConfigFile, removeLeadingSlash } from './misc'
+import { error, getConfigFile, removeLeadingSlash } from './misc'
 import fs from 'fs'
 import http from 'http'
 import logger from 'morgan'
@@ -11,8 +11,6 @@ import path from 'path'
 // FIX: Packages are not maintained anymore (replace them!)
 import express from 'express' // const connect = require('connect')
 import serveIndex from './dependencies/serve-index' // const serveIndex = require('serve-index')
-import send from './dependencies/send'
-const es = require('event-stream') // looks ok for now (https://david-dm.org/dominictarr/event-stream)
 
 // MOD: Replaced "faye-websocket" by "ws"
 // const WebSocket: any = require('faye-websocket')
@@ -23,104 +21,12 @@ import WebSocket from 'ws' // eslint-disable-line sort-imports
 import open from 'open'
 import { colors } from './colors'
 import { ProxyMiddlewareOptions } from './dependencies/proxy-middleware'
+import { entryPoint, staticServer } from './staticServer'
 
 const INJECTED_CODE = fs.readFileSync(path.join(__dirname, '../injected.html'), 'utf8')
 
-// Based on connect.static(), but streamlined and with added code injector
-const staticServer = root => {
-  let isFile = false
-  try {
-    // For supporting mounting files instead of just directories
-    isFile = fs.statSync(root).isFile()
-  } catch (e) {
-    if (e.code !== 'ENOENT') throw e
-  }
-  return function (req, res, next) {
-    if (req.method !== 'GET' && req.method !== 'HEAD') return next()
-    const baseURL = `http://${req.headers.host}/`
-    const reqUrl = new URL(req.url, baseURL)
-    const reqpath = isFile ? '' : reqUrl.pathname
-    const hasNoOrigin = !req.headers.origin
-    const injectCandidates = [new RegExp('</body>', 'i'), new RegExp('</head>', 'i'), new RegExp('</svg>')]
-    let injectTag: any = null
-
-    function directory() {
-      const baseURL = `http://${req.headers.host}/`
-      const reqUrl = new URL(req.url, baseURL)
-      const pathname = reqUrl.pathname
-      res.statusCode = 301
-      res.setHeader('Location', `${pathname}/`)
-      res.end(`Redirecting to ${escape(pathname)}/`)
-    }
-
-    function file(filepath /*, stat*/) {
-      const x = path.extname(filepath).toLocaleLowerCase()
-      const possibleExtensions = ['', '.html', '.htm', '.xhtml', '.php', '.svg']
-      let match
-
-      if (hasNoOrigin && possibleExtensions.indexOf(x) > -1) {
-        // TODO: Sync file read here is not nice, but we need to determine if the html should be injected or not
-        const contents = fs.readFileSync(filepath, 'utf8')
-        for (let i = 0; i < injectCandidates.length; ++i) {
-          match = injectCandidates[i].exec(contents)
-          if (match) {
-            injectTag = match[0]
-            break
-          }
-        }
-        if (injectTag === null && LiveServer.logLevel >= 3) {
-          console.warn(
-            colors('Failed to inject refresh script!', 'yellow'),
-            "Couldn't find any of the tags ",
-            injectCandidates,
-            'from',
-            filepath
-          )
-        }
-      }
-    }
-
-    function error(err) {
-      if (err.status === 404) return next()
-      next(err)
-    }
-
-    function inject(stream) {
-      if (injectTag) {
-        // We need to modify the length given to browser
-        const len = INJECTED_CODE.length + res.getHeader('Content-Length')
-        res.setHeader('Content-Length', len)
-        const originalPipe = stream.pipe
-        stream.pipe = function (resp) {
-          originalPipe.call(stream, es.replace(new RegExp(injectTag, 'i'), INJECTED_CODE + injectTag)).pipe(resp)
-        }
-      }
-    }
-
-    send(req, reqpath, { root: root })
-      .on('error', error)
-      .on('directory', directory)
-      .on('file', file)
-      .on('stream', inject)
-      .pipe(res)
-  }
-}
-
-/**
- * Rewrite request URL and pass it back to the static handler.
- * @param staticHandler {function} Next handler
- * @param file {string} Path to the entry point file
- */
-const entryPoint = (staticHandler, file) => {
-  if (!file)
-    return function (req, res, next) {
-      next()
-    }
-
-  return function (req, res, next) {
-    req.url = `/${file}`
-    staticHandler(req, res, next)
-  }
+interface ExtendedWebSocket extends WebSocket {
+  sendWithDelay: (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => void
 }
 
 /** five-server start params */
@@ -169,12 +75,18 @@ export interface LiveServerParams {
 }
 
 export default class LiveServer {
-  static server: http.Server
-  static watcher: chokidar.FSWatcher
-  static logLevel = 2
+  public httpServer!: http.Server
+  public watcher!: chokidar.FSWatcher
+  public logLevel = 2
+
+  public get isRunning() {
+    return !!this.httpServer?.listening
+  }
 
   /** Start five-server */
-  public static async start(options: LiveServerParams = {}): Promise<http.Server> {
+  public async start(options: LiveServerParams = {}): Promise<http.Server> {
+    if (this.isRunning) await this.shutdown()
+
     if (!options._cli) {
       const opts = getConfigFile(options.configFile)
       options = { ...opts, ...options }
@@ -207,9 +119,9 @@ export default class LiveServer {
 
     if (options.noBrowser) openPath = null // Backwards compatibility with 0.7.0
 
-    LiveServer.logLevel = logLevel
+    this.logLevel = logLevel
 
-    const staticServerHandler = staticServer(root)
+    const staticServerHandler = staticServer(root, { logLevel, injectedCode: INJECTED_CODE })
 
     let httpsModule = options.httpsModule
 
@@ -230,7 +142,7 @@ export default class LiveServer {
     const app = express()
 
     // Add logger. Level 2 logs only errors
-    if (LiveServer.logLevel === 2) {
+    if (this.logLevel === 2) {
       app.use(
         logger('dev', {
           skip: function (req, res) {
@@ -239,7 +151,7 @@ export default class LiveServer {
         })
       )
       // Level 2 or above logs all requests
-    } else if (LiveServer.logLevel > 2) {
+    } else if (this.logLevel > 2) {
       app.use(logger('dev'))
     }
     if (options.spa) {
@@ -282,15 +194,15 @@ export default class LiveServer {
         })
       )
     }
-    mount.forEach(function (mountRule) {
+    mount.forEach(mountRule => {
       const mountPath = path.resolve(process.cwd(), mountRule[1])
       if (!options.watch)
         // Auto add mount paths to wathing but only if exclusive path option is not given
         watchPaths.push(mountPath)
-      app.use(mountRule[0], staticServer(mountPath))
-      if (LiveServer.logLevel >= 1) console.log('Mapping %s to "%s"', mountRule[0], mountPath)
+      app.use(mountRule[0], staticServer(mountPath, { logLevel, injectedCode: INJECTED_CODE }))
+      if (this.logLevel >= 1) console.log('Mapping %s to "%s"', mountRule[0], mountPath)
     })
-    proxy.forEach(function (proxyRule) {
+    proxy.forEach(proxyRule => {
       const url = new URL(proxyRule[1])
 
       const proxyOpts: ProxyMiddlewareOptions = {
@@ -312,60 +224,60 @@ export default class LiveServer {
       }
 
       app.use(proxyRule[0], require('./dependencies/proxy-middleware')(proxyOpts))
-      if (LiveServer.logLevel >= 1) console.log('Mapping %s to "%s"', proxyRule[0], proxyRule[1])
+      if (this.logLevel >= 1) console.log('Mapping %s to "%s"', proxyRule[0], proxyRule[1])
     })
     app
       .use(staticServerHandler) // Custom static server
       .use(entryPoint(staticServerHandler, file))
       .use(serveIndex(root, { icons: true }))
 
-    let server: http.Server
+    let httpServer: http.Server
     let protocol
     if (https !== null) {
       let httpsConfig = https
       if (typeof https === 'string') {
         httpsConfig = require(path.resolve(process.cwd(), https))
       }
-      server = require(httpsModule).createServer(httpsConfig, app)
+      httpServer = require(httpsModule).createServer(httpsConfig, app)
       protocol = 'https'
     } else {
-      server = http.createServer(app)
+      httpServer = http.createServer(app)
       protocol = 'http'
     }
 
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       // Handle server startup errors
-      server.addListener('error', function (e) {
+      httpServer.addListener('error', e => {
         // @ts-ignore
         if (e.message === 'EADDRINUSE' || (e.code && e.code === 'EADDRINUSE')) {
           const serveURL = `${protocol}://${host}:${port}`
           console.log(colors('%s is already in use. Trying another port.', 'yellow'), serveURL)
           setTimeout(function () {
-            server.listen(0, host)
+            httpServer.listen(0, host)
           }, 1000)
         } else {
           console.error(colors(e.toString(), 'red'))
-          LiveServer.shutdown()
+          this.shutdown()
           return reject(colors(e.toString(), 'red'))
         }
       })
 
-      // Handle successful server
-      server.addListener('listening', function (/*e*/) {
-        LiveServer.server = server
+      // Handle successful httpServer
+      httpServer.addListener('listening', (/*e*/) => {
+        this.httpServer = httpServer
 
-        const address = server.address() as any
+        const address = httpServer.address() as any
         const serveHost = address.address === '0.0.0.0' ? '127.0.0.1' : address.address
         const openHost = host === '0.0.0.0' ? '127.0.0.1' : host
 
         const serveURL = `${protocol}://${serveHost}:${address.port}`
         const openURL = `${protocol}://${openHost}:${address.port}`
 
-        resolve(server)
+        resolve(httpServer)
 
         let serveURLs: any = [serveURL]
-        if (LiveServer.logLevel > 2 && address.address === '0.0.0.0') {
+        if (this.logLevel > 2 && address.address === '0.0.0.0') {
           const ifaces = os.networkInterfaces()
 
           serveURLs = Object.keys(ifaces).map(iface => {
@@ -390,7 +302,7 @@ export default class LiveServer {
         }
 
         // Output
-        if (LiveServer.logLevel >= 1) {
+        if (this.logLevel >= 1) {
           if (serveURL === openURL)
             if (serveURLs.length === 1) {
               console.log(colors('Serving "%s" at %s', 'green'), root, serveURLs[0])
@@ -414,17 +326,16 @@ export default class LiveServer {
       })
 
       // Setup server to listen at port
-      await server.listen(port, host)
+      await httpServer.listen(port, host)
 
       // WebSocket
-      let clients: any[] = []
+      let clients: ExtendedWebSocket[] = []
       // server.addListener('upgrade', function (request, socket, head) {
       //   let ws: any = new WebSocket(request, socket, head)
 
-      const wss = new WebSocket.Server({ server })
+      const wss = new WebSocket.Server({ server: httpServer })
 
-      wss.on('connection', ws => {
-        // @ts-ignore
+      wss.on('connection', (ws: ExtendedWebSocket) => {
         ws.sendWithDelay = (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => {
           setTimeout(
             () => {
@@ -467,13 +378,13 @@ export default class LiveServer {
         ignored.push(options.ignorePattern)
       }
       // Setup file watcher
-      LiveServer.watcher = chokidar.watch(watchPaths, {
+      this.watcher = chokidar.watch(watchPaths, {
         ignored: ignored,
         ignoreInitial: true
       })
-      function handleChange(changePath) {
+      const handleChange = changePath => {
         const cssChange = path.extname(changePath) === '.css' && !noCssInject
-        if (LiveServer.logLevel >= 1) {
+        if (this.logLevel >= 1) {
           if (cssChange) console.log(colors('CSS change detected', 'magenta'), changePath)
           else console.log(colors('Change detected', 'cyan'), changePath)
         }
@@ -481,28 +392,40 @@ export default class LiveServer {
           if (ws) ws.sendWithDelay(cssChange ? 'refreshcss' : 'reload')
         })
       }
-      LiveServer.watcher
+      this.watcher
         .on('change', handleChange)
         .on('add', handleChange)
         .on('unlink', handleChange)
         .on('addDir', handleChange)
         .on('unlinkDir', handleChange)
-        .on('ready', function () {
-          if (LiveServer.logLevel >= 1) console.log(colors('Ready for changes', 'cyan'))
+        .on('ready', () => {
+          if (this.logLevel >= 1) console.log(colors('Ready for changes', 'cyan'))
         })
-        .on('error', function (err) {
+        .on('error', err => {
           console.log(colors('ERROR:', 'red'), err)
         })
     })
   }
 
+  /** Close five-server (same as shutdown()) */
+  public get close() {
+    return this.shutdown
+  }
+
   /** Shutdown five-server */
-  public static shutdown() {
-    const watcher = LiveServer.watcher
+  public async shutdown(): Promise<void> {
+    const watcher = this.watcher
     if (watcher) {
-      watcher.close()
+      await watcher.close()
     }
-    const server = LiveServer.server
-    if (server) server.close()
+    const httpServer = this.httpServer
+
+    return new Promise((resolve, reject) => {
+      if (httpServer && httpServer.listening)
+        httpServer.close(err => {
+          if (err) return reject(err.message)
+          else return resolve()
+        })
+    })
   }
 }

@@ -1,10 +1,11 @@
-var request = require('supertest')
-var path = require('path')
+const request = require('supertest')
+const path = require('path')
+const LiveServer = require('../lib').default
 
-var liveServer
+var liveServer = new LiveServer()
 
 beforeAll(async () => {
-  liveServer = await require('../lib').default.start({
+  await liveServer.start({
     root: path.join(__dirname, 'data'),
     port: 0,
     open: false,
@@ -17,17 +18,21 @@ beforeAll(async () => {
 
 describe('mount tests', function () {
   it('should respond with sub.html', function (done) {
-    request(liveServer)
+    request(liveServer.httpServer)
       .get('/mounted/sub.html')
       .expect('Content-Type', 'text/html; charset=UTF-8')
       .expect(/Subdirectory/i)
       .expect(200, done)
   })
   it('should respond with style.css', function (done) {
-    request(liveServer)
+    request(liveServer.httpServer)
       .get('/style')
       .expect('Content-Type', 'text/css; charset=UTF-8')
       .expect(/color/i)
       .expect(200, done)
   })
+})
+
+afterAll(async () => {
+  await liveServer.shutdown()
 })

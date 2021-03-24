@@ -1,17 +1,18 @@
-var request = require('supertest')
-var path = require('path')
+const request = require('supertest')
+const path = require('path')
+const LiveServer = require('../lib').default
 
-var liveServerSpa
-var liveServerSpaIgnoreAssets
+const liveServerSpa = new LiveServer()
+const liveServerSpaIgnoreAssets = new LiveServer()
 
 beforeAll(async () => {
-  liveServerSpa = await require('../lib').default.start({
+  await liveServerSpa.start({
     root: path.join(__dirname, 'data'),
     port: 0,
     open: false,
     middleware: ['spa']
   })
-  liveServerSpaIgnoreAssets = await require('../lib').default.start({
+  await liveServerSpaIgnoreAssets.start({
     root: path.join(__dirname, 'data'),
     port: 0,
     open: false,
@@ -21,15 +22,20 @@ beforeAll(async () => {
 
 describe('spa tests', function () {
   it('spa should redirect', function (done) {
-    request(liveServerSpa).get('/api').expect('Location', /\/#\//).expect(302, done)
+    request(liveServerSpa.httpServer).get('/api').expect('Location', /\/#\//).expect(302, done)
   })
   it('spa should redirect everything', function (done) {
-    request(liveServerSpa).get('/style.css').expect('Location', /\/#\//).expect(302, done)
+    request(liveServerSpa.httpServer).get('/style.css').expect('Location', /\/#\//).expect(302, done)
   })
   it('spa-ignore-assets should redirect something', function (done) {
-    request(liveServerSpaIgnoreAssets).get('/api').expect('Location', /\/#\//).expect(302, done)
+    request(liveServerSpaIgnoreAssets.httpServer).get('/api').expect('Location', /\/#\//).expect(302, done)
   })
   it('spa-ignore-assets should not redirect .css', function (done) {
-    request(liveServerSpaIgnoreAssets).get('/style.css').expect(200, done)
+    request(liveServerSpaIgnoreAssets.httpServer).get('/style.css').expect(200, done)
   })
+})
+
+afterAll(async () => {
+  await liveServerSpa.shutdown()
+  await liveServerSpaIgnoreAssets.shutdown()
 })

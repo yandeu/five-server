@@ -1,10 +1,11 @@
-var request = require('supertest')
-var path = require('path')
+const request = require('supertest')
+const path = require('path')
+const LiveServer = require('../lib').default
 
-var liveServer
+const liveServer = new LiveServer()
 
 beforeAll(async () => {
-  liveServer = await require('../lib').default.start({
+  await liveServer.start({
     root: path.join(__dirname, 'data'),
     port: 0,
     open: false,
@@ -14,7 +15,7 @@ beforeAll(async () => {
 
 describe('cors tests', function () {
   it('should respond with appropriate header', function (done) {
-    request(liveServer)
+    request(liveServer.httpServer)
       .get('/index.html')
       .set('Origin', 'http://example.com')
       .expect('Content-Type', 'text/html; charset=UTF-8')
@@ -23,7 +24,7 @@ describe('cors tests', function () {
       .expect(200, done)
   })
   it('should support preflighted requests', function (done) {
-    request(liveServer)
+    request(liveServer.httpServer)
       .options('/index.html')
       .set('Origin', 'http://example.com')
       .set('Access-Control-Request-Method', 'POST')
@@ -34,7 +35,7 @@ describe('cors tests', function () {
       .expect(204, done)
   })
   it('should support requests with credentials', function (done) {
-    request(liveServer)
+    request(liveServer.httpServer)
       .options('/index.html')
       .set('Origin', 'http://example.com')
       .set('Cookie', 'foo=bar')
@@ -42,4 +43,8 @@ describe('cors tests', function () {
       .expect('Access-Control-Allow-Credentials', 'true')
       .expect(204, done)
   })
+})
+
+afterAll(async () => {
+  await liveServer.shutdown()
 })

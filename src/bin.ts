@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 import { NAME, VERSION } from './const'
 import { error, getConfigFile, removeLeadingSlash } from './misc'
-import liveServer from './index'
+import LiveServer from './index'
 import path from 'path'
+
+const liveServer = new LiveServer()
+let isTesting = false
 
 const opts = getConfigFile()
 opts._cli = true
@@ -120,8 +123,8 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
     )
     process.exit()
   } else if (arg === '--test') {
-    // Hidden param for tests to exit automatically
-    setTimeout(liveServer.shutdown, 500)
+    // Hidden param for tests (with jest) to exit automatically
+    isTesting = true
     process.argv.splice(i, 1)
   }
 }
@@ -140,4 +143,17 @@ if (opts.ignore) {
   })
 }
 
-liveServer.start(opts)
+if (!isTesting) liveServer.start(opts)
+
+// when testing with jest
+if (isTesting) {
+  liveServer.start(opts).then(() => {
+    setTimeout(() => {
+      liveServer.shutdown().then(() => {
+        setTimeout(() => {
+          process.exit(0)
+        }, 500)
+      })
+    }, 500)
+  })
+}

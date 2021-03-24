@@ -1,9 +1,11 @@
-var request = require('supertest')
-var path = require('path')
-var liveServer
+const request = require('supertest')
+const path = require('path')
+const LiveServer = require('../lib').default
+
+const liveServer = new LiveServer()
 
 beforeAll(async () => {
-  liveServer = await require('../lib').default.start({
+  await liveServer.start({
     root: path.join(__dirname, 'data'),
     port: 0,
     open: false
@@ -12,35 +14,35 @@ beforeAll(async () => {
 
 describe('basic functional tests', function () {
   it('should respond with index.html', function (done) {
-    request(liveServer)
+    request(liveServer.httpServer)
       .get('/')
       .expect('Content-Type', 'text/html; charset=UTF-8')
       .expect(/hello world/i)
       .expect(200, done)
   })
   it('should have injected script', function (done) {
-    request(liveServer)
+    request(liveServer.httpServer)
       .get('/')
       .expect('Content-Type', 'text/html; charset=UTF-8')
       .expect(/<script [^]+?Five-Server is connected[^]+?<\/script>/i)
       .expect(200, done)
   })
   it('should inject script when tags are in CAPS', function (done) {
-    request(liveServer)
+    request(liveServer.httpServer)
       .get('/index-caps.htm')
       .expect('Content-Type', 'text/html; charset=UTF-8')
       .expect(/<script [^]+?Five-Server is connected[^]+?<\/script>/i)
       .expect(200, done)
   })
   it('should inject to <head> when no <body>', function (done) {
-    request(liveServer)
+    request(liveServer.httpServer)
       .get('/index-head.html')
       .expect('Content-Type', 'text/html; charset=UTF-8')
       .expect(/<script [^]+?Five-Server is connected[^]+?<\/script>/i)
       .expect(200, done)
   })
   it('should inject also svg files', function (done) {
-    request(liveServer)
+    request(liveServer.httpServer)
       .get('/test.svg')
       .expect('Content-Type', 'image/svg+xml')
       .expect(function (res) {
@@ -49,7 +51,7 @@ describe('basic functional tests', function () {
       .expect(200, done)
   })
   it('should not inject html fragments', function (done) {
-    request(liveServer)
+    request(liveServer.httpServer)
       .get('/fragment.html')
       .expect('Content-Type', 'text/html; charset=UTF-8')
       .expect(function (res) {
@@ -67,4 +69,8 @@ describe('basic functional tests', function () {
   xit('should reload (without refreshing) on css change', function (done) {
     done() // todo
   })
+})
+
+afterAll(async () => {
+  await liveServer.shutdown()
 })

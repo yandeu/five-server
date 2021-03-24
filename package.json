@@ -28,6 +28,7 @@
     "dev": "npm run clean && tsc --watch",
     "build": "npm run extract && tsc",
     "clean": "rimraf lib",
+    "prune": "rimraf lib node_modules package-lock.json",
     "format": "prettier --check src/**",
     "format:write": "prettier --write src/**",
     "lint": "eslint src --ext .ts,.tsx",

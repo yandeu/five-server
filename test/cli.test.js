@@ -1,16 +1,16 @@
-var assert = require('assert')
-var path = require('path')
+const assert = require('assert')
+const path = require('path')
 
 // run exec in github actions
 // https://github.com/actions/toolkit/tree/main/packages/exec
 const exec = require('@actions/exec').exec
 
-var cmd = path.join(__dirname, '../lib', 'bin.js')
+const cmd = path.join(__dirname, '../lib', 'bin.js')
 
 let stdout = ''
 let stderr = ''
 
-var options = {
+const options = {
   timeout: 2000,
   maxBuffer: 1024,
   listeners: {
@@ -65,7 +65,7 @@ describe('command line usage', function () {
     assert(stdout.indexOf('at http://localhost:') != -1, 'host string not found')
     done()
   })
-  // TODO: Does not work yet
+  // TODO: hppasswd does not work yet
   xit('--htpasswd', async done => {
     const error = await exec_test([
       '--htpasswd=' + path.join(__dirname, 'data/htpasswd-test'),
