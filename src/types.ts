@@ -16,8 +16,10 @@ export interface LiveServerParams {
   mount?: string[][]
   /** Takes an array of Connect-compatible middleware that are injected into the server middleware stack. */
   middleware?: Array<(req: any, res: any, next: any) => void>
-  /** Don't inject CSS changes, just reload as with any other file change. */
-  noCssInject?: boolean
+  /** Set to false to not inject body changes. (Default: false; Experimental; VSCode only) */
+  injectBody?: boolean
+  /** Set to false to not inject CSS changes, just reload as with any other file change. */
+  injectCss?: boolean
   /** Subpath(s) to open in browser, use false to suppress launch. */
   open?: string | string[] | boolean | null
   /** Set the server port. Defaults to 8080. */

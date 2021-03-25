@@ -5,10 +5,12 @@ import send from './dependencies/send'
 const es = require('event-stream') // looks ok for now (https://david-dm.org/dominictarr/event-stream)
 
 // Based on connect.static(), but streamlined and with added code injector
-export const staticServer = (root: any, opts: { logLevel: number; injectedCode: any }) => {
+export const staticServer = (root: any, opts: { logLevel: number; injectedCode: string }) => {
   const { logLevel, injectedCode } = opts
 
   let isFile = false
+  let filePath = ''
+
   try {
     // For supporting mounting files instead of just directories
     isFile = fs.statSync(root).isFile()
@@ -21,7 +23,7 @@ export const staticServer = (root: any, opts: { logLevel: number; injectedCode: 
     const reqUrl = new URL(req.url, baseURL)
     const reqpath = isFile ? '' : reqUrl.pathname
     const hasNoOrigin = !req.headers.origin
-    const injectCandidates = [new RegExp('</body>', 'i'), new RegExp('</head>', 'i'), new RegExp('</svg>')]
+    const injectCandidates = [new RegExp('</head>', 'i'), new RegExp('</body>', 'i'), new RegExp('</svg>')]
     let injectTag: any = null
 
     function directory() {
@@ -34,6 +36,8 @@ export const staticServer = (root: any, opts: { logLevel: number; injectedCode: 
     }
 
     function file(filepath /*, stat*/) {
+      filePath = filepath
+
       const x = path.extname(filepath).toLocaleLowerCase()
       const possibleExtensions = ['', '.html', '.htm', '.xhtml', '.php', '.svg']
       let match
@@ -67,12 +71,18 @@ export const staticServer = (root: any, opts: { logLevel: number; injectedCode: 
 
     function inject(stream) {
       if (injectTag) {
+        const injection = `
+    <!-- Code injected by Five-server -->
+    <script data-file="${filePath}" type="text/javascript" src="/fiveserver.js"></script>
+
+  ${injectTag}`
+
         // We need to modify the length given to browser
-        const len = injectedCode.length + res.getHeader('Content-Length')
+        const len = injection.length + res.getHeader('Content-Length') - injectTag.length
         res.setHeader('Content-Length', len)
         const originalPipe = stream.pipe
         stream.pipe = function (resp) {
-          originalPipe.call(stream, es.replace(new RegExp(injectTag, 'i'), injectedCode + injectTag)).pipe(resp)
+          originalPipe.call(stream, es.replace(new RegExp(injectTag, 'i'), injection)).pipe(resp)
         }
       }
     }

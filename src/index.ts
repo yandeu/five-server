@@ -30,12 +30,17 @@ const INJECTED_CODE = fs.readFileSync(path.join(__dirname, '../injected.html'), 
 
 interface ExtendedWebSocket extends WebSocket {
   sendWithDelay: (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => void
+  file: string
 }
 
 export default class LiveServer {
   public httpServer!: http.Server
   public watcher!: chokidar.FSWatcher
   public logLevel = 2
+  public injectBody = false
+
+  // WebSocket clients
+  clients: ExtendedWebSocket[] = []
 
   public get isRunning() {
     return !!this.httpServer?.listening
@@ -60,11 +65,14 @@ export default class LiveServer {
       logLevel = 2,
       middleware = [],
       mount = [],
-      noCssInject,
+      injectCss = true,
+      injectBody = false,
       port = 8080,
       proxy = [],
       wait = 100
     } = options
+
+    this.injectBody = injectBody
 
     const root = options.root || process.cwd()
     const watchPaths = options.watch || [root]
@@ -98,6 +106,13 @@ export default class LiveServer {
 
     // Setup a web server
     const app = express()
+
+    app.use((req, res, next) => {
+      if (req.url === '/fiveserver.js') {
+        return res.sendFile(path.join(__dirname, '../injected.js'))
+      }
+      next()
+    })
 
     // Add logger. Level 2 logs only errors
     if (this.logLevel === 2) {
@@ -286,8 +301,6 @@ export default class LiveServer {
       // Setup server to listen at port
       await httpServer.listen(port, host)
 
-      // WebSocket
-      let clients: ExtendedWebSocket[] = []
       // server.addListener('upgrade', function (request, socket, head) {
       //   let ws: any = new WebSocket(request, socket, head)
 
@@ -310,17 +323,30 @@ export default class LiveServer {
         //   console.log('WS ERROR:', err)
         // })
 
+        ws.on('message', data => {
+          try {
+            if (typeof data === 'string') {
+              const json = JSON.parse(data)
+              if (json && json.file) {
+                ws.file = json.file
+              }
+            }
+          } catch (err) {
+            //
+          }
+        })
+
         ws.on('open', () => {
           ws.send('connected')
         })
 
         ws.on('close', () => {
-          clients = clients.filter(function (x) {
+          this.clients = this.clients.filter(function (x) {
             return x !== ws
           })
         })
 
-        clients.push(ws)
+        this.clients.push(ws)
       })
 
       let ignored: any = [
@@ -341,12 +367,15 @@ export default class LiveServer {
         ignoreInitial: true
       })
       const handleChange = changePath => {
-        const cssChange = path.extname(changePath) === '.css' && !noCssInject
+        const htmlChange = path.extname(changePath) === '.html'
+        if (htmlChange && injectBody) return
+
+        const cssChange = path.extname(changePath) === '.css' && injectCss
         if (this.logLevel >= 1) {
           if (cssChange) console.log(colors('CSS change detected', 'magenta'), changePath)
           else console.log(colors('Change detected', 'cyan'), changePath)
         }
-        clients.forEach(function (ws) {
+        this.clients.forEach(ws => {
           if (ws) ws.sendWithDelay(cssChange ? 'refreshcss' : 'reload')
         })
       }
@@ -362,6 +391,27 @@ export default class LiveServer {
         .on('error', err => {
           console.log(colors('ERROR:', 'red'), err)
         })
+    })
+  }
+
+  /** Reloads all browser windows */
+  public reloadBrowserWindow() {
+    this.clients.forEach(ws => {
+      if (ws) ws.sendWithDelay('reload')
+    })
+  }
+
+  /** Manually refresh css */
+  public refreshCSS() {
+    this.clients.forEach(ws => {
+      if (ws) ws.sendWithDelay('refreshcss')
+    })
+  }
+
+  /** Inject new HTML into the body (VSCode only) */
+  public updateBody(body: string, file: string) {
+    this.clients.forEach(ws => {
+      if (ws && ws.file === file) ws.sendWithDelay(body)
     })
   }
 

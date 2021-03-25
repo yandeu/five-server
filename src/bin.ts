@@ -7,7 +7,7 @@ import path from 'path'
 const liveServer = new LiveServer()
 let isTesting = false
 
-const opts = getConfigFile()
+const opts: any = getConfigFile()
 opts._cli = true
 
 for (let i = process.argv.length - 1; i >= 2; --i) {
@@ -51,7 +51,7 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
     opts.ignorePattern = new RegExp(arg.substring(16))
     process.argv.splice(i, 1)
   } else if (arg === '--no-css-inject') {
-    opts.noCssInject = true
+    opts.injectCss = false
     process.argv.splice(i, 1)
   } else if (arg === '--no-browser') {
     opts.open = false

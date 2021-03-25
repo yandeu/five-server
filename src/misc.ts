@@ -1,3 +1,4 @@
+import { LiveServerParams } from '.'
 import fs from 'fs'
 import path from 'path'
 
@@ -21,7 +22,7 @@ export const escape = html => {
     .replace(/"/g, '&quot;')
 }
 
-export const removeLeadingSlash = (str: string) => {
+export const removeLeadingSlash = (str: string): string => {
   return str.replace(/^\/+/g, '')
 }
 
@@ -29,10 +30,10 @@ export const removeTrailingSlash = (str: string) => {
   return str.replace(/\/+$/g, '')
 }
 
-export const getConfigFile = (configFile: string | boolean = true) => {
-  let options: any = {
+export const getConfigFile = (configFile: string | boolean = true): LiveServerParams => {
+  let options: LiveServerParams = {
     host: process.env.IP,
-    port: process.env.PORT,
+    port: process.env.PORT ? parseInt(process.env.PORT) : 8080,
     open: true,
     mount: [],
     proxy: [],
