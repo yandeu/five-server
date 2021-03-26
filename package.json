@@ -26,7 +26,7 @@
     "depcheck": "npx depcheck",
     "start": "npm run dev",
     "dev": "npm run clean && tsc --watch",
-    "build": "npm run extract && tsc",
+    "build": "npm run extract && tsc && tsc --project tsconfig.injected.json",
     "clean": "rimraf lib",
     "prune": "rimraf lib node_modules package-lock.json",
     "format": "prettier --check src/**",
@@ -36,7 +36,6 @@
     "extract": "extract version name src/const.ts",
     "test": "jest --forceExit --silent",
     "test:big": "npm run clean && npm run build && npm run format:write && npm run lint:fix && npm run test",
-    "live-server": "node ./lib/live-server.js --no-browser",
     "publish": "publish",
     "push": "npm run publish",
     "preReleaseHook": "clean build format:write lint:fix test"
