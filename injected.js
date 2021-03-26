@@ -28,6 +28,8 @@ if ("WebSocket" in window) {
         const d = JSON.parse(msg.data);
         if (d.body) injectBody(d.body);
         if (d.position) {
+          // TODO: This highlight section needs improvement
+
           let line = d.position.line + 1;
           let char = d.position.character;
 
@@ -48,9 +50,6 @@ if ("WebSocket" in window) {
             if (match) {
               const firstIndex = lines[line].indexOf(match[0]);
               const lastIndex = lines[line].lastIndexOf(match[match.length - 1], char ? char : lines[line].length - 1);
-              // console.log("match", match);
-              // console.log("first", firstIndex);
-              // console.log("lastIndex", lastIndex);
 
               // the open html tag to the left
               if (lastIndex >= 0) i = lastIndex;
@@ -61,9 +60,7 @@ if ("WebSocket" in window) {
               if (i !== -1) i += match[0].length - 1;
             }
 
-            // i = lines[line].lastIndexOf(">", char ? char : lines[line].length - 1);
             char = undefined;
-            // console.log("i", i, "l", line, "line", lines[line]);
           }
 
           if (i === -1) {
@@ -71,7 +68,14 @@ if ("WebSocket" in window) {
             return;
           }
 
-          lines[line] = lines[line].slice(0, i) + ' data-hightlight="true"' + lines[line].slice(i);
+          let part1 = lines[line].slice(0, i).replace(/(<\w[^>]*)(>)(?!.*<\w[^>]*>)/gm, `$1 data-hightlight="true">`);
+          let part2 = lines[line].slice(i);
+
+          if (!part1.includes('data-hightlight="true"')) {
+            part1 += ' data-hightlight="true"';
+          }
+
+          lines[line] = part1 + part2;
 
           const hasChanges = document.body.innerHTML.trim() !== lines.join("\n").trim();
 
