@@ -422,9 +422,15 @@ export default class LiveServer {
   }
 
   /** Inject new HTML into the body (VSCode only) */
-  public updateBody(body: string, file: string) {
+  public updateBody(file: string, body: string, position?: { line: number; character: number }) {
     this.clients.forEach(ws => {
-      if (ws && ws.file === file) ws.sendWithDelay(body)
+      if (ws && ws.file === file) ws.sendWithDelay(JSON.stringify({ body, position }))
+    })
+  }
+
+  public highlight(file: string, position: { line: number; character: number }) {
+    this.clients.forEach(ws => {
+      if (ws && ws.file === file) ws.sendWithDelay(JSON.stringify({ position }))
     })
   }
 
