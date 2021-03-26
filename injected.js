@@ -120,15 +120,7 @@ if ("WebSocket" in window) {
       `;
       document.head.appendChild(style);
 
-      console.log(
-        `%c %c %c %c %c Five-Server is connected. %c https://npmjs.com/five-server`,
-        "background: #ff0000",
-        "background: #ffff00",
-        "background: #00ff00",
-        "background: #00ffff",
-        "color: #fff; background: #000000;",
-        "background: none",
-      );
+      console.log("Five-Server connected! https://npmjs.com/five-server");
     };
   })();
 }
