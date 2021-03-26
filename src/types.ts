@@ -30,6 +30,8 @@ export interface LiveServerParams {
   wait?: number
   /** Paths to exclusively watch for changes */
   watch?: string[]
+  /** Absolute path of your workspace (for VSCode extension) */
+  workspace?: string
 
   /** @deprecated Use open instead */
   noBrowser?: boolean

@@ -30,7 +30,7 @@ export const removeTrailingSlash = (str: string) => {
   return str.replace(/\/+$/g, '')
 }
 
-export const getConfigFile = (configFile: string | boolean = true): LiveServerParams => {
+export const getConfigFile = (configFile: string | boolean = true, workspace?: string): LiveServerParams => {
   let options: LiveServerParams = {
     host: process.env.IP,
     port: process.env.PORT ? parseInt(process.env.PORT) : 8080,
@@ -47,11 +47,17 @@ export const getConfigFile = (configFile: string | boolean = true): LiveServerPa
     return options
   }
 
-  const dirs = [path.resolve()]
+  const dirs: string[] = []
   const files = ['.fiveserverrc', '.fiveserverrc.json', '.live-server.json']
+
+  if (workspace) dirs.push(workspace)
+
+  dirs.push(path.resolve())
 
   const homeDir = process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME']
   if (homeDir) dirs.push(homeDir)
+
+  dirs.push(process.cwd())
 
   loop: for (const d of dirs) {
     for (const f of files) {

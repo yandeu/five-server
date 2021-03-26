@@ -56,7 +56,7 @@ export default class LiveServer {
   /** Start five-server */
   public async start(options: LiveServerParams = {}): Promise<void> {
     if (!options._cli) {
-      const opts = getConfigFile(options.configFile)
+      const opts = getConfigFile(options.configFile, options.workspace)
       options = { ...opts, ...options }
     }
 
