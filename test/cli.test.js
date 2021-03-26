@@ -55,14 +55,14 @@ describe('command line usage', function () {
     const error = await exec_test(['--port=16123', '--no-browser', '--test'])
     assert(!error, error)
     assert(stdout.indexOf('Serving') >= 0, 'serving string not found')
-    assert(stdout.indexOf('at http://127.0.0.1:16123') != -1, 'port string not found')
+    assert(stdout.indexOf('at http://localhost:16123') != -1, 'port string not found')
     done()
   })
   it('--host', async done => {
-    const error = await exec_test(['--host=localhost', '--no-browser', '--test'])
+    const error = await exec_test(['--host=0.0.0.0', '--no-browser', '--test'])
     assert(!error, error)
     assert(stdout.indexOf('Serving') >= 0, 'serving string not found')
-    assert(stdout.indexOf('at http://localhost:') != -1, 'host string not found')
+    assert(stdout.indexOf('at http://127.0.0.1:') != -1, 'host string not found')
     done()
   })
   // TODO: hppasswd does not work yet

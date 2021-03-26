@@ -65,7 +65,10 @@ export const getConfigFile = (configFile: string | boolean = true): LiveServerPa
     }
   }
 
+  // some small adjustments
   if (options.root) options.root = options.root.replace(/^\/+/, '')
+  if (options.open === 'true') options.open = true
+  if (options.open === 'false') options.open = false
 
   return options
 }

@@ -59,7 +59,7 @@ export default class LiveServer {
       browser = null,
       cors = false,
       file,
-      host = '0.0.0.0',
+      host = 'localhost', // '0.0.0.0'
       htpasswd = null,
       https = null,
       logLevel = 2,

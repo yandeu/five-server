@@ -12,6 +12,7 @@ opts._cli = true
 
 for (let i = process.argv.length - 1; i >= 2; --i) {
   const arg = process.argv[i]
+
   if (arg.indexOf('--port=') > -1) {
     const portString = arg.substring(7)
     const portNumber = parseInt(portString, 10)
@@ -23,21 +24,13 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
     opts.host = arg.substring(7)
     process.argv.splice(i, 1)
   } else if (arg.indexOf('--open=') > -1) {
-    let open = arg.substring(7)
-    if (open.indexOf('/') !== 0) {
-      open = `/${open}`
-    }
-    switch (typeof opts.open) {
-      case 'boolean':
-        opts.open = open
-        break
-      case 'string':
-        opts.open = [opts.open, open]
-        break
-      case 'object':
-        opts.open.push(open)
-        break
-    }
+    const open = arg.substring(7)
+
+    if (open === 'true') opts.open = true
+    else if (open === 'false') opts.open = false
+    else if (/,/.test(open)) opts.open = open.split(',').map(opn => (opn === '/' ? '' : opn))
+    else opts.open = open
+
     process.argv.splice(i, 1)
   } else if (arg.indexOf('--watch=') > -1) {
     // Will be modified later when cwd is known
