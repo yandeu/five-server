@@ -30,6 +30,12 @@ export const removeTrailingSlash = (str: string) => {
   return str.replace(/\/+$/g, '')
 }
 
+/**
+ * Get and parse the configFile.
+ * @param configFile Absolute path of configFile, or true, or false.
+ * @param workspace Absolute path to the current workspace.
+ * @returns LiveServerParams
+ */
 export const getConfigFile = (configFile: string | boolean = true, workspace?: string): LiveServerParams => {
   let options: LiveServerParams = {
     host: process.env.IP,
@@ -42,13 +48,22 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
   }
 
   if (configFile === false) return options
-  if (typeof configFile === 'string') {
-    console.log(`configFile can't be a string yet`)
-    return options
-  }
 
   const dirs: string[] = []
-  const files = ['.fiveserverrc', '.fiveserverrc.json', '.live-server.json']
+  const files = [
+    '.fiveserverrc',
+    '.fiveserverrc.json',
+    '.fiveserverrc.js',
+    '.fiveserverrc.cjs',
+    'fiveserver.config.js',
+    'fiveserver.config.cjs',
+    '.live-server.json'
+  ]
+
+  if (typeof configFile === 'string') {
+    // TODO: Add support for this
+    files.unshift(configFile)
+  }
 
   if (workspace) dirs.push(workspace)
 
@@ -63,9 +78,16 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
     for (const f of files) {
       const configPath = path.join(d, f)
       if (fs.existsSync(configPath)) {
-        const userConfig = fs.readFileSync(configPath, 'utf8')
-        options = { ...options, ...JSON.parse(userConfig) }
+        if (/\.c?js/.test(path.extname(configPath))) {
+          const config = require(configPath)
+          options = { ...options, ...config }
+        } else {
+          const config = fs.readFileSync(configPath, 'utf8')
+          options = { ...options, ...JSON.parse(config) }
+        }
+
         if (options.ignorePattern) options.ignorePattern = new RegExp(options.ignorePattern)
+
         break loop
       }
     }
