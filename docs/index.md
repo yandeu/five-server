@@ -12,9 +12,9 @@ The config file is picked up by [five-server](https://github.com/yandeu/five-ser
 
 FiveServer supports the following configuration files:
 
-- A `.prettierrc` file written in JSON.
-- A `.prettierrc.json` file.
-<!-- - A `.prettierrc.js`, `.prettierrc.cjs`, `prettier.config.js`, or `prettier.config.cjs` file that exports an object using `module.exports`. -->
+- A `.fiveserverrc` file written in JSON.
+- A `.fiveserverrc.json` file.
+- A `.fiveserverrc.js`, `.fiveserverrc.cjs`, `fiveserver.config.js`, or `fiveserver.config.cjs` file that exports an object using `module.exports`.
 
 Here's a simple example that serves everything from our `src/` directory on port 9000 in the project root:
 
