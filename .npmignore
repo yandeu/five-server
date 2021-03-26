@@ -2,6 +2,7 @@
 .github
 coverage
 node_modules
+dev
 src
 test
 package-lock.json
