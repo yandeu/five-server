@@ -1,3 +1,4 @@
+.cache
 .github
 coverage
 node_modules

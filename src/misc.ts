@@ -97,6 +97,7 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
   if (options.root) options.root = options.root.replace(/^\/+/, '')
   if (options.open === 'true') options.open = true
   if (options.open === 'false') options.open = false
+  if (options.https === 'true') options.https = true
 
   return options
 }
@@ -105,7 +106,7 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
  * @author       Benjamin Thomas (https://github.com/bentomas)
  * @author       Robert Kieffer (https://github.com/broofa)
  * @copyright    Copyright (c) 2010 Benjamin Thomas, Robert Kieffer
- * @license      {@link  https://github.com/broofa/mime/blob/v1.x/LICENSE|MIT}
+ * @license      {@link https://github.com/broofa/mime/blob/v1.x/LICENSE|MIT}
  * @description  charset() methods have been removed from mime v2, this is why I added it here
  */
 /** Lookup a charset based on mime type. */

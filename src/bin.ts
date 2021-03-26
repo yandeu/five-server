@@ -94,7 +94,9 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
     opts.cors = true
     process.argv.splice(i, 1)
   } else if (arg.indexOf('--https=') > -1) {
-    opts.https = arg.substring(8)
+    const https = arg.substring(8)
+    if (https === 'true') opts.https = true
+    else opts.https = https
     process.argv.splice(i, 1)
   } else if (arg.indexOf('--https-module=') > -1) {
     opts.httpsModule = arg.substring(15)

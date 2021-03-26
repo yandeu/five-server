@@ -4,6 +4,7 @@ import chokidar from 'chokidar'
 import { error, getConfigFile, removeLeadingSlash } from './misc'
 import fs from 'fs'
 import http from 'http'
+import https from 'https'
 import logger from 'morgan'
 import os from 'os'
 import path from 'path'
@@ -23,6 +24,7 @@ import { colors } from './colors'
 import { ProxyMiddlewareOptions } from './dependencies/proxy-middleware'
 import { entryPoint, staticServer } from './staticServer'
 import { LiveServerParams } from './types'
+import { getCertificate } from './utils/getCertificate'
 
 export { LiveServerParams }
 
@@ -66,7 +68,7 @@ export default class LiveServer {
       file,
       host = 'localhost', // '0.0.0.0'
       htpasswd = null,
-      https = null,
+      https: _https = null,
       logLevel = 2,
       middleware = [],
       mount = [],
@@ -216,12 +218,19 @@ export default class LiveServer {
       .use(entryPoint(staticServerHandler, file))
       .use(serveIndex(root, { icons: true }))
 
-    if (https !== null) {
-      let httpsConfig = https
-      if (typeof https === 'string') {
-        httpsConfig = require(path.resolve(process.cwd(), https))
+    if (_https !== null) {
+      let httpsConfig = _https
+
+      if (typeof _https === 'string') {
+        httpsConfig = require(path.resolve(process.cwd(), _https))
       }
-      this.httpServer = require(httpsModule).createServer(httpsConfig, app)
+
+      if (_https === true) {
+        const fakeCert = getCertificate()
+        httpsConfig = { key: fakeCert, cert: fakeCert }
+      }
+
+      this.httpServer = https.createServer(httpsConfig, app)
       this._protocol = 'https'
     } else {
       this.httpServer = http.createServer(app)
