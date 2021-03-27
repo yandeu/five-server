@@ -37,7 +37,7 @@ export interface LiveServerParams {
   noBrowser?: boolean
 
   spa?: boolean
-  browser?: string
+  browser?: string | string[]
   cors?: boolean
   https?: any
   proxy?: any

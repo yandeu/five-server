@@ -402,18 +402,67 @@ export default class LiveServer {
   }
 
   /** Launch a new browser window. */
-  public launchBrowser(path: string | boolean | string[] | null | undefined, browser: string | null = null) {
-    // Launch browser
-    if (path !== null)
-      if (typeof path === 'object') {
-        path.forEach(p => {
-          if (browser) open(`${this.openURL}/${p}`, { app: { name: browser } })
-          else open(`${this.openURL}/${p}`)
-        })
-      } else {
-        if (browser) open(`${this.openURL}/${path}`, { app: { name: browser } })
-        else open(`${this.openURL}/${path}`)
+  public async launchBrowser(
+    path: string | boolean | string[] | null | undefined,
+    browser: string | string[] | null = null
+  ) {
+    const launch = async (target: string, browser: string | string[] | null = null, index = -1) => {
+      if (!browser) return await open(target)
+
+      let res: any
+
+      const opn = async browser => {
+        res = await open(target, { app: { name: browser } })
       }
+
+      if (typeof browser === 'string') await opn(browser)
+
+      if (Array.isArray(browser)) {
+        index++
+        await opn(browser[index])
+      }
+
+      const launchDefaultBrowser = () => {
+        launch(target)
+      }
+
+      res.once('exit', code => {
+        if (code && code > 0) {
+          if (typeof browser === 'string') {
+            console.log(colors(`Could not open browser "${browser}". Trying the default browser next.`, 'yellow'))
+            launchDefaultBrowser()
+          } else if (Array.isArray(browser)) {
+            if (typeof browser[index + 1] === 'undefined') {
+              console.log(
+                colors(`Could not open browser "${browser[index]}". Trying the default browser next.`, 'yellow')
+              )
+              launchDefaultBrowser()
+            } else {
+              console.log(
+                colors(`Could not open browser "${browser[index]}". Trying "${browser[index + 1]}" next.`, 'yellow')
+              )
+
+              launch(target, browser, index)
+            }
+          }
+        }
+      })
+    }
+
+    // Don't open a browser
+    if (path === null) return
+
+    // Try to open one browser from a list of browsers
+    if (Array.isArray(path)) {
+      for (const p of path) {
+        await launch(`${this.openURL}/${p}`, browser)
+      }
+    }
+
+    // Open browser "browser"
+    if (typeof path === 'string') {
+      await launch(`${this.openURL}/${path}`, browser)
+    }
   }
 
   /** Reloads all browser windows */
