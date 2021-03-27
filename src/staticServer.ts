@@ -73,7 +73,7 @@ export const staticServer = (root: any, opts: { logLevel: number; injectedCode: 
       if (injectTag) {
         const injection = `
     <!-- Code injected by Five-server -->
-    <script async data-id="five-server" data-file="${filePath}" type="text/javascript" src="/fiveserver.js"></script>
+    <script async data-id="five-server" data-file="${filePath}" type="application/javascript" src="/fiveserver.js"></script>
 
   ${injectTag}`
 
