@@ -35,14 +35,16 @@ $ npm -g i five-server@latest
 
 ## Usage
 
-Same as for [Live-Server](https://www.npmjs.com/package/live-server).
+Similar to [Live-Server](https://www.npmjs.com/package/live-server).
+
+## Documentation
+
+_Will be available soon._
 
 ## Config File
 
-You can use a `.fiveserverrc` or `.fiveserverrc.json` file to configure your server.
-
-A simple example of a config file:  
-Your browser will open the about page of your portfolio project at `http://127.0.0.1:8085/about.html`.
+**A simple example of a config file:**  
+Your browser will open the about page of your portfolio project at `http://localhost:8085/about.html`.
 
 ```json
 // .fiveserverrc
@@ -53,16 +55,19 @@ Your browser will open the about page of your portfolio project at `http://127.0
 }
 ```
 
-Open multiple html files:  
-Your browser will open `http://localhost:8086/about.html` and `http://localhost:8086/contact.html`
+**Another example:**  
+Firefox (if available) will open `https://127.0.0.1:8086/about.html` and `https://127.0.0.1:8086/contact.html`.  
+_The https certificate is self-signed. Means, the first time you open your browser, you have to confirm that you want to continue._
 
-```json
-// .fiveserverrc
-{
-  "port": 8086,
-  "root": "src/portfolio",
-  "open": ["about.html", "contact.html"],
-  "host": "localhost"
+```js
+// fiveserver.config.js
+module.exports = {
+  port: 8086,
+  root: 'src/portfolio',
+  open: ['about.html', 'contact.html'],
+  host: '0.0.0.0',
+  browser: 'firefox',
+  https: true
 }
 ```
 
@@ -72,9 +77,7 @@ Download it from [marketplace.visualstudio.com](https://marketplace.visualstudio
 
 ## Logo
 
-![logo](https://raw.githubusercontent.com/yandeu/five-server/main/img/logo.png)
-
-_Inspired by [vscode-live-server](https://github.com/ritwickdey/vscode-live-server/blob/master/images/icon.png)_
+<img alt="fiveserver logo" src="https://raw.githubusercontent.com/yandeu/five-server/main/img/logo.png" width="128" height="96">
 
 ## Changes since fork
 
