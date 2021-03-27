@@ -28,7 +28,8 @@ import { getCertificate } from './utils/getCertificate'
 
 export { LiveServerParams }
 
-const INJECTED_CODE = fs.readFileSync(path.join(__dirname, '../injected.html'), 'utf8')
+// const INJECTED_CODE = fs.readFileSync(path.join(__dirname, '../injected.html'), 'utf8')
+const INJECTED_CODE = fs.readFileSync(path.join(__dirname, '../injected.js'), 'utf8')
 
 interface ExtendedWebSocket extends WebSocket {
   sendWithDelay: (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => void
@@ -130,7 +131,7 @@ export default class LiveServer {
 
     app.use((req, res, next) => {
       if (req.url === '/fiveserver.js') {
-        return res.sendFile(path.join(__dirname, '../injected.js'))
+        return res.type('.js').send(INJECTED_CODE)
       }
       next()
     })
