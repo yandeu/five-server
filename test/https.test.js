@@ -20,6 +20,9 @@ describe('https tests with external module', () => {
   afterEach(async () => {
     await liveServer.shutdown()
   })
+  it('protocol should be https', function () {
+    expect(liveServer.protocol).toBe('https')
+  })
   it('should reply with a correct index file', function (done) {
     request(liveServer.httpServer)
       .get('/index.html')
@@ -47,6 +50,40 @@ describe('https tests with object', () => {
   })
   afterEach(async () => {
     await liveServer.shutdown()
+  })
+  it('protocol should be https', function () {
+    expect(liveServer.protocol).toBe('https')
+  })
+  it('should reply with a correct index file', function (done) {
+    request(liveServer.httpServer)
+      .get('/index.html')
+      .expect('Content-Type', 'text/html; charset=UTF-8')
+      .expect(/Hello world/i)
+      .expect(200, done)
+  })
+  it('should support head request', function (done) {
+    request(liveServer.httpServer)
+      .head('/index.html')
+      .expect('Content-Type', 'text/html; charset=UTF-8')
+      .expect(200, done)
+  })
+})
+
+describe('https tests with the "selfsigned" package', () => {
+  const opts = {
+    root: path.join(__dirname, 'data'),
+    port: 0,
+    open: false,
+    https: true
+  }
+  beforeEach(async () => {
+    await liveServer.start(opts)
+  })
+  afterEach(async () => {
+    await liveServer.shutdown()
+  })
+  it('protocol should be https', function () {
+    expect(liveServer.protocol).toBe('https')
   })
   it('should reply with a correct index file', function (done) {
     request(liveServer.httpServer)

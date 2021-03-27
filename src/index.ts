@@ -51,6 +51,10 @@ export default class LiveServer {
     return this._openURL
   }
 
+  public get protocol() {
+    return this._protocol
+  }
+
   public get isRunning() {
     return !!this.httpServer?.listening
   }
