@@ -133,6 +133,9 @@ export default class LiveServer {
       if (req.url === '/fiveserver.js') {
         return res.type('.js').send(INJECTED_CODE)
       }
+      if (req.url === '/fiveserver') {
+        return res.json({ status: 'online' })
+      }
       next()
     })
 
