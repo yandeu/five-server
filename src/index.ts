@@ -85,8 +85,11 @@ export default class LiveServer {
 
     this.injectBody = injectBody
 
+    let watch = options.watch
+    if (watch && !Array.isArray(watch)) watch = [watch]
+
     const root = options.root || process.cwd()
-    const watchPaths = options.watch || [root]
+    const watchPaths = watch || [root]
 
     let openPath = options.open
     if (typeof openPath === 'string') openPath = removeLeadingSlash(openPath)
@@ -347,7 +350,7 @@ export default class LiveServer {
       ignored.push(options.ignorePattern)
     }
     // Setup file watcher
-    this.watcher = chokidar.watch(watchPaths, {
+    this.watcher = chokidar.watch(watchPaths as any, {
       ignored: ignored,
       ignoreInitial: true
     })
