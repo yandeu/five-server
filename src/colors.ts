@@ -3,7 +3,7 @@
 export const colors = (str: string, clr: Colors) => {
   const c = colorCodes[clr]
   const open = `\u001b[${c[0]}m`
-  const close = `\u001b[${c[0]}m`
+  const close = `\u001b[${c[1]}m`
   return `${open}${str}${close}`
 }
 
