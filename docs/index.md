@@ -30,7 +30,7 @@ Here's a simple example that serves everything from our `src/` directory on port
 When the server is started, there will be a message prior to the list of resolved modules:
 
 ```bash
-Serving at http://localhost:8080
+Serving at http://localhost:9000
 ```
 
 that will give some background on where the server is located and what it's serving.
@@ -85,128 +85,27 @@ Usage via the CLI
 npx five-server --open="index.html,contact.html"
 ```
 
-T> The browser application name is platform dependent. Don't hard code it in reusable modules. For example, `'Chrome'` is `'Google Chrome'` on macOS, `'google-chrome'` on Linux and `'chrome'` on Windows.
+## `fiveServer.browser`
 
-## `fiveServer.openPage`
+`string` `string[]`
 
-`string` `[string]`
+Tells five-server which browser to open.
 
-Specify a page to navigate to when opening the browser.
+**.prettierrc**
 
-**webpack.config.js**
-
-```javascript
-module.exports = {
-  //...
-  fiveServer: {
-    openPage: '/different/page'
-  }
+```json
+{
+  "browser": "chrome"
 }
 ```
 
 Usage via the CLI
 
 ```bash
-npx webpack serve --open-page /different/page
+npx five-server --open="chrome"
 ```
 
-If you wish to specify multiple pages to open in the browser.
-
-**webpack.config.js**
-
-```javascript
-module.exports = {
-  //...
-  fiveServer: {
-    openPage: ['/different/page1', '/different/page2']
-  }
-}
-```
-
-Usage via the CLI
-
-```bash
-npx webpack serve --open-page /different/page1,/different/page2
-```
-
-## `fiveServer.overlay`
-
-`boolean = false` `object: { errors boolean = false, warnings boolean = false }`
-
-Shows a full-screen overlay in the browser when there are compiler errors or warnings. If you want to show only compiler errors:
-
-**webpack.config.js**
-
-```javascript
-module.exports = {
-  //...
-  fiveServer: {
-    overlay: true
-  }
-}
-```
-
-If you want to show warnings as well as errors:
-
-**webpack.config.js**
-
-```javascript
-module.exports = {
-  //...
-  fiveServer: {
-    overlay: {
-      warnings: true,
-      errors: true
-    }
-  }
-}
-```
-
-## `fiveServer.pfx`
-
-`string`
-
-When used via the CLI, a path to an SSL .pfx file. If used in options, it should be the bytestream of the .pfx file.
-
-**webpack.config.js**
-
-```javascript
-module.exports = {
-  //...
-  fiveServer: {
-    pfx: './path/to/file.pfx'
-  }
-}
-```
-
-Usage via the CLI
-
-```bash
-npx webpack serve --pfx ./path/to/file.pfx
-```
-
-## `fiveServer.pfxPassphrase`
-
-`string`
-
-The passphrase to a SSL PFX file.
-
-**webpack.config.js**
-
-```javascript
-module.exports = {
-  //...
-  fiveServer: {
-    pfxPassphrase: 'passphrase'
-  }
-}
-```
-
-Usage via the CLI
-
-```bash
-npx webpack serve --pfx-passphrase passphrase
-```
+The browser application name is platform dependent. Don't hard code it in reusable modules. For example, `'Chrome'` is `'Google Chrome'` on macOS, `'google-chrome'` on Linux and `'chrome'` on Windows.
 
 ## `fiveServer.port`
 
@@ -214,21 +113,18 @@ npx webpack serve --pfx-passphrase passphrase
 
 Specify a port number to listen for requests on:
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
-  //...
-  fiveServer: {
-    port: 8080
-  }
+  port: 8080
 }
 ```
 
 Usage via the CLI
 
 ```bash
-npx webpack serve --port 8080
+npx webpack serve --port="8080"
 ```
 
 ## `fiveServer.proxy`
@@ -241,7 +137,7 @@ The five-server makes use of the powerful [http-proxy-middleware](https://github
 
 With a backend on `localhost:3000`, you can use this to enable proxying:
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -258,7 +154,7 @@ A request to `/api/users` will now proxy the request to `http://localhost:3000/a
 
 If you don't want `/api` to be passed along, we need to rewrite the path:
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -276,7 +172,7 @@ module.exports = {
 
 A backend server running on HTTPS with an invalid certificate will not be accepted by default. If you want to, modify your configuration like this:
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -302,7 +198,7 @@ In the function you get access to the request, response, and proxy options.
 
 E.g. for a browser request, you want to serve an HTML page, but for an API request you want to proxy it. You could do something like this:
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -325,7 +221,7 @@ module.exports = {
 
 If you want to proxy multiple, specific paths to the same target, you can use an array of one or more objects with a `context` property:
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -343,7 +239,7 @@ module.exports = {
 
 Note that requests to root won't be proxied by default. To enable root proxying, the `fiveServer.index` option should be specified as a falsy value:
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -362,7 +258,7 @@ module.exports = {
 
 The origin of the host header is kept when proxying by default, you can set `changeOrigin` to `true` to override this behaviour. It is useful in some cases like using [name-based virtual hosted sites](https://en.wikipedia.org/wiki/Virtual_hosting#Name-based).
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -378,16 +274,6 @@ module.exports = {
 }
 ```
 
-## `fiveServer.progress` - CLI only
-
-`boolean`
-
-Output running progress to console.
-
-```bash
-npx webpack serve --progress
-```
-
 ## `fiveServer.public`
 
 `string`
@@ -396,7 +282,7 @@ When using _inline mode_ and you're proxying five-server, the inline client scri
 
 For example, the five-server is proxied by nginx, and available on `myapp.test`:
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -423,7 +309,7 @@ Imagine that the server is running under `http://localhost:8080` and [`output.fi
 
 Change `fiveServer.publicPath` to put bundle under specific directory:
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -440,7 +326,7 @@ T> Make sure `fiveServer.publicPath` always starts and ends with a forward slash
 
 It is also possible to use a full URL.
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -461,7 +347,7 @@ T> It is recommended that `fiveServer.publicPath` is the same as [`output.public
 
 With `fiveServer.quiet` enabled, nothing except the initial startup information will be written to the console. This also means that errors or warnings from webpack are not visible.
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -504,7 +390,7 @@ W> This option is **deprecated** in favor of [`fiveServer.before`](#devserverbef
 Here you can access the Express app object and add your own custom middleware to it.
 For example, to define custom handlers for some paths:
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -525,7 +411,7 @@ module.exports = {
 
 Tells clients connected to `fiveServer` to use provided socket host.
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -542,7 +428,7 @@ module.exports = {
 
 The path at which to connect to the reloading socket.
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -565,7 +451,7 @@ npx webpack serve --sock-path /socket
 
 Tells clients connected to `fiveServer` to use provided socket port.
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -582,7 +468,7 @@ module.exports = {
 
 It is possible to configure advanced options for serving static files from `contentBase`. See the [Express documentation](http://expressjs.com/en/4x/api.html#express.static) for the possible options.
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -605,7 +491,7 @@ This option lets you precisely control what bundle information gets displayed. T
 
 To show only errors in your bundle:
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -731,7 +617,7 @@ module.exports = {
 
 This option lets the browser open with your local IP.
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -754,7 +640,7 @@ npx webpack serve --use-local-ip
 
 Tell five-server to watch the files served by the [`fiveServer.contentBase`](#devservercontentbase) option. It is disabled by default. When enabled, file changes will trigger a full page reload.
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -779,7 +665,7 @@ Control options related to watching the files.
 
 webpack uses the file system to get notified of file changes. In some cases, this does not work. For example, when using Network File System (NFS). [Vagrant](https://www.vagrantup.com/) also has a lot of problems with this. In these cases, use polling:
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -802,7 +688,7 @@ See [WatchOptions](/configuration/watch/) for more options.
 
 Tells `fiveServer` to write generated assets to the disk. The output is written to the [output.path](/configuration/output/#outputpath) directory.
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
@@ -815,7 +701,7 @@ module.exports = {
 
 Providing a `Function` to `fiveServer.writeToDisk` can be used for filtering. The function follows the same premise as [`Array#filter`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter) in which a boolean return value tells if the file should be written to disk.
 
-**webpack.config.js**
+**fiveserver.config.js**
 
 ```javascript
 module.exports = {
