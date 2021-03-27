@@ -128,9 +128,13 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
 opts.root = process.argv[2] ? removeLeadingSlash(process.argv[2]) : opts.root
 
 if (opts.watch) {
-  opts.watch = opts.watch.map(function (relativePath) {
-    return path.join(opts.root, relativePath)
-  })
+  if (opts.length === 1 && opts.watch[0] === 'true') opts.watch = true
+  else if (opts.length === 1 && opts.watch[0] === 'false') opts.watch = false
+  else {
+    opts.watch = opts.watch.map(function (relativePath) {
+      return path.join(opts.root, relativePath)
+    })
+  }
 }
 if (opts.ignore) {
   opts.ignore = opts.ignore.map(function (relativePath) {

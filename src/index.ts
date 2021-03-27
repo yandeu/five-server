@@ -25,6 +25,7 @@ import { ProxyMiddlewareOptions } from './dependencies/proxy-middleware'
 import { entryPoint, staticServer } from './staticServer'
 import { LiveServerParams } from './types'
 import { getCertificate } from './utils/getCertificate'
+import { Socket } from 'node:net'
 
 export { LiveServerParams }
 
@@ -44,6 +45,9 @@ export default class LiveServer {
 
   // WebSocket clients
   public clients: ExtendedWebSocket[] = []
+
+  // http sockets
+  public sockets: Set<Socket> = new Set()
 
   private _openURL!: string
   private _protocol!: 'http' | 'https'
@@ -87,7 +91,9 @@ export default class LiveServer {
     this.injectBody = injectBody
 
     let watch = options.watch
-    if (watch && !Array.isArray(watch)) watch = [watch]
+    if (watch === true) watch = undefined
+    if (watch === false) watch = false
+    else if (watch && !Array.isArray(watch)) watch = [watch]
 
     const root = options.root || process.cwd()
     const watchPaths = watch || [root]
@@ -354,6 +360,7 @@ export default class LiveServer {
       ignored.push(options.ignorePattern)
     }
     // Setup file watcher
+    if (watch === false) return
     this.watcher = chokidar.watch(watchPaths as any, {
       ignored: ignored,
       ignoreInitial: true
@@ -401,6 +408,10 @@ export default class LiveServer {
           this.shutdown()
           reject(e.message)
         }
+      })
+
+      this.httpServer.on('connection', socket => {
+        this.sockets.add(socket)
       })
 
       // Handle successful httpServer
@@ -510,18 +521,32 @@ export default class LiveServer {
 
   /** Shutdown five-server */
   public async shutdown(): Promise<void> {
-    const watcher = this.watcher
-    if (watcher) {
-      await watcher.close()
+    if (this.watcher) {
+      await this.watcher.close()
     }
-    const httpServer = this.httpServer
+
+    for (const client of this.clients) {
+      await client.close()
+    }
+
+    for (const socket of this.sockets) {
+      socket.destroy()
+      this.sockets.delete(socket)
+    }
 
     return new Promise((resolve, reject) => {
-      if (httpServer && httpServer.listening)
-        httpServer.close(err => {
+      if (this.httpServer && this.httpServer.listening) {
+        this.httpServer.close(err => {
           if (err) return reject(err.message)
-          else return resolve()
+          else {
+            resolve()
+            // @ts-ignore
+            this.httpServer = null
+          }
         })
+      } else {
+        return resolve()
+      }
     })
   }
 }

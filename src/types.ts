@@ -30,7 +30,7 @@ export interface LiveServerParams {
   /** Waits for all changes, before reloading. Defaults to 0 sec. */
   wait?: number
   /** Paths to exclusively watch for changes. (Relative path to root) */
-  watch?: Array<string | RegExp | Glob>
+  watch?: boolean | Array<string | RegExp | Glob>
 
   /** Set to false to not inject body changes. (for VSCode Extension) */
   injectBody?: boolean
