@@ -25,7 +25,6 @@ import { ProxyMiddlewareOptions } from './dependencies/proxy-middleware'
 import { entryPoint, staticServer } from './staticServer'
 import { LiveServerParams } from './types'
 import { getCertificate } from './utils/getCertificate'
-import { Socket } from 'node:net'
 
 export { LiveServerParams }
 
@@ -47,7 +46,7 @@ export default class LiveServer {
   public clients: ExtendedWebSocket[] = []
 
   // http sockets
-  public sockets: Set<Socket> = new Set()
+  public sockets: Set<any> = new Set()
 
   private _openURL!: string
   private _protocol!: 'http' | 'https'
