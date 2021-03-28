@@ -80,6 +80,7 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
       const configPath = path.join(d, f)
       if (fs.existsSync(configPath)) {
         if (/\.c?js/.test(path.extname(configPath))) {
+          delete require.cache[configPath]
           const config = require(configPath)
           options = { ...options, ...config }
         } else {
