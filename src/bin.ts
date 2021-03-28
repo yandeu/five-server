@@ -131,15 +131,14 @@ if (opts.watch) {
   if (opts.length === 1 && opts.watch[0] === 'true') opts.watch = true
   else if (opts.length === 1 && opts.watch[0] === 'false') opts.watch = false
   else {
+    if (typeof opts.watch === 'string') opts.watch = [opts.watch]
     opts.watch = opts.watch.map(function (relativePath) {
-      return path.join(opts.root, relativePath)
+      return path.join(path.resolve(), relativePath)
     })
   }
 }
 if (opts.ignore) {
-  opts.ignore = opts.ignore.map(function (relativePath) {
-    return path.join(opts.root, relativePath)
-  })
+  if (typeof opts.ignore === 'string') opts.ignore = [opts.ignore]
 }
 
 if (!isTesting) liveServer.start(opts)

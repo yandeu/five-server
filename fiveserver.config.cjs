@@ -1,8 +1,10 @@
 module.exports = {
   port: 8085,
-  root: 'dev'
+  root: 'dev',
   // open: false,
   // https: true,
   // browser: ['edge', 'chrome', 'firefox']
-  // browser: 'edge'
+  // browser: 'edge',
+  watch: 'dev',
+  ignore: /\.js$/
 }
