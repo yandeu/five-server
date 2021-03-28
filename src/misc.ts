@@ -11,7 +11,8 @@ export const error = (msg: string) => {
 
 // just a fallback for removing http-errors dependency
 export const createError = (code: number, msg: string = 'unknown', _nothing?: any) => {
-  return new Error(`${code.toString()}: ${msg}`)
+  console.log(`ERROR: ${code} ${msg}`)
+  return { message: msg, code, status: code, statusCode: code, name: code }
 }
 
 export const escape = html => {
