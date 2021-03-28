@@ -90,6 +90,30 @@ module.exports = {
 }
 ```
 
+**Server Side Rendering (like PHP or Express.js):**
+
+You can enable live reload for any server side generated content.
+
+Simply start Five Server and add the script below to you files:
+
+```html
+<script async data-id="five-server" src="http://localhost:8085/fiveserver.js"></script>
+```
+
+Add this config file:
+
+```js
+// fiveserver.config.js
+module.exports = {
+  https: false,
+  host: 'localhost'
+  port: 8085,
+  open: false,
+}
+```
+
+(_Five Server only provides the live reload functionality. Five Server does not serve the server side file for you. You still need a PHP or Node.js server._)
+
 ## VSCode Extension
 
 Download it from [marketplace.visualstudio.com](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server).
@@ -97,24 +121,6 @@ Download it from [marketplace.visualstudio.com](https://marketplace.visualstudio
 ## Logo
 
 <img alt="fiveserver logo" src="https://raw.githubusercontent.com/yandeu/five-server/main/img/logo.png" width="128" height="96">
-
-## Changes since fork
-
-### All notable changes since the fork.
-
----
-
-You can now use a config file in your home directory\* or the root directory of your project.
-
-Allowed file names are `.fiveserverrc` and `.fiveserverrc.json` written in JSON.
-
-_\*`C:\\Users\\USER` on Windows and `/home/USER` on Linux and Mac_
-
----
-
-`htpasswd` does not work yet.
-
----
 
 ## License
 
