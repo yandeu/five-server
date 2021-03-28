@@ -43,7 +43,8 @@ _Will be available soon._
 
 ## Config File
 
-**A simple example of a config file:**  
+**A simple example of a config file:**
+
 Your browser will open the about page of your portfolio project at `http://localhost:8085/about.html`.
 
 ```json
@@ -55,9 +56,9 @@ Your browser will open the about page of your portfolio project at `http://local
 }
 ```
 
-**Another example:**  
-Firefox (if available) will open `https://127.0.0.1:8086/about.html` and `https://127.0.0.1:8086/contact.html`.  
-_The https certificate is self-signed. Means, the first time you open your browser, you have to confirm that you want to continue._
+**Another example:**
+
+Firefox (if available) will open `https://127.0.0.1:8086/about.html` and `https://127.0.0.1:8086/contact.html`.
 
 ```js
 // fiveserver.config.js
@@ -68,6 +69,24 @@ module.exports = {
   host: '0.0.0.0',
   browser: 'firefox',
   https: true
+}
+```
+
+(_The **https certificate** is self-signed. Means, the first time you open your browser, you have to confirm that you want to continue._)
+
+**Watch & Ignore:**
+
+Watch only for file changes in `/src`. But exclude all `.sass` and `.scss` files from watching.
+
+```js
+// fiveserver.config.js
+module.exports = {
+  // ...
+  watch: 'src',
+  ignore: /\.s[ac]ss$/i
+
+  // can also be an array:
+  // ignore: [/\.s[ac]ss$/i, /\.tsx?$/i]
 }
 ```
 

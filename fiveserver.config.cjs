@@ -6,5 +6,5 @@ module.exports = {
   // browser: ['edge', 'chrome', 'firefox']
   // browser: 'edge',
   watch: 'dev',
-  ignore: /\.js$/
+  ignore: [/\.s[ac]ss$/i, /\.tsx?$/i]
 }
