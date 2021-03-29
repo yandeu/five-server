@@ -5,8 +5,7 @@ module.exports = {
   // host: '0.0.0.0',
   // open: false,
   // https: true,
-  // browser: ['edge', 'chrome', 'firefox']
-  // browser: 'edge',
+  // browser: ['edge', 'chrome', 'firefox', 'chrome --incognito', 'firefox --incognito'],
   watch: 'dev',
   ignore: [/\.s[ac]ss$/i, /\.tsx?$/i],
   remoteLogs: 'brightMagenta'

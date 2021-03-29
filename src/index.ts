@@ -457,8 +457,19 @@ export default class LiveServer {
 
       let res: any
 
-      const opn = async browser => {
-        res = await open(target, { app: { name: browser } })
+      const opn = async (browser: string) => {
+        const hasArguments = browser.includes('--')
+
+        if (!hasArguments) {
+          res = await open(target, { app: { name: browser } })
+        }
+
+        if (hasArguments) {
+          const b = browser.split('--').map(c => c.trim())
+          res = await open(target, {
+            app: { name: b.shift() as string, arguments: b.map(arg => `--${arg}`) }
+          })
+        }
       }
 
       if (typeof browser === 'string') await opn(browser)
