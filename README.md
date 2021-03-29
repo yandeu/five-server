@@ -20,20 +20,20 @@ Development Server with **Live Reload** Capability.
 
 ## Top Features
 
-- 🚀 Remote Logs  
+- 🚀 **Remote Logs**  
    Displays the logs of your browser in your terminal!  
    _Useful for debugging on your smart phone for example._
 
-- 🚀 Instant Updates  
+- 🚀 **Instant Updates**  
   Updates your html page while typing!  
   (_[VSCode Extension only](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server)_)
 
-- 🚀 Highlights  
+- 🚀 **Highlights**  
   Highlights the code you are working on in your browser!  
    (_[VSCode Extension only](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server)_)
 
-- 🚀 Server Side Rendered App  
-  Works with any Server Side Rendered content like PHP or Express.js!  
+- 🚀 **Server Side Rendered App**  
+  Works with any Server Side Rendered content like **PHP** or **Express.js**!  
   _See docs below_
 
 ## Get Started
