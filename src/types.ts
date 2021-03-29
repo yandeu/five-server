@@ -47,9 +47,11 @@ export interface LiveServerParams {
   /** Paths to exclusively watch for changes. */
   watch?: boolean | Array<string | RegExp | Glob>
 
-  /** Set to false to not inject body changes. (for VSCode Extension) */
+  /** Highlights the code you are working on. (VSCode Extension only) */
+  highlight?: boolean
+  /** Set to false to not inject body changes. (VSCode Extension only) */
   injectBody?: boolean
-  /** Absolute path of your workspace. (for VSCode Extension) */
+  /** Absolute path of your workspace. (VSCode Extension only) */
   workspace?: string
 
   /** @deprecated No need for an external https module */
@@ -61,5 +63,6 @@ export interface LiveServerParams {
   /** @deprecated No one uses /# anymore.  */
   spa?: boolean
 
+  /** @private Doesn't fetch the config file twice. */
   _cli?: boolean
 }
