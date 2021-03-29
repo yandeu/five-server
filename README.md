@@ -130,9 +130,9 @@ Add this config file:
 // fiveserver.config.js
 module.exports = {
   https: false,
-  host: 'localhost'
+  host: 'localhost',
   port: 8085,
-  open: false,
+  open: false
 }
 ```
 
