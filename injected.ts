@@ -1,6 +1,49 @@
 // <![CDATA[  <-- For SVG support
 if ('WebSocket' in window) {
   window.addEventListener('load', () => {
+    const script = document.querySelector('[data-id="five-server"]') as HTMLScriptElement
+    const protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://'
+    // const address = `${protocol}${window.location.host}${window.location.pathname}/ws`
+    const address = `${protocol}${new URL(script.src).host}${window.location.pathname}/ws`
+
+    const CONNECTED_MSG = 'Five-Server connected! https://npmjs.com/five-server'
+    const MAX_ATTEMPTS = 25
+    let wait = 1000
+    let attempts = 0
+    let socket!: WebSocket
+
+    const send = (type: string, ...message: string[]) => {
+      if (socket && socket?.readyState === 1) {
+        socket.send(JSON.stringify({ console: { type, message } }))
+      }
+    }
+
+    const overwriteLogs = () => {
+      // log
+      const oldLog = console.log
+      console.log = function (...message) {
+        if (message[0] === CONNECTED_MSG) send('log', 'Connected!')
+        else send('log', ...message)
+        oldLog.apply(console, message)
+      }
+
+      // warn
+      const oldWarn = console.warn
+      console.warn = function (...message) {
+        send('warn', ...message)
+        oldWarn.apply(console, message)
+      }
+
+      // error
+      const oldError = console.error
+      console.error = function (...message) {
+        send('error', ...message)
+        oldError.apply(console, message)
+      }
+    }
+
+    overwriteLogs()
+
     function refreshCSS() {
       const sheets = document.getElementsByTagName('link')
       const head = document.getElementsByTagName('head')[0]
@@ -18,17 +61,9 @@ if ('WebSocket' in window) {
     function injectBody(body) {
       document.body.innerHTML = body
     }
-    const script = document.querySelector('[data-id="five-server"]') as HTMLScriptElement
-    const protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://'
-    // const address = `${protocol}${window.location.host}${window.location.pathname}/ws`
-    const address = `${protocol}${new URL(script.src).host}${window.location.pathname}/ws`
-
-    const MAX_ATTEMPTS = 25
-    let wait = 1000
-    let attempts = 0
 
     const connect = () => {
-      const socket = new WebSocket(address)
+      socket = new WebSocket(address)
 
       socket.onmessage = function (msg) {
         wait = 1000
@@ -132,7 +167,7 @@ if ('WebSocket' in window) {
       `
         document.head.appendChild(style)
 
-        console.log('Five-Server connected! https://npmjs.com/five-server')
+        console.log(CONNECTED_MSG)
       }
       socket.onclose = function (e) {
         if (attempts === 0) console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason)

@@ -5,3 +5,15 @@
 h1 {
   color: blue;
 }
+
+.btn {
+  background-color: #f4f4f4;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-block;
+  padding: 12px 18px;
+}
+
+.btn:hover {
+  background-color: #c4c4c4;
+}

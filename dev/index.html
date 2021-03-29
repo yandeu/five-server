@@ -15,5 +15,20 @@
       <li>two</li>
       <li>three</li>
     </ul>
+
+    <div class="btn" id="btn1">LOG</div>
+    <div class="btn" id="btn2">WARN</div>
+    <div class="btn" id="btn3">ERROR</div>
+
+    <script>
+      const el = document.getElementById("btn1");
+      el.addEventListener("click", () => console.log("clicked log btn"));
+
+      const el2 = document.getElementById("btn2");
+      el2.addEventListener("click", () => console.warn("clicked warn btn"));
+
+      const el3 = document.getElementById("btn3");
+      el3.addEventListener("click", () => console.error("clicked error btn"));
+    </script>
   </body>
 </html>

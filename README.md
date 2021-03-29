@@ -5,6 +5,7 @@ Development Server with **Live Reload** Capability.
 
 - Rewritten in TypeScript
 - Up-to-date dependencies
+- Better than ever!
 
 ---
 
@@ -16,6 +17,24 @@ Development Server with **Live Reload** Capability.
 [![Codecov](https://img.shields.io/codecov/c/github/yandeu/five-server?logo=codecov&style=flat-square)](https://codecov.io/gh/yandeu/five-server)
 
 ---
+
+## Top Features
+
+- 🚀 Remote Logs  
+   Displays the logs of your browser in your terminal!  
+   _Useful for debugging on your smart phone for example._
+
+- 🚀 Instant Updates  
+  Updates your html page while typing!  
+  (_[VSCode Extension only](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server)_)
+
+- 🚀 Highlights  
+  Highlights the code you are working on in your browser!  
+   (_[VSCode Extension only](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server)_)
+
+- 🚀 Server Side Rendered App  
+  Works with any Server Side Rendered content like PHP or Express.js!  
+  _See docs below_
 
 ## Get Started
 
@@ -42,6 +61,10 @@ Similar to [Live-Server](https://www.npmjs.com/package/live-server).
 _Will be available soon._
 
 ## Config File
+
+**Reference:**
+
+You will find all available options for your Config File in [`/src/types.ts`](https://github.com/yandeu/five-server/blob/main/src/types.ts).
 
 **A simple example of a config file:**
 
@@ -92,7 +115,8 @@ module.exports = {
 
 **Server Side Rendering (like PHP or Express.js):**
 
-You can enable live reload for any server side generated content.
+You can enable live reload for any server side generated content.  
+(_Additional Plugin for Chrome available soon!_)
 
 Simply start Five Server and add the script below to you files:
 

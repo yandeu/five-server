@@ -20,7 +20,7 @@ import WebSocket from 'ws' // eslint-disable-line sort-imports
 // MOD: Replaced "opn" by "open"
 // const open = require('opn')
 import open from 'open'
-import { colors } from './colors'
+import { Colors, colors } from './colors'
 import { ProxyMiddlewareOptions } from './dependencies/proxy-middleware'
 import { entryPoint, staticServer } from './staticServer'
 import { Certificate, LiveServerParams } from './types'
@@ -34,6 +34,8 @@ const INJECTED_CODE = fs.readFileSync(path.join(__dirname, '../injected.js'), 'u
 interface ExtendedWebSocket extends WebSocket {
   sendWithDelay: (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => void
   file: string
+  ip: string
+  color: Colors
 }
 
 export default class LiveServer {
@@ -41,6 +43,13 @@ export default class LiveServer {
   public watcher!: chokidar.FSWatcher
   public logLevel = 2
   public injectBody = false
+
+  private colors: Colors[] = ['blue', 'magenta', 'cyan', 'green', 'red', 'yellow']
+  private colorIndex = -1
+  private newColor = () => {
+    this.colorIndex++
+    return this.colors[this.colorIndex % this.colors.length]
+  }
 
   // WebSocket clients
   public clients: ExtendedWebSocket[] = []
@@ -77,13 +86,14 @@ export default class LiveServer {
       host = 'localhost', // '0.0.0.0'
       htpasswd = null,
       https: _https = null,
+      injectBody = false,
+      injectCss = true,
       logLevel = 2,
       middleware = [],
       mount = [],
-      injectCss = true,
-      injectBody = false,
       port = 8080,
       proxy = [],
+      remoteLogs = true,
       wait = 100
     } = options
 
@@ -305,7 +315,7 @@ export default class LiveServer {
 
     const wss = new WebSocket.Server({ server: this.httpServer })
 
-    wss.on('connection', (ws: ExtendedWebSocket) => {
+    wss.on('connection', (ws: ExtendedWebSocket, req: any) => {
       ws.sendWithDelay = (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => {
         setTimeout(
           () => {
@@ -318,6 +328,9 @@ export default class LiveServer {
         )
       }
 
+      ws.ip = req?.connection?.remoteAddress
+      ws.color = typeof remoteLogs === 'string' ? remoteLogs : this.newColor()
+
       // ws.on('error', err => {
       //   console.log('WS ERROR:', err)
       // })
@@ -328,6 +341,16 @@ export default class LiveServer {
             const json = JSON.parse(data)
             if (json && json.file) {
               ws.file = json.file
+            }
+
+            const useRemoteLogs = remoteLogs === true || typeof remoteLogs === 'string'
+            if (useRemoteLogs && json && json.console) {
+              const ip = `[${ws.ip}]`
+              const msg = json.console.message
+              const T = json.console.type
+              const t = T === 'warn' ? ' (warn) ' : T === 'error' ? ' (error) ' : ' '
+
+              console[T](colors(`${ip}${t}${msg}`, ws.color))
             }
           }
         } catch (err) {

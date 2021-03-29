@@ -8,5 +8,6 @@ module.exports = {
   // browser: ['edge', 'chrome', 'firefox']
   // browser: 'edge',
   watch: 'dev',
-  ignore: [/\.s[ac]ss$/i, /\.tsx?$/i]
+  ignore: [/\.s[ac]ss$/i, /\.tsx?$/i],
+  remoteLogs: 'brightMagenta'
 }

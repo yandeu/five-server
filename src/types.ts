@@ -1,3 +1,5 @@
+import { Colors } from './colors'
+
 /** Glob Pattern */
 export type Glob = string
 
@@ -40,6 +42,8 @@ export interface LiveServerParams {
   port?: number
   /** Proxy all requests for ROUTE to URL. */
   proxy?: string[][]
+  /** Displays the logs of your browser in your terminal. Default: true. */
+  remoteLogs?: boolean | Colors
   /** Set root directory that's being served. Defaults to cwd. */
   root?: string
   /** Waits for all changes, before reloading. Defaults to 0 sec. */
