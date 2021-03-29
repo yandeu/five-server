@@ -1,6 +1,8 @@
 module.exports = {
   port: 8085,
   root: 'dev',
+  file: '404.html',
+  // host: '0.0.0.0',
   // open: false,
   // https: true,
   // browser: ['edge', 'chrome', 'firefox']
