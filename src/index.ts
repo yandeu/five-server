@@ -23,7 +23,7 @@ import open from 'open'
 import { colors } from './colors'
 import { ProxyMiddlewareOptions } from './dependencies/proxy-middleware'
 import { entryPoint, staticServer } from './staticServer'
-import { LiveServerParams } from './types'
+import { Certificate, LiveServerParams } from './types'
 import { getCertificate } from './utils/getCertificate'
 
 export { LiveServerParams }
@@ -116,20 +116,22 @@ export default class LiveServer {
 
     const staticServerHandler = staticServer(root, { logLevel, injectedCode: INJECTED_CODE })
 
-    let httpsModule = options.httpsModule
+    const httpsModule = 'https'
 
-    if (httpsModule) {
-      try {
-        require.resolve(httpsModule)
-      } catch (e) {
-        console.error(colors(`HTTPS module "${httpsModule}" you've provided was not found.`, 'red'))
-        console.error('Did you do', `"npm install ${httpsModule}"?`)
-        // @ts-ignore
-        return
-      }
-    } else {
-      httpsModule = 'https'
-    }
+    // let httpsModule = options.httpsModule
+
+    // if (httpsModule) {
+    //   try {
+    //     require.resolve(httpsModule)
+    //   } catch (e) {
+    //     console.error(colors(`HTTPS module "${httpsModule}" you've provided was not found.`, 'red'))
+    //     console.error('Did you do', `"npm install ${httpsModule}"?`)
+    //     // @ts-ignore
+    //     return
+    //   }
+    // } else {
+    //   httpsModule = 'https'
+    // }
 
     // Setup a web server
     const app = express()
@@ -234,8 +236,8 @@ export default class LiveServer {
       .use(entryPoint(staticServerHandler, file))
       .use(serveIndex(root, { icons: true }))
 
-    if (_https !== null) {
-      let httpsConfig = _https
+    if (_https !== null && _https !== false) {
+      let httpsConfig = _https as Certificate
 
       if (typeof _https === 'string') {
         httpsConfig = require(path.resolve(process.cwd(), _https))
