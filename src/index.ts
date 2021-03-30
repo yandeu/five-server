@@ -212,9 +212,16 @@ export default class LiveServer {
     mount.forEach(mountRule => {
       const mountPath = path.resolve(process.cwd(), mountRule[1])
       if (!options.watch)
-        // Auto add mount paths to wathing but only if exclusive path option is not given
+        // Auto add mount paths to watching but only if exclusive path option is not given
         watchPaths.push(mountPath)
-      app.use(mountRule[0], staticServer(mountPath, { logLevel, injectedCode: INJECTED_CODE }))
+
+      // make sure mountRule[0] has a leading slash
+      if (mountRule[0].indexOf('/') !== 0) mountRule[0] = `/${mountRule[0]}`
+
+      // mount it with  express.static
+      app.use(mountRule[0], express.static(mountPath))
+
+      // log the mapping folder
       if (this.logLevel >= 1) console.log('Mapping %s to "%s"', mountRule[0], mountPath)
     })
     proxy.forEach(proxyRule => {

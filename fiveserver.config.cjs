@@ -9,5 +9,7 @@ module.exports = {
   // browser: ['C:\\Program Files\\Firefox Developer Edition\\firefox.exe --private-window'],
   watch: 'dev',
   ignore: [/\.s[ac]ss$/i, /\.tsx?$/i],
+  // mount: [['/img', 'C:\\Users\\USERNAME\\Pictures']],
   remoteLogs: 'brightMagenta'
+  // logLevel: 2
 }
