@@ -113,6 +113,19 @@ module.exports = {
 }
 ```
 
+**Browser of your choice**
+
+The option browser can be a `string` or an `string[]`.  
+_If you provide an array, the first browser found will be opened._
+
+Following options are all valid:
+
+```
+'chrome',
+['firefox', 'chrome --incognito']
+['C:\\Program Files\\Firefox Developer Edition\\firefox.exe --private-window']
+```
+
 **Server Side Rendering (like PHP or Express.js):**
 
 You can enable live reload for any server side generated content.  

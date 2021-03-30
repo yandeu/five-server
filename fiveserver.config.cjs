@@ -6,6 +6,7 @@ module.exports = {
   // open: false,
   // https: true,
   // browser: ['edge', 'chrome', 'firefox', 'chrome --incognito', 'firefox --incognito'],
+  // browser: ['C:\\Program Files\\Firefox Developer Edition\\firefox.exe --private-window'],
   watch: 'dev',
   ignore: [/\.s[ac]ss$/i, /\.tsx?$/i],
   remoteLogs: 'brightMagenta'
