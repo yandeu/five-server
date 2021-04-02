@@ -94,7 +94,8 @@ export default class LiveServer {
       port = 8080,
       proxy = [],
       remoteLogs = false,
-      wait = 100
+      wait = 100,
+      workspace
     } = options
 
     this.injectBody = injectBody
@@ -105,7 +106,8 @@ export default class LiveServer {
     else if (watch && !Array.isArray(watch)) watch = [watch]
 
     const root = options.root || process.cwd()
-    const watchPaths = watch || [root]
+    const rootPath = workspace ? path.join(workspace, options.root ? options.root : '') : root
+    const watchPaths = watch || [rootPath]
 
     let openPath = options.open
     if (typeof openPath === 'string') openPath = removeLeadingSlash(openPath)
@@ -124,7 +126,7 @@ export default class LiveServer {
 
     this.logLevel = logLevel
 
-    const staticServerHandler = staticServer(root, { logLevel, injectedCode: INJECTED_CODE })
+    const staticServerHandler = staticServer(rootPath, { logLevel, injectedCode: INJECTED_CODE })
 
     const httpsModule = 'https'
 
@@ -248,10 +250,11 @@ export default class LiveServer {
       app.use(proxyRule[0], require('./dependencies/proxy-middleware')(proxyOpts))
       if (this.logLevel >= 1) console.log('Mapping %s to "%s"', proxyRule[0], proxyRule[1])
     })
+
     app
       .use(staticServerHandler) // Custom static server
       .use(entryPoint(staticServerHandler, file))
-      .use(serveIndex(root, { icons: true }))
+      .use(serveIndex(rootPath, { icons: true }))
 
     if (_https !== null && _https !== false) {
       let httpsConfig = _https as Certificate

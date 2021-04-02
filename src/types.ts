@@ -55,7 +55,7 @@ export interface LiveServerParams {
   highlight?: boolean
   /** Set to false to not inject body changes. (VSCode Extension only) */
   injectBody?: boolean
-  /** Absolute path of your workspace. (VSCode Extension only) */
+  /** Absolute path of your vscode workspace. (VSCode Extension only) */
   workspace?: string
 
   /** @deprecated No need for an external https module */
