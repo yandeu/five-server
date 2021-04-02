@@ -42,8 +42,6 @@ if ('WebSocket' in window) {
       }
     }
 
-    overwriteLogs()
-
     function refreshCSS() {
       const sheets = document.getElementsByTagName('link')
       const head = document.getElementsByTagName('head')[0]
@@ -69,8 +67,10 @@ if ('WebSocket' in window) {
         wait = 1000
         attempts = 0
 
-        if (msg.data == 'reload') window.location.reload()
-        else if (msg.data == 'refreshcss') refreshCSS()
+        if (msg.data === 'reload') window.location.reload()
+        else if (msg.data === 'refreshcss') refreshCSS()
+        else if (msg.data === 'connected') console.log(CONNECTED_MSG)
+        else if (msg.data === 'initRemoteLogs') overwriteLogs()
         else {
           const d = JSON.parse(msg.data)
           if (d.body) injectBody(d.body)
@@ -166,8 +166,6 @@ if ('WebSocket' in window) {
       }
       `
         document.head.appendChild(style)
-
-        console.log(CONNECTED_MSG)
       }
       socket.onclose = function (e) {
         if (attempts === 0) console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason)

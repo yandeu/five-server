@@ -42,7 +42,7 @@ export interface LiveServerParams {
   port?: number
   /** Proxy all requests for ROUTE to URL. */
   proxy?: string[][]
-  /** Displays the logs of your browser in your terminal. Default: true. */
+  /** Displays the logs of your browser in your terminal. Default: false. */
   remoteLogs?: boolean | Colors
   /** Set root directory that's being served. Defaults to cwd. */
   root?: string

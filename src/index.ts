@@ -93,7 +93,7 @@ export default class LiveServer {
       mount = [],
       port = 8080,
       proxy = [],
-      remoteLogs = true,
+      remoteLogs = false,
       wait = 100
     } = options
 
@@ -323,6 +323,9 @@ export default class LiveServer {
     const wss = new WebSocket.Server({ server: this.httpServer })
 
     wss.on('connection', (ws: ExtendedWebSocket, req: any) => {
+      if (remoteLogs !== false) ws.send('initRemoteLogs')
+      ws.send('connected')
+
       ws.sendWithDelay = (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => {
         setTimeout(
           () => {
@@ -363,10 +366,6 @@ export default class LiveServer {
         } catch (err) {
           //
         }
-      })
-
-      ws.on('open', () => {
-        ws.send('connected')
       })
 
       ws.on('close', () => {
