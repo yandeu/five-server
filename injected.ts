@@ -73,6 +73,7 @@ if ('WebSocket' in window) {
         else if (msg.data === 'initRemoteLogs') overwriteLogs()
         else {
           const d = JSON.parse(msg.data)
+          if (d.navigate) window.location.replace(d.navigate)
           if (d.body) injectBody(d.body)
           if (d.position) {
             // TODO: This highlight section needs improvement

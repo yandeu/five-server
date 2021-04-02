@@ -456,6 +456,16 @@ export default class LiveServer {
     })
   }
 
+  /**
+   * Navigate the browser to another page.
+   * @param url Navigates to the given URL.
+   */
+  public navigate(url: string) {
+    this.clients.forEach(ws => {
+      if (ws) ws.sendWithDelay(JSON.stringify({ navigate: url }))
+    })
+  }
+
   /** Launch a new browser window. */
   public async launchBrowser(
     path: string | boolean | string[] | null | undefined,
