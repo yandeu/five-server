@@ -264,7 +264,7 @@ export default class LiveServer {
       }
 
       if (_https === true) {
-        const fakeCert = getCertificate()
+        const fakeCert = getCertificate(path.join(workspace ? workspace : path.resolve(), '.cache'))
         httpsConfig = { key: fakeCert, cert: fakeCert }
       }
 
