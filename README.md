@@ -1,7 +1,7 @@
 # Five Server
 
 Development Server with **Live Reload** Capability.  
-(Maintained **F**ork of **Live-Server**)
+(Maintained **F**ork of **Live Server**)
 
 - Rewritten in TypeScript
 - Up-to-date dependencies
@@ -24,6 +24,10 @@ Development Server with **Live Reload** Capability.
    Displays the logs of your browser in your terminal!  
    _Useful for debugging on your smart phone for example._
 
+- 🚀 **Server Side Rendered App**  
+  Works with any Server Side Rendered content like **PHP** or **Express.js**!  
+  _See docs below_
+
 - 🚀 **Instant Updates**  
   Updates your html page while typing!  
   (_[VSCode Extension only](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server)_)
@@ -32,9 +36,9 @@ Development Server with **Live Reload** Capability.
   Highlights the code you are working on in your browser!  
    (_[VSCode Extension only](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server)_)
 
-- 🚀 **Server Side Rendered App**  
-  Works with any Server Side Rendered content like **PHP** or **Express.js**!  
-  _See docs below_
+- 🚀 **Auto Navigation**  
+  Navigates your browser automatically to the current editing .html file!  
+  (_[VSCode Extension only](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server)_)
 
 ## Get Started
 
@@ -54,7 +58,7 @@ $ npm -g i five-server@latest
 
 ## Usage
 
-Similar to [Live-Server](https://www.npmjs.com/package/live-server).
+Similar to [Live Server](https://www.npmjs.com/package/live-server).
 
 ## Documentation
 
@@ -121,7 +125,7 @@ _If you provide an array, the first browser found will be opened._
 Following options are all valid:
 
 ```
-'chrome',
+'chrome'
 ['firefox', 'chrome --incognito']
 ['C:\\Program Files\\Firefox Developer Edition\\firefox.exe --private-window']
 ```
@@ -134,7 +138,7 @@ You can enable live reload for any server side generated content.
 Simply start Five Server and add the script below to you files:
 
 ```html
-<script async data-id="five-server" src="http://localhost:8085/fiveserver.js"></script>
+<script async data-id="five-server" src="http://localhost:8080/fiveserver.js"></script>
 ```
 
 Add this config file:
@@ -144,7 +148,7 @@ Add this config file:
 module.exports = {
   https: false,
   host: 'localhost',
-  port: 8085,
+  port: 8080,
   open: false
 }
 ```
