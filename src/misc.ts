@@ -1,12 +1,13 @@
 import { LiveServerParams } from '.'
+import { colors } from './colors'
 import fs from 'fs'
 import path from 'path'
 
-export const error = (msg: string) => {
-  if (msg) console.log(msg)
-  else console.log('ERROR: Unknown :/')
+export const error = (msg: string, exit = true) => {
+  if (msg) console.log(colors(`ERROR: ${msg}`, 'red'))
+  else console.log(colors(`ERROR: unknown`, 'red'))
 
-  process.exit(1)
+  if (exit) process.exit(1)
 }
 
 // just a fallback for removing http-errors dependency
@@ -79,13 +80,22 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
     for (const f of files) {
       const configPath = path.join(d, f)
       if (fs.existsSync(configPath)) {
+        console.log(d, f, /\.c?js/.test(path.extname(configPath)))
         if (/\.c?js/.test(path.extname(configPath))) {
-          delete require.cache[configPath]
-          const config = require(configPath)
-          options = { ...options, ...config }
+          try {
+            delete require.cache[configPath]
+            const config = require(configPath)
+            options = { ...options, ...config }
+          } catch (err) {
+            error(err.message, false)
+          }
         } else {
           const config = fs.readFileSync(configPath, 'utf8')
-          options = { ...options, ...JSON.parse(config) }
+          try {
+            options = { ...options, ...JSON.parse(config) }
+          } catch (err) {
+            error(err.message, false)
+          }
         }
 
         if (options.ignorePattern) options.ignorePattern = new RegExp(options.ignorePattern)
