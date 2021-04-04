@@ -3,9 +3,12 @@ import { colors } from './colors'
 import fs from 'fs'
 import path from 'path'
 
-export const error = (msg: string, exit = true) => {
-  if (msg) console.log(colors(`ERROR: ${msg}`, 'red'))
-  else console.log(colors(`ERROR: unknown`, 'red'))
+export const error = (msg: string, comment: null | string = '', exit = true) => {
+  if (comment === null) comment = ''
+  if (comment !== '') comment += ':'
+
+  if (msg) console.log(colors(`ERROR: ${comment} ${msg}`, 'red'))
+  else console.log(colors(`ERROR: ${comment} unknown`, 'red'))
 
   if (exit) process.exit(1)
 }
@@ -76,25 +79,33 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
 
   dirs.push(process.cwd())
 
+  const isJSReg = /\.c?js$/
+
   loop: for (const d of dirs) {
     for (const f of files) {
       const configPath = path.join(d, f)
       if (fs.existsSync(configPath)) {
-        console.log(d, f, /\.c?js/.test(path.extname(configPath)))
-        if (/\.c?js/.test(path.extname(configPath))) {
+        const isJS = isJSReg.test(path.extname(configPath))
+
+        if (isJS) {
           try {
             delete require.cache[configPath]
             const config = require(configPath)
+
+            if (Object.keys(config).length === 0) {
+              error(`Config file "${f}" is empty or has issues`, null, false)
+            }
+
             options = { ...options, ...config }
           } catch (err) {
-            error(err.message, false)
+            error(err.message, f, false)
           }
         } else {
           const config = fs.readFileSync(configPath, 'utf8')
           try {
             options = { ...options, ...JSON.parse(config) }
           } catch (err) {
-            error(err.message, false)
+            error(err.message, f, false)
           }
         }
 
