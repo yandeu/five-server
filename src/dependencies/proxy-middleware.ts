@@ -1,10 +1,9 @@
-/*!
- * proxy-middleware
- * Copyright (c) 2014 Andrew Kelley
- * MIT Licensed
+/**
+ * @package      proxy-middleware (https://www.npmjs.com/package/proxy-middleware)
+ * @copyright    Copyright (c) 2014 Andrew Kelley
+ * @license      {@link https://github.com/gonzalocasas/node-proxy-middleware/blob/master/LICENSE|MIT}
+ * @description  modified version of proxy-middleware@0.15.0 (https://github.com/gonzalocasas/node-proxy-middleware/blob/master/index.js)
  */
-
-// modified version of proxy-middleware@0.15.0 (https://github.com/gonzalocasas/node-proxy-middleware/blob/master/index.js)
 
 const os = require('os')
 const http = require('http')

@@ -165,4 +165,4 @@ Download it from [marketplace.visualstudio.com](https://marketplace.visualstudio
 
 ## License
 
-[MIT](https://github.com/yandeu/five-server/blob/main/LICENSE)
+See [LICENSE](https://github.com/yandeu/five-server/blob/main/LICENSE)

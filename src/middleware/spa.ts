@@ -1,3 +1,8 @@
+/**
+ * @copyright   Copyright (c) 2021 Yannick Deubel (https://github.com/yandeu)
+ * @license     {@link https://github.com/tapio/live-server#license|MIT}
+ */
+
 // Single Page Apps - redirect to /#/
 const SPA = (req: any, res: any, next: any) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') next()

@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+
+/**
+ * @copyright   Copyright (c) 2012 Tapio Vierros (https://github.com/tapio)
+ * @copyright   Copyright (c) 2021 Yannick Deubel (https://github.com/yandeu)
+ * @license     {@link https://github.com/yandeu/five-server/blob/main/LICENSE.md|LICENSE}
+ */
+
 import { NAME, VERSION } from './const'
 import { error, getConfigFile, removeLeadingSlash } from './misc'
 import LiveServer from './index'

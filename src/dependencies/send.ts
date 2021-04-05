@@ -1,16 +1,15 @@
 /* eslint-disable prefer-template */
 /* eslint-disable prefer-spread */
 
-/*!
- * send
- * Copyright(c) 2012 TJ Holowaychuk
- * Copyright(c) 2014-2016 Douglas Christopher Wilson
- * MIT Licensed
+/**
+ * @package    send (https://www.npmjs.com/package/send)
+ * @copyright  Copyright(c) 2012 TJ Holowaychuk
+ * @copyright  Copyright(c) 2014-2016 Douglas Christopher Wilson
+ * @license    {@link https://github.com/pillarjs/send/blob/master/LICENSE|MIT}
+ * @description modified version of send@0.17.1 (https://github.com/pillarjs/send/blob/master/index.js)
  */
 
-// modified version of send@0.17.1 (https://github.com/pillarjs/send/blob/master/index.js)
-
-import { charsets } from '../misc'
+import { charsets } from '../utils/charset'
 import { createError } from '../misc' // const createError = require('http-errors')
 const debug = require('debug')('send')
 const destroy = require('destroy')

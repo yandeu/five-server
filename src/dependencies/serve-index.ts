@@ -1,15 +1,15 @@
 /* eslint-disable prefer-template */
 /* eslint-disable prefer-spread */
 
-/*!
- * serve-index
- * Copyright(c) 2011 Sencha Inc.
- * Copyright(c) 2011 TJ Holowaychuk
- * Copyright(c) 2014-2015 Douglas Christopher Wilson
- * MIT Licensed
+/**
+ * @package     serve-index (https://www.npmjs.com/package/serve-index)
+ * @copyright   Copyright (c) 2010 Sencha Inc.
+ * @copyright   Copyright (c) 2011 LearnBoost
+ * @copyright   Copyright (c) 2011 TJ Holowaychuk
+ * @copyright   Copyright (c) 2014-2015 Douglas Christopher Wilson
+ * @license     {@link https://github.com/expressjs/serve-index/blob/master/LICENSE|MIT}
+ * @description modified version of serve-index@1.9.1 (https://github.com/expressjs/serve-index/blob/master/index.js)
  */
-
-// modified version of serve-index@1.9.1 (https://github.com/expressjs/serve-index/blob/master/index.js)
 
 const accepts = require('accepts')
 import { createError } from '../misc' // const createError = require('http-errors')

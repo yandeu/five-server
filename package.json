@@ -47,7 +47,7 @@
     "url": "git+https://github.com/yandeu/five-server.git"
   },
   "author": "Yannick Deubel (https://github.com/yandeu)",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/yandeu/five-server/issues"
   },

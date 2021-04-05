@@ -1,9 +1,8 @@
 /**
  * @copyright    Copyright JS Foundation and other contributors
  * @license      {@link https://github.com/webpack/webpack-dev-server/blob/master/LICENSE|MIT}
+ * @description  Copied from webpack-dev-server@3.11.2 (https://github.com/webpack/webpack-dev-server/blob/master/lib/utils/createCertificate.js)
  */
-
-// Copied from webpack-dev-server@3.11.2 (https://github.com/webpack/webpack-dev-server/blob/master/lib/utils/createCertificate.js)
 
 import selfsigned from 'selfsigned'
 

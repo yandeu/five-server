@@ -1,3 +1,9 @@
+/**
+ * @copyright    Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+ * @license      {@link https://github.com/Marak/colors.js/blob/master/lib/styles.js|MIT}
+ * @description  modified version of https://github.com/Marak/colors.js/blob/master/lib/styles.js
+ */
+
 // usage '\u001b[Xm' // where X is the number
 
 export const colors = (str: string, clr: Colors) => {
