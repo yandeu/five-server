@@ -20,7 +20,13 @@ opts._cli = true
 for (let i = process.argv.length - 1; i >= 2; --i) {
   const arg = process.argv[i]
 
-  if (arg.indexOf('--port=') > -1) {
+  if (arg.indexOf('--remoteLogs=') > -1) {
+    const log = arg.substring(13)
+    if (log === 'true') opts.remoteLogs = true
+    else if (log === 'false') opts.remoteLogs = false
+    else opts.remoteLogs = log
+    process.argv.splice(i, 1)
+  } else if (arg.indexOf('--port=') > -1) {
     const portString = arg.substring(7)
     const portNumber = parseInt(portString, 10)
     if (portNumber === +portString) {
