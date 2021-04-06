@@ -46,6 +46,8 @@ export interface LiveServerParams {
   remoteLogs?: boolean | Colors
   /** Set root directory that's being served. Defaults to cwd. */
   root?: string
+  /** This option lets the browser open with your local IP. */
+  useLocalIp?: boolean
   /** Waits for all changes, before reloading. Defaults to 0 sec. */
   wait?: number
   /** Paths to exclusively watch for changes. */

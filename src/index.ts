@@ -31,6 +31,7 @@ import { ProxyMiddlewareOptions } from './dependencies/proxy-middleware'
 import { entryPoint, staticServer } from './staticServer'
 import { Certificate, LiveServerParams } from './types'
 import { getCertificate } from './utils/getCertificate'
+import { getNetworkAddress } from './utils/getNetworkAddress'
 
 export { LiveServerParams }
 
@@ -89,7 +90,6 @@ export default class LiveServer {
       browser = null,
       cors = false,
       file,
-      host = 'localhost', // '0.0.0.0'
       htpasswd = null,
       https: _https = null,
       injectBody = false,
@@ -100,9 +100,13 @@ export default class LiveServer {
       port = 8080,
       proxy = [],
       remoteLogs = false,
+      useLocalIp = false,
       wait = 100,
       workspace
     } = options
+
+    let host = options.host || 'localhost' // '0.0.0.0'
+    if (useLocalIp && host === 'localhost') host = '0.0.0.0'
 
     this.injectBody = injectBody
 
@@ -286,7 +290,9 @@ export default class LiveServer {
 
     const address = this.httpServer.address() as any
     const serveHost = address.address === '0.0.0.0' ? '127.0.0.1' : address.address
-    const openHost = host === '0.0.0.0' ? '127.0.0.1' : host
+
+    let openHost = host === '0.0.0.0' ? '127.0.0.1' : host
+    if (useLocalIp) openHost = getNetworkAddress() || openHost
 
     const serveURL = `${this._protocol}://${serveHost}:${address.port}`
     this._openURL = `${this._protocol}://${openHost}:${address.port}`

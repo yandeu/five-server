@@ -20,7 +20,10 @@ opts._cli = true
 for (let i = process.argv.length - 1; i >= 2; --i) {
   const arg = process.argv[i]
 
-  if (arg.indexOf('--remoteLogs=') > -1) {
+  if (arg.indexOf('--useLocalIp') > -1) {
+    opts.useLocalIp = true
+    process.argv.splice(i, 1)
+  } else if (arg.indexOf('--remoteLogs=') > -1) {
     const log = arg.substring(13)
     if (log === 'true') opts.remoteLogs = true
     else if (log === 'false') opts.remoteLogs = false
