@@ -101,6 +101,19 @@ module.exports = {
 
 (_The **https certificate** is self-signed. Means, the first time you open your browser, you have to confirm that you want to continue._)
 
+**Debug on your Mobile Device**
+
+Allows you to connect your mobile device by making your server accessible externally.  
+You will see all logs from the mobile device in your terminal in yellow.
+
+```js
+// fiveserver.config.js
+module.exports = {
+  host: '0.0.0.0', // default: 'localhost'
+  remoteLogs: 'yellow' // true | false | Color
+}
+```
+
 **Watch & Ignore:**
 
 Watch only for file changes in `/src`. But exclude all `.sass` and `.scss` files from watching.
