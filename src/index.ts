@@ -159,12 +159,24 @@ export default class LiveServer {
     const app = express()
 
     app.use((req, res, next) => {
-      if (req.url === '/fiveserver.js') {
-        return res.type('.js').send(INJECTED_CODE)
+      if (req.url === '/fiveserver.js') return res.type('.js').send(INJECTED_CODE)
+      if (req.url === '/fiveserver') return res.json({ status: 'online' })
+
+      next()
+    })
+
+    // serve without file extension
+    app.use(async (req, res, next) => {
+      // check if the url has not dot
+      if (/\/[\w-]+$/.test(req.url)) {
+        // get the absolute path
+        const absolute = path.join(path.resolve(), rootPath + req.url)
+        // check if .html file exists
+        if (fs.existsSync(`${absolute}.html`)) req.url = req.url += '.html'
+        // check if .php file exists
+        else if (fs.existsSync(`${absolute}.php`)) req.url = req.url += '.php'
       }
-      if (req.url === '/fiveserver') {
-        return res.json({ status: 'online' })
-      }
+
       next()
     })
 
