@@ -59,6 +59,10 @@ export interface LiveServerParams {
   injectBody?: boolean
   /** Navigates your browser automatically to the current working file. (VSCode Extension only) */
   navigate?: boolean
+  /** Access your page with or without file extension.
+   * @example 'redirect' will redirect /contact.html to /contact.
+   */
+  withExtension?: 'always' | 'avoid' | 'redirect' | 'unset'
   /** @private Absolute path of your workspace. (VSCode Extension only) */
   workspace?: string
 

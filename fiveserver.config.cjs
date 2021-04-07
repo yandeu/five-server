@@ -3,7 +3,7 @@ module.exports = {
   root: 'dev',
   file: '404.html',
   // host: '0.0.0.0',
-  // open: false,
+  open: false,
   // https: true,
   // browser: ['edge', 'chrome', 'firefox', 'chrome --incognito', 'firefox --incognito'],
   // browser: ['C:\\Program Files\\Firefox Developer Edition\\firefox.exe --private-window'],
@@ -11,5 +11,6 @@ module.exports = {
   ignore: [/\.s[ac]ss$/i, /\.tsx?$/i],
   // mount: [['/img', 'C:\\Users\\USERNAME\\Pictures']],
   remoteLogs: 'brightMagenta'
+  // withExtension: 'redirect'
   // logLevel: 2
 }

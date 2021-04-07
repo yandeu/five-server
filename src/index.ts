@@ -102,6 +102,7 @@ export default class LiveServer {
       remoteLogs = false,
       useLocalIp = false,
       wait = 100,
+      withExtension,
       workspace
     } = options
 
@@ -165,10 +166,23 @@ export default class LiveServer {
       next()
     })
 
-    // serve without file extension
+    // serve files (.html, .php) with or without extension
     app.use(async (req, res, next) => {
-      // check if the url has not dot
-      if (/\/[\w-]+$/.test(req.url)) {
+      const isHtml = path.extname(req.url) === '.html'
+      const isPhp = path.extname(req.url) === '.php'
+      const isNon = path.extname(req.url) === ''
+
+      if (withExtension === 'always' && isNon) return next()
+      if (withExtension === 'avoid' && (isHtml || isPhp)) return next()
+      if (withExtension === 'redirect') {
+        if (isHtml || isPhp) {
+          const reg = new RegExp(`${path.extname(req.url)}$`)
+          return res.redirect(req.url.replace(reg, ''))
+        }
+      }
+
+      // serve file without extension (if it exists)
+      if (isNon) {
         // get the absolute path
         const absolute = path.join(path.resolve(), rootPath + req.url)
         // check if .html file exists
