@@ -1,5 +1,6 @@
 module.exports = {
   ...require('@yandeu/prettier-config'),
+  endOfLine: 'auto',
   overrides: [
     {
       files: ['*.html', 'injected.js'],
