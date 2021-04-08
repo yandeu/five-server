@@ -144,6 +144,12 @@ if ('WebSocket' in window) {
         }
       }
       socket.onopen = function () {
+        // reload page on successful reconnection
+        if (attempts > 0) {
+          window.location.reload()
+          return
+        }
+
         const scripts = document.querySelectorAll('script')
         for (let i = 0; i < scripts.length; i++) {
           const script = scripts[i]
