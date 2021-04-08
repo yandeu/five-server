@@ -1,6 +1,7 @@
 const path = require('path')
 const FiveServer = require('../lib').default
 const puppeteer = require('puppeteer')
+const pause = require('./helpers/pause')
 
 jest.setTimeout(15_000)
 
@@ -15,14 +16,6 @@ const options = {
 }
 
 let log = ''
-
-const pause = (ms = 1000) => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve()
-    }, ms)
-  })
-}
 
 beforeAll(async () => {
   await fiveServer.start(options)
