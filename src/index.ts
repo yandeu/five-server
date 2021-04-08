@@ -33,6 +33,10 @@ import { Certificate, LiveServerParams } from './types'
 import { getCertificate } from './utils/getCertificate'
 import { getNetworkAddress } from './utils/getNetworkAddress'
 
+// execute php
+import { ExecPHP } from './utils/execPHP'
+const PHP = new ExecPHP()
+
 export { LiveServerParams }
 
 // const INJECTED_CODE = fs.readFileSync(path.join(__dirname, '../injected.html'), 'utf8')
@@ -97,14 +101,19 @@ export default class LiveServer {
       logLevel = 2,
       middleware = [],
       mount = [],
+      php,
+      phpIni,
       port = 8080,
       proxy = [],
       remoteLogs = false,
       useLocalIp = false,
       wait = 100,
-      withExtension,
+      withExtension = 'unset',
       workspace
     } = options
+
+    PHP.path = php
+    PHP.ini = phpIni
 
     let host = options.host || 'localhost' // '0.0.0.0'
     if (useLocalIp && host === 'localhost') host = '0.0.0.0'
@@ -139,7 +148,7 @@ export default class LiveServer {
 
     const staticServerHandler = staticServer(rootPath, { logLevel, injectedCode: INJECTED_CODE })
 
-    const httpsModule = 'https'
+    // const httpsModule = 'https'
 
     // let httpsModule = options.httpsModule
 
@@ -188,6 +197,21 @@ export default class LiveServer {
       // serve file without extension (if it exists)
       if (isNon) {
         // get the absolute path
+        const absolute = path.resolve(path.join(rootPath + req.url))
+        // check if .html file exists
+        if (fs.existsSync(`${absolute}.html`)) req.url = req.url += '.html'
+        // check if .php file exists
+        else if (fs.existsSync(`${absolute}.php`)) req.url = req.url += '.php'
+      }
+
+      next()
+    })
+
+    // serve without file extension
+    app.use(async (req, res, next) => {
+      // check if the url has not dot
+      if (/\/[\w-]+$/.test(req.url)) {
+        // get the absolute path
         const absolute = path.join(path.resolve(), rootPath + req.url)
         // check if .html file exists
         if (fs.existsSync(`${absolute}.html`)) req.url = req.url += '.html'
@@ -196,6 +220,29 @@ export default class LiveServer {
       }
 
       next()
+    })
+
+    // serve php files as text/html
+    app.use(async (req, res, next) => {
+      if (/\.php$/.test(req.url)) {
+        const filePath = path.resolve(path.join(rootPath + req.url))
+
+        res.setHeader('Content-Type', 'text/html; charset=UTF-8')
+        let html = await PHP.parseFile(filePath, res)
+
+        html = html.replace(
+          '</html>',
+          `
+    <!-- Code injected by Five-server -->
+    <script async data-id="five-server" data-file="${filePath}" type="application/javascript" src="/fiveserver.js"></script>
+
+  </html>`
+        )
+
+        res.send(html)
+      } else {
+        next()
+      }
     })
 
     // Add logger. Level 2 logs only errors

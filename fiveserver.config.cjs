@@ -1,7 +1,7 @@
 module.exports = {
   port: 8085,
   root: 'dev',
-  file: '404.html',
+  // file: '404.html',
   // host: '0.0.0.0',
   open: false,
   // https: true,
@@ -10,7 +10,10 @@ module.exports = {
   watch: 'dev',
   ignore: [/\.s[ac]ss$/i, /\.tsx?$/i],
   // mount: [['/img', 'C:\\Users\\USERNAME\\Pictures']],
-  remoteLogs: 'brightMagenta'
+  remoteLogs: 'yellow',
+  // logLevel: 2,
+  // php: '/usr/bin/php',
+  php: 'C:\\xampp\\php\\php.exe'
   // withExtension: 'redirect'
   // logLevel: 2
 }

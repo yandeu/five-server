@@ -24,8 +24,12 @@ Development Server with **Live Reload** Capability.
    Displays the logs of your browser in your terminal!  
    _Useful for debugging on your smart phone for example._
 
+- 🚀 **PHP Server**  
+  Serves not only your **.html** files but also **.php**.  
+  _See docs below_
+
 - 🚀 **Server Side Rendered App**  
-  Works with any Server Side Rendered content like **PHP** or **Express.js**!  
+  Works with any Server Side Rendered content like **Express.js**!  
   _See docs below_
 
 - 🚀 **Instant Updates**  
@@ -143,7 +147,20 @@ Following options are all valid:
 ['C:\\Program Files\\Firefox Developer Edition\\firefox.exe --private-window']
 ```
 
-**Server Side Rendering (like PHP or Express.js):**
+**PHP Server**
+
+Serve and auto-reload PHP file in your browser!
+
+Simply add the path to your PHP executable.
+
+```js
+module.exports = {
+  php: '/usr/bin/php', // Linux/macOS (example)
+  php: 'C:\\xampp\\php\\php.exe' // Windows (example)
+}
+```
+
+**Server Side Rendering (Express.js):**
 
 You can enable live reload for any server side generated content.  
 (_Additional Plugin for Chrome available soon!_)
@@ -165,8 +182,6 @@ module.exports = {
   open: false
 }
 ```
-
-(_Five Server only provides the live reload functionality. Five Server does not serve the server side file for you. You still need a PHP or Node.js server._)
 
 ## VSCode Extension
 

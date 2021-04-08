@@ -23,6 +23,14 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
   if (arg.indexOf('--useLocalIp') > -1) {
     opts.useLocalIp = true
     process.argv.splice(i, 1)
+  } else if (arg.indexOf('--php=') > -1) {
+    const php = arg.substring(6)
+    opts.php = php
+    process.argv.splice(i, 1)
+  } else if (arg.indexOf('--phpIni=') > -1) {
+    const phpIni = arg.substring(9)
+    opts.phpIni = phpIni
+    process.argv.splice(i, 1)
   } else if (arg.indexOf('--remoteLogs=') > -1) {
     const log = arg.substring(13)
     if (log === 'true') opts.remoteLogs = true

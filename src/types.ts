@@ -38,6 +38,10 @@ export interface LiveServerParams {
   injectCss?: boolean
   /** Subpath(s) to open in browser, use false to suppress launch. */
   open?: string | string[] | boolean | null
+  /** Absolute path to PHP executable. */
+  php?: string
+  /** Absolute path to php.ini file. */
+  phpIni?: string
   /** Set the server port. Defaults to 8080. */
   port?: number
   /** Proxy all requests for ROUTE to URL. */
