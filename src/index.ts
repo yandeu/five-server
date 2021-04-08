@@ -156,9 +156,13 @@ export default class LiveServer {
     //   httpsModule = 'https'
     // }
 
-    // Setup a web server
+    // setup a web server
     const app = express()
 
+    // enable CORS
+    if (cors) app.use(require('cors')({ credentials: true }))
+
+    // serve fiveserver files
     app.use((req, res, next) => {
       if (req.url === '/fiveserver.js') return res.type('.js').send(INJECTED_CODE)
       if (req.url === '/fiveserver') return res.json({ status: 'online' })
@@ -239,14 +243,7 @@ export default class LiveServer {
       // })
       // app.use(authConnect(basic))
     }
-    if (cors) {
-      app.use(
-        require('cors')({
-          origin: true, // reflecting request origin
-          credentials: true // allowing requests with credentials
-        })
-      )
-    }
+
     mount.forEach(mountRule => {
       const mountPath = path.resolve(process.cwd(), mountRule[1])
       if (!options.watch)
