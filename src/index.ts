@@ -610,16 +610,20 @@ export default class LiveServer {
     // Don't open a browser
     if (path === null) return
 
+    const isURL = path => /(www|http:|https:)+[^\s]+[\w]/gm.test(path)
+
     // Try to open one browser from a list of browsers
     if (Array.isArray(path)) {
       for (const p of path) {
-        await launch(`${this.openURL}/${p}`, browser)
+        if (isURL(p)) await launch(p, browser)
+        else await launch(`${this.openURL}/${p}`, browser)
       }
     }
 
     // Open browser "browser"
     if (typeof path === 'string') {
-      await launch(`${this.openURL}/${path}`, browser)
+      if (isURL(path)) await launch(path, browser)
+      else await launch(`${this.openURL}/${path}`, browser)
     }
   }
 
