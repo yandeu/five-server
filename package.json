@@ -13,6 +13,8 @@
     "development",
     "tool",
     "http",
+    "html",
+    "php",
     "live",
     "server",
     "cli",
