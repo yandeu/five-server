@@ -55,6 +55,9 @@ export default class LiveServer {
   public logLevel = 2
   public injectBody = false
 
+  /** inject stript to any file */
+  public injectToAny = false
+
   private colors: Colors[] = ['blue', 'magenta', 'cyan', 'green', 'red', 'yellow']
   private colorIndex = -1
   private newColor = () => {
@@ -319,6 +322,79 @@ export default class LiveServer {
 
     // inject to fallback "file"
     app.use(fallbackFile(injectHandler, file))
+
+    // inject to any (converts and file to a .html file (if possible))
+    app.use((req, res, next) => {
+      if (!this.injectToAny) return next()
+      if (path.extname(req.url) !== '.preview') return next()
+
+      req.url = req.url.replace(/\.preview$/, '')
+
+      try {
+        const filePath = path.resolve(path.join(rootPath + req.url))
+        console.log(filePath)
+
+        const isFile = fs.statSync(filePath).isFile()
+        if (!isFile) return next()
+
+        const isImg = /\.(gif|jpg|jpeg|tiff|png)$/i.test(req.url)
+
+        let preview = ''
+
+        if (isImg) preview = `<img style="max-width: 100%;" src="${req.url}">`
+        else
+          preview = `
+            <div style="border: 1px #0C0E14 solid; margin-right: 8px;">
+              <pre style="margin: 16px 16px;"><code>${fs.readFileSync(filePath, { encoding: 'utf-8' })}</code></pre>
+            </div>`
+
+        const html = `
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <title>Preview</title>
+              <script async data-id="five-server" data-file="${filePath}" type="application/javascript" src="/fiveserver.js"></script>
+            </head>
+            <body>
+              <style>
+                html,
+                body {
+                  font-family: Arial, Helvetica, sans-serif;
+                  color: #0C0E14;
+                  background-color: #F8F8F2;
+                }
+                body {
+                  text-align: center;
+                }
+                #content {
+                  text-align: left;
+                  display: inline-block;
+                }
+
+              </style>
+
+              <div id="content">
+                <h1>Preview: ${req.url}</h1>
+                <p>
+                  Why this preview? Five Server could not detect any head, body or html tag in your file.
+                  <br>
+                  <i>A better preview will be available soon!</i>
+                </p>
+                <div>
+                  ${preview}
+                </div>
+              </div>
+            </body>
+          </html>        
+        `
+        return res.type('html').send(html)
+      } catch (error) {
+        return next()
+      }
+    })
 
     // serveIndex middleware
     app.use(serveIndex(rootPath, { icons: true }))
