@@ -1,0 +1,6 @@
+{
+  "https": false,
+  "host": "localhost",
+  "port": 8080,
+  "open": "http://localhost:3000/"
+}

@@ -3,6 +3,7 @@
 .vscode
 coverage
 dev
+examples
 node_modules
 package-lock.json
 src

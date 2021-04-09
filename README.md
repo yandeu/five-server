@@ -70,11 +70,11 @@ _Will be available soon._
 
 ## Config File
 
-**Reference:**
+### Reference:
 
 You will find all available options for your Config File in [`/src/types.ts`](https://github.com/yandeu/five-server/blob/main/src/types.ts).
 
-**A simple example of a config file:**
+### A simple example of a config file:
 
 Your browser will open the about page of your portfolio project at `http://localhost:8085/about.html`.
 
@@ -87,7 +87,7 @@ Your browser will open the about page of your portfolio project at `http://local
 }
 ```
 
-**Another example:**
+### Another example:
 
 Firefox (if available) will open `https://127.0.0.1:8086/about.html` and `https://127.0.0.1:8086/contact.html`.
 
@@ -105,7 +105,7 @@ module.exports = {
 
 (_The **https certificate** is self-signed. Means, the first time you open your browser, you have to confirm that you want to continue._)
 
-**Debug on your Mobile Device**
+### Debug on your Mobile Device
 
 Allows you to connect your mobile device by making your server accessible externally.  
 You will see all logs from the mobile device in your terminal in yellow.
@@ -115,10 +115,11 @@ You will see all logs from the mobile device in your terminal in yellow.
 module.exports = {
   host: '0.0.0.0', // default: 'localhost'
   remoteLogs: 'yellow' // true | false | Color
+  useLocalIp: true, // optional: opens browser with your local IP
 }
 ```
 
-**Watch & Ignore:**
+### Watch & Ignore:
 
 Watch only for file changes in `/src`. But exclude all `.sass` and `.scss` files from watching.
 
@@ -134,7 +135,7 @@ module.exports = {
 }
 ```
 
-**Browser of your choice**
+### Browser of your choice
 
 The option browser can be a `string` or an `string[]`.  
 _If you provide an array, the first browser found will be opened._
@@ -147,7 +148,7 @@ Following options are all valid:
 ['C:\\Program Files\\Firefox Developer Edition\\firefox.exe --private-window']
 ```
 
-**PHP Server**
+### PHP Server
 
 Serve and auto-reload PHP file in your browser!
 
@@ -160,10 +161,12 @@ module.exports = {
 }
 ```
 
-**Server Side Rendering (Express.js):**
+### Server Side Rendering (like express.js):
 
 You can enable live reload for any server side generated content.  
 (_Additional Plugin for Chrome available soon!_)
+
+Check out the express.js example at [/examples/express](https://github.com/yandeu/five-server/tree/main/examples/express).
 
 Simply start Five Server and add the script below to you files:
 
@@ -179,7 +182,7 @@ module.exports = {
   https: false,
   host: 'localhost',
   port: 8080,
-  open: false
+  open: false // or open your express.js app (http://localhost:3000/ for example)
 }
 ```
 

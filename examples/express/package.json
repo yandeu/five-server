@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "start": "npm-run-all --parallel dev:*",
+    "dev:express": "nodemon server.js",
+    "dev:five-server": "five-server"
+  }
+}
