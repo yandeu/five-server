@@ -1,3 +1,9 @@
+/**
+ * @author      Yannick Deubel (https://github.com/yandeu)
+ * @copyright   Copyright (c) 2021 Yannick Deubel
+ * @license     {@link https://github.com/yandeu/five-server/blob/main/LICENSE.md|LICENSE}
+ */
+
 import { exec } from 'child_process'
 import fs from 'fs'
 
