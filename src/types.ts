@@ -76,7 +76,7 @@ export interface LiveServerParams {
   ignorePattern?: any
   /** @deprecated Use open instead. */
   noBrowser?: boolean
-  /** @deprecated No one uses /# anymore.  */
+  /** @deprecated No one uses /# anymore. */
   spa?: boolean
 
   /** @private Doesn't fetch the config file twice. */

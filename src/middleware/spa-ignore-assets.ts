@@ -1,5 +1,5 @@
 /**
- * @copyright   Copyright (c) 2021 Yannick Deubel (https://github.com/yandeu)
+ * @copyright   Copyright (c) 2012 Tapio Vierros (https://github.com/tapio)
  * @license     {@link https://github.com/tapio/live-server#license|MIT}
  */
 

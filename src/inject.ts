@@ -1,12 +1,22 @@
+/**
+ * @copyright    Copyright (c) 2012 Tapio Vierros (https://github.com/tapio)
+ * @copyright    Copyright (c) 2021 Yannick Deubel (https://github.com/yandeu)
+ * @license      {@link https://github.com/yandeu/five-server/blob/main/LICENSE.md|LICENSE}
+ * @description  copied and modified from https://github.com/tapio/live-server/blob/master/live-server.js
+ */
+
 import { colors } from './colors'
 import fs from 'fs'
 import path from 'path'
+import { removeTrailingSlash } from './misc'
 import send from './dependencies/send'
 const es = require('event-stream') // looks ok for now (https://david-dm.org/dominictarr/event-stream)
 
 // Based on connect.static(), but streamlined and with added code injector
-export const staticServer = (root: any, opts: { logLevel: number; injectedCode: string }) => {
-  const { logLevel, injectedCode } = opts
+export const injectCode = (root: any, options: { logLevel: number; serverURL?: string } = { logLevel: 1 }) => {
+  const { logLevel, serverURL } = options
+
+  const possibleExtensions = ['.html', '.htm', '.xhtml', '.svg']
 
   let isFile = false
   let filePath = ''
@@ -18,12 +28,22 @@ export const staticServer = (root: any, opts: { logLevel: number; injectedCode: 
     if (e.code !== 'ENOENT') throw e
   }
   return function (req, res, next) {
-    if (req.method !== 'GET' && req.method !== 'HEAD') return next()
+    const isRoot = req.url === '/'
+    if (!isRoot && !possibleExtensions.includes(path.extname(req.url))) return next()
+
+    // should be able to POST to PHP files!
+    // if (req.method !== 'GET' && req.method !== 'HEAD') return next()
+
     const baseURL = `http://${req.headers.host}/`
     const reqUrl = new URL(req.url, baseURL)
     const reqpath = isFile ? '' : reqUrl.pathname
     const hasNoOrigin = !req.headers.origin
-    const injectCandidates = [new RegExp('</head>', 'i'), new RegExp('</body>', 'i'), new RegExp('</svg>')]
+    const injectCandidates = [
+      new RegExp('</head>', 'i'),
+      new RegExp('</html>', 'i'),
+      new RegExp('</body>', 'i'),
+      new RegExp('</svg>')
+    ]
     let injectTag: any = null
 
     function directory() {
@@ -39,7 +59,7 @@ export const staticServer = (root: any, opts: { logLevel: number; injectedCode: 
       filePath = filepath
 
       const x = path.extname(filepath).toLocaleLowerCase()
-      const possibleExtensions = ['', '.html', '.htm', '.xhtml', '.php', '.svg']
+
       let match
 
       if (hasNoOrigin && possibleExtensions.indexOf(x) > -1) {
@@ -71,9 +91,11 @@ export const staticServer = (root: any, opts: { logLevel: number; injectedCode: 
 
     function inject(stream) {
       if (injectTag) {
+        removeTrailingSlash
+        const src = serverURL ? `${removeTrailingSlash(serverURL)}/fiveserver.js` : '/fiveserver.js'
         const injection = `
     <!-- Code injected by Five-server -->
-    <script async data-id="five-server" data-file="${filePath}" type="application/javascript" src="/fiveserver.js"></script>
+    <script async data-id="five-server" data-file="${filePath}" type="application/javascript" src="${src}"></script>
 
   ${injectTag}`
 
@@ -101,7 +123,7 @@ export const staticServer = (root: any, opts: { logLevel: number; injectedCode: 
  * @param staticHandler {function} Next handler
  * @param file {string} Path to the entry point file
  */
-export const entryPoint = (staticHandler, file) => {
+export const fallbackFile = (staticHandler, file) => {
   if (!file)
     return function (req, res, next) {
       next()

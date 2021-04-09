@@ -28,7 +28,7 @@ import WebSocket from 'ws' // eslint-disable-line sort-imports
 import open from 'open'
 import { Colors, colors } from './colors'
 import { ProxyMiddlewareOptions } from './dependencies/proxy-middleware'
-import { entryPoint, staticServer } from './staticServer'
+import { injectCode, fallbackFile } from './inject'
 import { Certificate, LiveServerParams } from './types'
 import { getCertificate } from './utils/getCertificate'
 import { getNetworkAddress } from './utils/getNetworkAddress'
@@ -115,6 +115,8 @@ export default class LiveServer {
     PHP.path = php
     PHP.ini = phpIni
 
+    this.logLevel = logLevel
+
     let host = options.host || 'localhost' // '0.0.0.0'
     if (useLocalIp && host === 'localhost') host = '0.0.0.0'
 
@@ -135,7 +137,7 @@ export default class LiveServer {
     else if (openPath === undefined || openPath === true) openPath = ''
     else if (openPath === null || openPath === false) openPath = null
 
-    if (options.noBrowser) openPath = null // Backwards compatibility with 0.7.0
+    if (options.noBrowser) openPath = null // Backwards compatibility
 
     // if server is already running, just open a new browser window
     if (this.isRunning) {
@@ -144,28 +146,12 @@ export default class LiveServer {
       return
     }
 
-    this.logLevel = logLevel
+    /**
+     * STEP: 1/4
+     * Set up "express" server (https://www.npmjs.com/package/express)
+     */
 
-    const staticServerHandler = staticServer(rootPath, { logLevel, injectedCode: INJECTED_CODE })
-
-    // const httpsModule = 'https'
-
-    // let httpsModule = options.httpsModule
-
-    // if (httpsModule) {
-    //   try {
-    //     require.resolve(httpsModule)
-    //   } catch (e) {
-    //     console.error(colors(`HTTPS module "${httpsModule}" you've provided was not found.`, 'red'))
-    //     console.error('Did you do', `"npm install ${httpsModule}"?`)
-    //     // @ts-ignore
-    //     return
-    //   }
-    // } else {
-    //   httpsModule = 'https'
-    // }
-
-    // setup a web server
+    // express.js
     const app = express()
 
     // enable CORS
@@ -258,16 +244,20 @@ export default class LiveServer {
     } else if (this.logLevel > 2) {
       app.use(logger('dev'))
     }
-    if (options.spa) {
-      // @ts-expect-error
-      middleware.push('spa')
-    }
+
+    // Use http-auth if configured
+    if (htpasswd !== null) error('Sorry htpasswd does not work yet.', null, false)
+
+    // Custom https module
+    if (options.httpsModule) error('Sorry "httpsModule" has been removed.', null, false)
+
+    // SPA middleware
+    if (options.spa) error('Sorry SPA middleware has been removed.', null, false)
+
     // Add middleware
     middleware.map(function (mw) {
       if (typeof mw === 'string') {
         const ext = path.extname(mw).toLocaleLowerCase()
-        // TODO: Try to use a better import syntax
-        // require().default does just not look right :/
         if (ext !== '.js') {
           mw = require(path.join(__dirname, 'middleware', `${mw}.js`)).default
         } else {
@@ -278,19 +268,6 @@ export default class LiveServer {
       app.use(mw)
     })
 
-    // Use http-auth if configured
-    if (htpasswd !== null) {
-      // TODO: Replace http-auth with a lib that does not have native code
-      error('Sorry htpasswd does not work yet.')
-      // const auth = require('http-auth')
-      // const authConnect = require('http-auth-connect')
-      // const basic = auth.basic({
-      //   realm: 'Please authorize',
-      //   file: htpasswd
-      // })
-      // app.use(authConnect(basic))
-    }
-
     mount.forEach(mountRule => {
       const mountPath = path.resolve(process.cwd(), mountRule[1])
       if (!options.watch)
@@ -300,12 +277,13 @@ export default class LiveServer {
       // make sure mountRule[0] has a leading slash
       if (mountRule[0].indexOf('/') !== 0) mountRule[0] = `/${mountRule[0]}`
 
-      // mount it with  express.static
+      // mount it with express.static
       app.use(mountRule[0], express.static(mountPath))
 
       // log the mapping folder
       if (this.logLevel >= 1) console.log('Mapping %s to "%s"', mountRule[0], mountPath)
     })
+
     proxy.forEach(proxyRule => {
       const url = new URL(proxyRule[1])
 
@@ -331,11 +309,21 @@ export default class LiveServer {
       if (this.logLevel >= 1) console.log('Mapping %s to "%s"', proxyRule[0], proxyRule[1])
     })
 
-    app
-      .use(staticServerHandler) // Custom static server
-      .use(entryPoint(staticServerHandler, file))
-      .use(serveIndex(rootPath, { icons: true }))
+    const injectHandler = injectCode(rootPath, { logLevel })
 
+    // inject to .html and .php files
+    app.use(injectHandler)
+
+    // serve static files
+    app.use(express.static(rootPath))
+
+    // inject to fallback "file"
+    app.use(fallbackFile(injectHandler, file))
+
+    // serveIndex middleware
+    app.use(serveIndex(rootPath, { icons: true }))
+
+    // create http server
     if (_https !== null && _https !== false) {
       let httpsConfig = _https as Certificate
 
@@ -355,7 +343,7 @@ export default class LiveServer {
       this._protocol = 'http'
     }
 
-    // Setup server to listen at port
+    // start and listen at port
     await this.listen(port, host)
 
     const address = this.httpServer.address() as any
@@ -403,8 +391,16 @@ export default class LiveServer {
       else console.log(colors('Serving "%s" at %s (%s)', 'green'), root, this.openURL, serveURL)
     }
 
+    /**
+     * STEP: 2/4
+     * Open Browser using "open" (https://www.npmjs.com/package/open)
+     */
     this.launchBrowser(openPath, browser)
 
+    /**
+     * STEP: 3/4
+     * Make WebSocket Connection using "ws" (https://www.npmjs.com/package/ws)
+     */
     const wss = new WebSocket.Server({ server: this.httpServer })
 
     wss.on('connection', (ws: ExtendedWebSocket, req: any) => {
@@ -462,6 +458,10 @@ export default class LiveServer {
       this.clients.push(ws)
     })
 
+    /**
+     * STEP: 4/4
+     * Listen for File changes using "chokidar" (https://www.npmjs.com/package/chokidar)
+     */
     let ignored: any = [
       function (testPath) {
         // Always ignore dotfiles (important e.g. because editor hidden temp files)
