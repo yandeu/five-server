@@ -1,3 +1,4 @@
+/* eslint-disable sort-imports */
 /* eslint-disable prefer-template */
 /* eslint-disable prefer-spread */
 
@@ -15,12 +16,30 @@ const accepts = require('accepts')
 import { createError } from '../misc' // const createError = require('http-errors')
 const debug = require('debug')('serve-index')
 const escapeHtml = require('escape-html')
-const fs = require('fs'),
-  path = require('path'),
-  normalize = path.normalize,
-  sep = path.sep,
-  extname = path.extname,
-  join = path.join
+const fs = require('fs')
+import path, { extname as _extname, normalize, sep, join } from 'path'
+
+// wrap extname for special files like .d.ts
+const extname = (p: string) => {
+  if (/\.d\.ts$/.test(p)) return '.d.ts'
+  if (/\.test\.c?m?js$/.test(p)) return '.test.js'
+  if (/\.test\.jsx$/.test(p)) return '.test.jsx'
+  if (/\.test\.tsx?$/.test(p)) return '.test.ts'
+
+  if (/fiveserver/i.test(p)) return 'FIVESERVER'
+  if (/eslint/i.test(p)) return 'ESLINT'
+  if (/prettier/i.test(p)) return 'PRETTIER'
+  if (/^.gitignore$/i.test(p)) return 'GIT'
+  if (/^.npmignore$/i.test(p)) return 'NPM'
+  if (/^.gitignore$/i.test(p)) return 'GIT'
+  if (/^package.json$|^package-lock.json$/i.test(p)) return 'NODEJS'
+  if (/^CHANGELOG$|^CHANGELOG\./i.test(p)) return 'CHANGELOG'
+  if (/^LICENSE$|^LICENSE\./i.test(p)) return 'LICENSE'
+  if (/^README$|^README\./i.test(p)) return 'README'
+
+  return _extname(p)
+}
+
 const mime = require('mime-types')
 const parseUrl = require('parseurl')
 const resolve = require('path').resolve
@@ -50,7 +69,8 @@ const serveIndex = (root, options?: any) => {
   const rootPath = normalize(resolve(root) + sep)
 
   const filter = opts.filter
-  const hidden = opts.hidden
+  const hidden = opts.hidden || false
+  const dotFiles = opts.dotFiles || true
   const icons = opts.icons
   const stylesheet = opts.stylesheet || defaultStylesheet
   const template = opts.template || defaultTemplate
@@ -109,6 +129,7 @@ const serveIndex = (root, options?: any) => {
       fs.readdir(path, function (err, files) {
         if (err) return next(err)
         if (!hidden) files = removeHidden(files)
+        if (!dotFiles) files = removeDotFiles(files)
         if (filter)
           files = files.filter(function (filename, index, list) {
             return filter(filename, index, list, path)
@@ -341,12 +362,13 @@ function iconLookup(filename) {
   // try by extension
   if (icons[ext]) {
     return {
-      className: 'icon-' + ext.substring(1),
+      className: 'icon-' + ext.substring(1).split('.').join('-'),
       fileName: icons[ext]
     }
   }
 
   const mimetype = mime.lookup(ext)
+  console.log('mimetype', mimetype)
 
   // default if no mime type
   if (mimetype === false) {
@@ -409,7 +431,7 @@ function iconStyle(files, useIcons) {
     selector = '#files .' + icon.className + ' .name'
 
     if (!rules[iconName]) {
-      rules[iconName] = 'background-image: url(data:image/png;base64,' + load(iconName) + ');'
+      rules[iconName] = load(iconName)
       selectors[iconName] = []
       list.push(iconName)
     }
@@ -429,7 +451,7 @@ function iconStyle(files, useIcons) {
 
 function load(icon) {
   if (cache[icon]) return cache[icon]
-  return (cache[icon] = fs.readFileSync(path.join(__dirname, '../../public/serve-index/icons/', icon), 'base64'))
+  return (cache[icon] = 'background-image: url(/fiveserver/serve-index/icons/' + icon + ');')
 }
 
 function normalizeSlashes(path) {
@@ -437,6 +459,14 @@ function normalizeSlashes(path) {
 }
 
 function removeHidden(files) {
+  const hide = ['.git', '.cache']
+
+  return files.filter(function (file) {
+    return !hide.includes(file)
+  })
+}
+
+function removeDotFiles(files) {
   return files.filter(function (file) {
     return file[0] !== '.'
   })
@@ -478,109 +508,129 @@ function stat(dir, files, cb) {
 
 const icons = {
   // base icons
-  default: 'page_white.png',
-  folder: 'folder.png',
+  default: 'file.svg',
+  folder: 'folder.svg',
 
   // generic mime type icons
-  font: 'font.png',
-  image: 'image.png',
-  text: 'page_white_text.png',
-  video: 'film.png',
+  font: 'font.svg',
+  image: 'image.svg',
+  text: 'document.svg',
+  video: 'video.svg',
+  audio: 'audio.svg',
 
   // generic mime suffix icons
-  '+json': 'page_white_code.png',
-  '+xml': 'page_white_code.png',
-  '+zip': 'box.png',
+  '+json': 'json.svg',
+  '+xml': 'xml.svg',
+  '+zip': 'zip.svg',
 
   // specific mime type icons
-  'application/javascript': 'page_white_code_red.png',
-  'application/json': 'page_white_code.png',
-  'application/msword': 'page_white_word.png',
-  'application/pdf': 'page_white_acrobat.png',
-  'application/postscript': 'page_white_vector.png',
-  'application/rtf': 'page_white_word.png',
-  'application/vnd.ms-excel': 'page_white_excel.png',
-  'application/vnd.ms-powerpoint': 'page_white_powerpoint.png',
-  'application/vnd.oasis.opendocument.presentation': 'page_white_powerpoint.png',
-  'application/vnd.oasis.opendocument.spreadsheet': 'page_white_excel.png',
-  'application/vnd.oasis.opendocument.text': 'page_white_word.png',
-  'application/x-7z-compressed': 'box.png',
-  'application/x-sh': 'application_xp_terminal.png',
-  'application/x-msaccess': 'page_white_database.png',
-  'application/x-shockwave-flash': 'page_white_flash.png',
-  'application/x-sql': 'page_white_database.png',
-  'application/x-tar': 'box.png',
-  'application/x-xz': 'box.png',
-  'application/xml': 'page_white_code.png',
-  'application/zip': 'box.png',
-  'image/svg+xml': 'page_white_vector.png',
-  'text/css': 'page_white_code.png',
-  'text/html': 'page_white_code.png',
-  'text/less': 'page_white_code.png',
+  'application/javascript': 'javascript.svg',
+  'application/json': 'json.svg',
+  // 'application/msword': 'page_white_word.png',
+  'application/pdf': 'pdf.svg',
+  'application/postscript': 'svg.svg',
+  // 'application/rtf': 'page_white_word.png',
+  // 'application/vnd.ms-excel': 'page_white_excel.png',
+  // 'application/vnd.ms-powerpoint': 'page_white_powerpoint.png',
+  // 'application/vnd.oasis.opendocument.presentation': 'page_white_powerpoint.png',
+  // 'application/vnd.oasis.opendocument.spreadsheet': 'page_white_excel.png',
+  // 'application/vnd.oasis.opendocument.text': 'page_white_word.png',
+  'application/x-7z-compressed': 'zip.svg',
+  'application/x-sh': 'console.svg',
+  'application/x-msaccess': 'database.svg',
+  'application/x-sql': 'database.svg',
+  'application/x-tar': 'zip.svg',
+  'application/x-xz': 'zip.svg',
+  'application/xml': 'xml.svg',
+  'application/zip': 'zip.svg',
+  'image/svg+xml': 'svg.svg',
+
+  // special
+  CHANGELOG: 'changelog.svg',
+  ESLINT: 'eslint.svg',
+  FIVESERVER: 'fiveserver.svg',
+  GIT: 'git.svg',
+  LICENSE: 'certificate.svg',
+  NODEJS: 'nodejs.svg',
+  NPM: 'npm.svg',
+  PRETTIER: 'prettier.svg',
+  README: 'readme.svg',
+  '.test.js': 'test-js.svg',
+  '.test.jsx': 'test-jsx.svg',
+  '.test.ts': 'test-ts.svg',
+
+  // other, extension-specific icons (.svg from https://github.com/PKief/vscode-material-icon-theme/tree/master/icons)
+  '.cert': 'certificate.svg',
+  '.cjs': 'javascript.svg',
+  '.css': 'css.svg',
+  '.d.ts': 'typescript-def.svg',
+  '.html': 'html.svg',
+  '.info': 'readme.svg',
+  '.js': 'javascript.svg',
+  '.json': 'json.svg',
+  '.jsx': 'react.svg',
+  '.key': 'key.svg',
+  '.less': 'less.svg',
+  '.md': 'markdown.svg',
+  '.mjs': 'javascript.svg',
+  '.pem': 'key.svg',
+  '.sass': 'sass.svg',
+  '.scss': 'sass.svg',
+  '.svg': 'svg.svg',
+  '.ts': 'typescript.svg',
+  '.tsx': 'react_ts.svg',
+  '.yaml': 'yaml.svg',
+  '.yml': 'yaml.svg',
 
   // other, extension-specific icons
-  '.accdb': 'page_white_database.png',
-  '.apk': 'box.png',
-  '.app': 'application_xp.png',
-  '.as': 'page_white_actionscript.png',
-  '.asp': 'page_white_code.png',
-  '.aspx': 'page_white_code.png',
-  '.bat': 'application_xp_terminal.png',
-  '.bz2': 'box.png',
-  '.c': 'page_white_c.png',
-  '.cab': 'box.png',
-  '.cfm': 'page_white_coldfusion.png',
-  '.clj': 'page_white_code.png',
-  '.cc': 'page_white_cplusplus.png',
-  '.cgi': 'application_xp_terminal.png',
-  '.cpp': 'page_white_cplusplus.png',
-  '.cs': 'page_white_csharp.png',
-  '.db': 'page_white_database.png',
-  '.dbf': 'page_white_database.png',
-  '.deb': 'box.png',
-  '.dll': 'page_white_gear.png',
-  '.dmg': 'drive.png',
-  '.docx': 'page_white_word.png',
-  '.erb': 'page_white_ruby.png',
-  '.exe': 'application_xp.png',
-  '.fnt': 'font.png',
-  '.gam': 'controller.png',
-  '.gz': 'box.png',
-  '.h': 'page_white_h.png',
-  '.ini': 'page_white_gear.png',
-  '.iso': 'cd.png',
-  '.jar': 'box.png',
-  '.java': 'page_white_cup.png',
-  '.jsp': 'page_white_cup.png',
-  '.lua': 'page_white_code.png',
-  '.lz': 'box.png',
-  '.lzma': 'box.png',
-  '.m': 'page_white_code.png',
-  '.map': 'map.png',
-  '.msi': 'box.png',
-  '.mv4': 'film.png',
-  '.pdb': 'page_white_database.png',
-  '.php': 'page_white_php.png',
-  '.pl': 'page_white_code.png',
-  '.pkg': 'box.png',
-  '.pptx': 'page_white_powerpoint.png',
-  '.psd': 'page_white_picture.png',
-  '.py': 'page_white_code.png',
-  '.rar': 'box.png',
-  '.rb': 'page_white_ruby.png',
-  '.rm': 'film.png',
-  '.rom': 'controller.png',
-  '.rpm': 'box.png',
-  '.sass': 'page_white_code.png',
-  '.sav': 'controller.png',
-  '.scss': 'page_white_code.png',
-  '.srt': 'page_white_text.png',
-  '.tbz2': 'box.png',
-  '.tgz': 'box.png',
-  '.tlz': 'box.png',
-  '.vb': 'page_white_code.png',
-  '.vbs': 'page_white_code.png',
-  '.xcf': 'page_white_picture.png',
-  '.xlsx': 'page_white_excel.png',
-  '.yaws': 'page_white_code.png'
+  '.accdb': 'database.svg',
+  '.apk': 'zip.svg',
+  '.app': 'console.svg',
+  // '.as': 'page_white_actionscript.png',
+  // '.asp': 'page_white_code.png',
+  // '.aspx': 'page_white_code.png',
+  '.bat': 'console.svg',
+  '.bz2': 'zip.svg',
+  '.c': 'c.svg',
+  '.cab': 'zip.svg',
+  '.cc': 'cpp.svg',
+  '.cgi': 'console.svg',
+  '.cpp': 'cpp.svg',
+  // '.cs': 'page_white_csharp.png',
+  '.db': 'database.svg',
+  '.deb': 'zip.svg',
+  '.dll': 'settings.svg',
+  // '.dmg': 'drive.png',
+  // '.docx': 'page_white_word.png',
+  // '.erb': 'page_white_ruby.png',
+  '.exe': 'console.svg',
+  '.fnt': 'font.svg',
+  '.gz': 'zip.svg',
+  '.h': 'h.svg',
+  '.iso': 'disc.svg',
+  '.jar': 'zip.svg',
+  '.java': 'java.svg',
+  // '.jsp': 'page_white_cup.png',
+  // '.lua': 'page_white_code.png',
+  '.lz': 'zip.svg',
+  '.lzma': 'zip.svg',
+  '.msi': 'zip.svg',
+  '.mv4': 'video.svg',
+  '.php': 'php.svg',
+  // '.pl': 'page_white_code.png',
+  '.pkg': 'zip.svg',
+  // '.pptx': 'page_white_powerpoint.png',
+  '.psd': 'image.svg',
+  // '.py': 'page_white_code.png',
+  '.rar': 'zip.svg',
+  // '.rb': 'page_white_ruby.png',
+  '.rm': 'video.svg',
+  '.rpm': 'zip.svg',
+  '.tbz2': 'zip.svg',
+  '.tgz': 'zip.svg',
+  '.tlz': 'zip.svg',
+  // '.vb': 'page_white_code.png',
+  // '.vbs': 'page_white_code.png',
+  '.xcf': 'image.svg'
+  // '.xlsx': 'page_white_excel.png'
 }

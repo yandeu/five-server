@@ -29,12 +29,14 @@
         };
 
         el.getClasses = function () {
-          return this.getAttribute("class").split(/\s+/);
+          const c = this.getAttribute("class");
+          if (c) return c.split(/\s+/);
+          return [];
         };
 
         el.addClass = function (name) {
           var classes = this.getAttribute("class");
-          el.setAttribute("class", classes ? classes + " " + name : name);
+          if (!el.getAttribute(name)) el.setAttribute("class", classes ? classes + " " + name : name);
         };
 
         el.removeClass = function (name) {
@@ -49,17 +51,32 @@
 
       function search() {
         var str = $("search").value.toLowerCase();
-        var links = $("files").all("a");
+        // var links = $("files").all("a"); // for highlight
+        var list = $("files").all("li");
 
-        links.each(function (link) {
+        list.each(function (li) {
+          var link = $(li.firstChild);
           var text = link.textContent.toLowerCase();
 
           if (".." == text) return;
-          if (str.length && ~text.indexOf(str)) {
-            link.addClass("highlight");
+
+          const match = str.length && ~text.indexOf(str);
+
+          // highlight
+          // if (match) {
+          //   link.addClass("highlight");
+          // } else {
+          //   link.removeClass("highlight");
+          // }
+
+          // hide
+          if (match) {
+            li.removeClass("hidden");
           } else {
-            link.removeClass("highlight");
+            li.addClass("hidden");
           }
+
+          if (str.length === 0) li.removeClass("hidden");
         });
       }
 

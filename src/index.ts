@@ -168,6 +168,9 @@ export default class LiveServer {
       next()
     })
 
+    // fiveserver /public
+    app.use('/fiveserver', express.static(path.join(__dirname, '../public')))
+
     // serve files (.html, .php) with or without extension
     app.use(async (req, res, next) => {
       const isHtml = path.extname(req.url) === '.html'
@@ -397,7 +400,7 @@ export default class LiveServer {
     })
 
     // serveIndex middleware
-    app.use(serveIndex(rootPath, { icons: true }))
+    app.use(serveIndex(rootPath, { icons: true, hidden: false, dotFiles: true }))
 
     // create http server
     if (_https !== null && _https !== false) {
