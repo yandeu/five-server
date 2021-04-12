@@ -233,8 +233,8 @@ function createHtmlFileList(files, dir, useIcons, view) {
     (view === 'details'
       ? '<li class="header">' +
         '<span class="name">Name</span>' +
-        '<span class="size">Size</span>' +
-        '<span class="date">Modified</span>' +
+        // '<span class="size">Size</span>' +
+        // '<span class="date">Modified</span>' +
         '</li>'
       : '')
 
@@ -272,9 +272,14 @@ function createHtmlFileList(files, dir, useIcons, view) {
           : ''
       const size = file.stat && !isDir ? file.stat.size : ''
 
+      let href = escapeHtml(normalizeSlashes(normalize(path.join('/'))))
+
+      // use serve-preview
+      if (!isDir && !['.html', '.htm', '.php'].includes(extname(file.name))) href += '.preview'
+
       return (
         '<li><a href="' +
-        escapeHtml(normalizeSlashes(normalize(path.join('/')))) +
+        href +
         '" class="' +
         escapeHtml(classes.join(' ')) +
         '"' +
@@ -284,12 +289,12 @@ function createHtmlFileList(files, dir, useIcons, view) {
         '<span class="name">' +
         escapeHtml(file.name) +
         '</span>' +
-        '<span class="size">' +
-        escapeHtml(size) +
-        '</span>' +
-        '<span class="date">' +
-        escapeHtml(date) +
-        '</span>' +
+        // '<span class="size">' +
+        // escapeHtml(size) +
+        // '</span>' +
+        // '<span class="date">' +
+        // escapeHtml(date) +
+        // '</span>' +
         '</a></li>'
       )
     })
@@ -340,7 +345,7 @@ function getRequestedDir(req) {
   }
 }
 
-function htmlPath(dir) {
+export function htmlPath(dir) {
   const parts = dir.split('/')
   const crumb = new Array(parts.length)
 

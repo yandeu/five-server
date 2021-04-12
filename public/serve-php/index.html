@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PHP ERROR</title>
+
+    <script
+      async
+      data-id="five-server"
+      data-file="{filePath}"
+      type="application/javascript"
+      src="/fiveserver.js"
+    ></script>
+
+    <link rel="stylesheet" href="/fiveserver/serve-preview/vs.min.css" />
+    <script src="/fiveserver/serve-preview/highlight.min.js"></script>
+  </head>
+  <body>
+    <style>
+      html,
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #555;
+        background-color: #efecec;
+      }
+      body {
+        text-align: center;
+      }
+      #content {
+        text-align: left;
+        display: inline-block;
+      }
+      .is-code {
+        background: #e0e0e0;
+        padding: 2px 5px;
+        border-radius: 2px;
+      }
+    </style>
+
+    <div id="content">
+      <h2>PHP ERROR</h2>
+      <p>{msg}</p>
+
+      <h3>Install PHP</h3>
+      <p>Download and install <a href="https://www.apachefriends.org/index.html">XAMPP</a>.</p>
+
+      <h3>Get PHP Path</h3>
+      <p>Follow the steps below to get the path to the PHP executable:</p>
+      <ul>
+        <li><b>Ubuntu:</b> Enter <code class="is-code">which php</code> in your Terminal.</li>
+        <li><b>macOS:</b> Enter <code class="is-code">which php</code> in your Terminal.</li>
+        <li><b>Windows:</b> Search for php.exe.</li>
+      </ul>
+
+      <h3>Config File Example</h3>
+      <div style="margin-right: 8px">
+        <pre
+          margin="0px;"
+        ><code style="padding: 16px; border: 1px gray solid; font-size: 16px;" class="language-php">// fiveserver.config.js
+module.exports = {
+  php: "/usr/bin/php"              // macOS/Ubuntu
+  php: "C:\\xampp\\php\\php.exe"   // Windows
+}</code></pre>
+      </div>
+    </div>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>

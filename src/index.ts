@@ -17,7 +17,7 @@ import path from 'path'
 
 // FIX: Packages are not maintained anymore (replace them!)
 import express from 'express' // const connect = require('connect')
-import serveIndex from './dependencies/serve-index' // const serveIndex = require('serve-index')
+import serveIndex, { htmlPath } from './dependencies/serve-index' // const serveIndex = require('serve-index')
 
 // MOD: Replaced "faye-websocket" by "ws"
 // const WebSocket: any = require('faye-websocket')
@@ -35,12 +35,11 @@ import { getNetworkAddress } from './utils/getNetworkAddress'
 
 // execute php
 import { ExecPHP } from './utils/execPHP'
+import { INJECTED_CODE, NOT_FOUND, PREVIEW } from './public'
+import { join, normalize } from 'path'
 const PHP = new ExecPHP()
 
 export { LiveServerParams }
-
-// const INJECTED_CODE = fs.readFileSync(path.join(__dirname, '../injected.html'), 'utf8')
-const INJECTED_CODE = fs.readFileSync(path.join(__dirname, '../injected.js'), 'utf8')
 
 interface ExtendedWebSocket extends WebSocket {
   sendWithDelay: (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => void
@@ -56,7 +55,7 @@ export default class LiveServer {
   public injectBody = false
 
   /** inject stript to any file */
-  public injectToAny = false
+  public injectToAny = true
 
   private colors: Colors[] = ['blue', 'magenta', 'cyan', 'green', 'red', 'yellow']
   private colorIndex = -1
@@ -218,12 +217,28 @@ export default class LiveServer {
     app.use(async (req, res, next) => {
       if (/\.php$/.test(req.url)) {
         const filePath = path.resolve(path.join(rootPath + req.url))
+        if (!fs.existsSync(filePath)) return next()
 
-        res.setHeader('Content-Type', 'text/html; charset=UTF-8')
         let html = await PHP.parseFile(filePath, res)
 
+        const injectCandidates = [new RegExp('</head>', 'i'), new RegExp('</html>', 'i'), new RegExp('</body>', 'i')]
+        let match
+        let injectTag = ''
+
+        for (let i = 0; i < injectCandidates.length; ++i) {
+          match = injectCandidates[i].exec(html)
+          if (match) {
+            injectTag = match[0]
+            break
+          }
+        }
+
+        if (!injectTag) return next()
+
+        res.setHeader('Content-Type', 'text/html; charset=UTF-8')
+
         html = html.replace(
-          '</html>',
+          injectTag,
           `
     <!-- Code injected by Five-server -->
     <script async data-id="five-server" data-file="${filePath}" type="application/javascript" src="/fiveserver.js"></script>
@@ -320,8 +335,16 @@ export default class LiveServer {
     // inject to .html and .php files
     app.use(injectHandler)
 
-    // serve static files
-    app.use(express.static(rootPath))
+    const ignorePHP = handler => {
+      return function (req, res, next) {
+        if (path.extname(req.url) === '.php') next()
+        else handler(req, res, next)
+      }
+    }
+
+    // serve static files (ignore php files) // don't serve index files!
+    // TODO(yandeu): Make "index" optional // { index: false }
+    app.use(ignorePHP(express.static(rootPath)))
 
     // inject to fallback "file"
     app.use(fallbackFile(injectHandler, file))
@@ -329,70 +352,84 @@ export default class LiveServer {
     // inject to any (converts and file to a .html file (if possible))
     app.use((req, res, next) => {
       if (!this.injectToAny) return next()
-      if (path.extname(req.url) !== '.preview') return next()
+      if (!['.preview', '.php'].includes(path.extname(req.url))) return next()
 
+      // remove .preview
       req.url = req.url.replace(/\.preview$/, '')
+      const URL = decodeURI(req.url)
+
+      const isPHP = path.extname(req.url) === '.php'
+      const phpMsg = isPHP
+        ? 'Why this preview? Five Server could not detect any head, body or html tag in your file.<br><br>'
+        : ''
 
       try {
-        const filePath = path.resolve(path.join(rootPath + req.url))
-        console.log(filePath)
+        const filePath = path.resolve(path.join(rootPath + URL))
 
         const isFile = fs.statSync(filePath).isFile()
         if (!isFile) return next()
 
-        const isImg = /\.(gif|jpg|jpeg|tiff|png)$/i.test(req.url)
+        let ext = path.extname(URL).replace(/^\./, '').toLowerCase()
+        const fileName = path.basename(filePath, ext)
+
+        const isImage = /(gif|jpg|jpeg|tiff|png)$/i.test(ext)
+        const isVideo = /(mpg|mpeg|avi|wmv|mov|ogg|webm|mp4|mkv)$/i.test(ext)
+        const isAudio = /(mid|midi|wma|aac|wav|ogg|mp3|mp4)$/i.test(ext)
 
         let preview = ''
 
-        if (isImg) preview = `<img style="max-width: 100%;" src="${req.url}">`
-        else
+        if (isImage)
+          preview = `<div class="image" text-align:center; line-height: 0; padding: 0;">
+        
+        <img style="max-width: 100%;" src="${URL}"></div>`
+        else if (isVideo) {
+          const format = ext === 'ogg' ? 'ogg' : ext === 'webm' ? 'webm' : 'mp4'
           preview = `
-            <div style="border: 1px #0C0E14 solid; margin-right: 8px;">
-              <pre style="margin: 16px 16px;"><code>${fs.readFileSync(filePath, { encoding: 'utf-8' })}</code></pre>
+          <video style="max-width: 100%;" controls>
+            <source src="${URL}" type="video/${format}">
+            Your browser does not support the video tag.
+          </video>`
+        } else if (isAudio) {
+          const format = ext === 'ogg' ? 'ogg' : ext === 'wav' ? 'wav' : 'mpeg'
+          preview = `
+            <div style="margin-top: 72px;">
+            <audio controls>
+              <source src="${URL}" type="audio/${format}">
+              Your browser does not support the audio element.
+            </audio>
             </div>`
+        } else {
+          const MAX_FILE_SIZE = 250 // KB
+          const fileSize = Math.round(fs.statSync(filePath).size / 1024) // KB
+          const tooBig = fileSize > MAX_FILE_SIZE
 
-        const html = `
-          <!DOCTYPE html>
-          <html lang="en">
-            <head>
-              <meta charset="UTF-8" />
-              <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-              <title>Preview</title>
-              <script async data-id="five-server" data-file="${filePath}" type="application/javascript" src="/fiveserver.js"></script>
-            </head>
-            <body>
-              <style>
-                html,
-                body {
-                  font-family: Arial, Helvetica, sans-serif;
-                  color: #0C0E14;
-                  background-color: #F8F8F2;
-                }
-                body {
-                  text-align: center;
-                }
-                #content {
-                  text-align: left;
-                  display: inline-block;
-                }
+          if (tooBig) ext = 'txt'
 
-              </style>
+          let fileContent = !tooBig
+            ? fs.readFileSync(filePath, { encoding: 'utf-8' })
+            : `File is too big for a preview!\n\n\nFile Size: ${fileSize}KB\nAllowed Size: ${MAX_FILE_SIZE}KB`
 
-              <div id="content">
-                <h1>Preview: ${req.url}</h1>
-                <p>
-                  Why this preview? Five Server could not detect any head, body or html tag in your file.
-                  <br>
-                  <i>A better preview will be available soon!</i>
-                </p>
-                <div>
-                  ${preview}
-                </div>
-              </div>
-            </body>
-          </html>        
-        `
+          // check for .rc file (can be yml or json)
+          if (/^\.[\w]+rc$/.test(fileName)) {
+            const content = fileContent.trim()
+            ext = content[0] === '{' ? 'json' : 'yml'
+          }
+
+          // replace all < with &lt;
+          fileContent = fileContent.replace(/</gm, '&lt;')
+
+          preview = `
+            <div>
+              <pre margin="0px;"><code class="">${fileContent}</code></pre>
+            </div>`
+        }
+
+        const html = PREVIEW.replace('{linked-path}', htmlPath(URL))
+          .replace('{fileName}', fileName)
+          .replace('{ext}', ext)
+          .replace('{phpMsg}', phpMsg)
+          .replace('{preview}', preview)
+
         return res.type('html').send(html)
       } catch (error) {
         return next()
@@ -401,6 +438,19 @@ export default class LiveServer {
 
     // serveIndex middleware
     app.use(serveIndex(rootPath, { icons: true, hidden: false, dotFiles: true }))
+
+    // serve 404 page
+    app.use((req: any, res: any, next: any) => {
+      // join / normalize from root dir
+      const path = normalize(join(rootPath, req.url))
+
+      fs.stat(path, function (err, stat) {
+        if (err && err.code === 'ENOENT') {
+          const html = NOT_FOUND.replace('{linked-path}', htmlPath(decodeURI(req.url)))
+          return res.status(404).send(html)
+        } else return next()
+      })
+    })
 
     // create http server
     if (_https !== null && _https !== false) {

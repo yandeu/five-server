@@ -1,5 +1,6 @@
 .cache
 .github
+.tmp
 .vscode
 coverage
 dev
@@ -8,3 +9,4 @@ node_modules
 package-lock.json
 src
 test
+tmp

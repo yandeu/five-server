@@ -1,6 +1,8 @@
 .cache
+.tmp
 coverage
 injected.js
 lib
 node_modules
 package-lock.json
+tmp
