@@ -545,7 +545,11 @@ export default class LiveServer {
       function (testPath) {
         // Always ignore dotfiles (important e.g. because editor hidden temp files)
         return testPath !== '.' && /(^[.#]|(?:__|~)$)/.test(path.basename(testPath))
-      }
+      },
+      /(^|[/\\])\../, // ignore dotfile
+      '**/node_modules/**',
+      '**/bower_components/**',
+      '**/jspm_packages/**'
     ]
     if (options.ignore) {
       ignored = ignored.concat(options.ignore)
