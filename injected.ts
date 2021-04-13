@@ -1,16 +1,57 @@
 // <![CDATA[  <-- For SVG support
 if ('WebSocket' in window) {
   window.addEventListener('load', () => {
+    console.log('[Five Server] connecting...')
+
     const script = document.querySelector('[data-id="five-server"]') as HTMLScriptElement
     const protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://'
     // const address = `${protocol}${window.location.host}${window.location.pathname}/ws`
     const address = `${protocol}${new URL(script.src).host}${window.location.pathname}/ws`
 
-    const CONNECTED_MSG = 'Five-Server connected! https://npmjs.com/five-server'
+    const CONNECTED_MSG = '[Five Server] connected.'
     const MAX_ATTEMPTS = 25
     let wait = 1000
     let attempts = 0
     let socket!: WebSocket
+
+    const popup = (message: string, type: 'info' | 'success' | 'error' | 'warn') => {
+      let el = document.getElementById('fiveserver-info')
+      if (el) el.remove()
+
+      el = document.createElement('span')
+      el.id = 'fiveserver-info'
+      el.style.color = 'white'
+      el.style.backgroundColor = 'black'
+      el.style.position = 'absolute'
+      el.style.left = '50%'
+      el.style.transform = 'translateX(-50%)'
+      el.style.padding = '4px 12px'
+      el.style.borderRadius = '4px'
+      document.body.appendChild(el)
+
+      if (type === 'error') {
+        el.style.top = '4px'
+        el.style.animation = ''
+
+        el.style.color = 'black'
+        el.style.backgroundColor = 'red'
+      } else {
+        // el.style.top = '4px'
+        el.style.top = '-30px'
+        el.style.animation = 'fiveserverInfoPopup 3s forwards'
+      }
+
+      if (type === 'success') {
+        el.style.color = '#498d76'
+        el.style.backgroundColor = '#00ffa9'
+      } else if (type === 'info') {
+        el.style.color = '#d2e1f0'
+        el.style.backgroundColor = '#2996ff'
+      }
+      el.innerText = message
+    }
+
+    setTimeout(() => {}, 200)
 
     const send = (type: string, ...message: string[]) => {
       if (socket && socket?.readyState === 1) {
@@ -22,8 +63,11 @@ if ('WebSocket' in window) {
       // log
       const oldLog = console.log
       console.log = function (...message) {
-        if (message[0] === CONNECTED_MSG) send('log', 'Connected!')
-        else send('log', ...message)
+        if (message[0] === CONNECTED_MSG) {
+          popup('connected', 'success')
+        } else {
+          send('log', ...message)
+        }
         oldLog.apply(console, message)
       }
 
@@ -55,6 +99,8 @@ if ('WebSocket' in window) {
         }
         head.appendChild(elem)
       }
+
+      popup('css updated', 'info')
     }
     function injectBody(body) {
       document.body.innerHTML = body
@@ -171,10 +217,17 @@ if ('WebSocket' in window) {
         from {background-color: rgba(155,215,255,0.5);}
         to {background-color: rgba(155,215,255,0);}
       }
+      @keyframes fiveserverInfoPopup {
+        0%   {top:-30px;}
+        15%  {top:4px;}
+        85%  {top:4px;}
+        100% {top:-30px;}
+      }
       `
         document.head.appendChild(style)
       }
       socket.onclose = function (e) {
+        popup('lost connection to dev server', 'error')
         if (attempts === 0) console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason)
 
         setTimeout(function () {

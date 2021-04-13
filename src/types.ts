@@ -20,7 +20,7 @@ export interface LiveServerParams {
   cors?: boolean
   /** When set, serve this file (server root relative) for every 404 (useful for single-page applications). */
   file?: string
-  /** Set the address to bind to. Defaults to localhost or process.env.IP. */
+  /** Set the address to bind to. Defaults to 0.0.0.0 or process.env.IP. */
   host?: string
   /** Path to htpasswd file to enable HTTP Basic authentication */
   htpasswd?: string
@@ -28,8 +28,8 @@ export interface LiveServerParams {
   https?: boolean | string | Certificate
   /** Paths to ignore from watching changes. */
   ignore?: Array<string | RegExp | Glob>
-  /** 0 = errors only, 1 = some, 2 = lots */
-  logLevel?: 0 | 1 | 2
+  /** 0 = errors only, 1 = some, 2 = lots, 3 = all */
+  logLevel?: 0 | 1 | 2 | 3
   /** Mount a directory to a route, e.g. [['/components', './node_modules']]. */
   mount?: string[][]
   /** Takes an array of Connect-compatible middleware that are injected into the server middleware stack. */

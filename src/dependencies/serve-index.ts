@@ -17,7 +17,7 @@ import { createError } from '../misc' // const createError = require('http-error
 const debug = require('debug')('serve-index')
 const escapeHtml = require('escape-html')
 const fs = require('fs')
-import path, { extname as _extname, normalize, sep, join } from 'path'
+import { extname as _extname, normalize, sep, join } from 'path'
 
 // wrap extname for special files like .d.ts
 const extname = (p: string) => {

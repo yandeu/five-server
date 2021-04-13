@@ -7,7 +7,7 @@
  */
 
 import chokidar from 'chokidar'
-import { error, getConfigFile, removeLeadingSlash } from './misc'
+import { getConfigFile, removeLeadingSlash } from './misc'
 import fs from 'fs'
 import http from 'http'
 import https from 'https'
@@ -37,6 +37,8 @@ import { getNetworkAddress } from './utils/getNetworkAddress'
 import { ExecPHP } from './utils/execPHP'
 import { INJECTED_CODE, NOT_FOUND, PREVIEW } from './public'
 import { join, normalize } from 'path'
+import { message } from './msg'
+import { VERSION } from './const'
 const PHP = new ExecPHP()
 
 export { LiveServerParams }
@@ -51,13 +53,13 @@ interface ExtendedWebSocket extends WebSocket {
 export default class LiveServer {
   public httpServer!: http.Server
   public watcher!: chokidar.FSWatcher
-  public logLevel = 2
+  public logLevel = 1
   public injectBody = false
 
   /** inject stript to any file */
   public injectToAny = true
 
-  private colors: Colors[] = ['blue', 'magenta', 'cyan', 'green', 'red', 'yellow']
+  private colors: Colors[] = ['magenta', 'cyan', 'blue', 'green', 'yellow', 'red']
   private colorIndex = -1
   private newColor = () => {
     this.colorIndex++
@@ -69,6 +71,7 @@ export default class LiveServer {
 
   // http sockets
   public sockets: Set<any> = new Set()
+  public ipColors: Map<string, Colors> = new Map()
 
   private _openURL!: string
   private _protocol!: 'http' | 'https'
@@ -100,7 +103,7 @@ export default class LiveServer {
       https: _https = null,
       injectBody = false,
       injectCss = true,
-      logLevel = 2,
+      logLevel = 1,
       middleware = [],
       mount = [],
       php,
@@ -117,9 +120,9 @@ export default class LiveServer {
     PHP.path = php
     PHP.ini = phpIni
 
-    this.logLevel = logLevel
+    this.logLevel = message.logLevel = logLevel
 
-    let host = options.host || 'localhost' // '0.0.0.0'
+    let host = options.host || '0.0.0.0' // 'localhost'
     if (useLocalIp && host === 'localhost') host = '0.0.0.0'
 
     this.injectBody = injectBody
@@ -143,7 +146,7 @@ export default class LiveServer {
 
     // if server is already running, just open a new browser window
     if (this.isRunning) {
-      console.log(colors(`Opening new window at ${this.openURL}`, 'green'))
+      message.log(colors(`Opening new window at ${this.openURL}`, 'green'))
       this.launchBrowser(openPath, browser)
       return
     }
@@ -267,13 +270,13 @@ export default class LiveServer {
     }
 
     // Use http-auth if configured
-    if (htpasswd !== null) error('Sorry htpasswd does not work yet.', null, false)
+    if (htpasswd !== null) message.error('Sorry htpasswd does not work yet.', null, false)
 
     // Custom https module
-    if (options.httpsModule) error('Sorry "httpsModule" has been removed.', null, false)
+    if (options.httpsModule) message.error('Sorry "httpsModule" has been removed.', null, false)
 
     // SPA middleware
-    if (options.spa) error('Sorry SPA middleware has been removed.', null, false)
+    if (options.spa) message.error('Sorry SPA middleware has been removed.', null, false)
 
     // Add middleware
     middleware.map(function (mw) {
@@ -284,7 +287,7 @@ export default class LiveServer {
         } else {
           mw = require(mw)
         }
-        if (typeof mw !== 'function') error(`middleware ${mw} does not return a function`)
+        if (typeof mw !== 'function') message.error(`middleware ${mw} does not return a function`, null, false)
       }
       app.use(mw)
     })
@@ -302,7 +305,7 @@ export default class LiveServer {
       app.use(mountRule[0], express.static(mountPath))
 
       // log the mapping folder
-      if (this.logLevel >= 1) console.log('Mapping %s to "%s"', mountRule[0], mountPath)
+      if (this.logLevel >= 1) message.log('Mapping %s to "%s"', mountRule[0], mountPath)
     })
 
     proxy.forEach(proxyRule => {
@@ -327,7 +330,7 @@ export default class LiveServer {
       }
 
       app.use(proxyRule[0], require('./dependencies/proxy-middleware')(proxyOpts))
-      if (this.logLevel >= 1) console.log('Mapping %s to "%s"', proxyRule[0], proxyRule[1])
+      if (this.logLevel >= 1) message.log('Mapping %s to "%s"', proxyRule[0], proxyRule[1])
     })
 
     const injectHandler = injectCode(rootPath, { logLevel })
@@ -487,48 +490,42 @@ export default class LiveServer {
     await this.listen(port, host)
 
     const address = this.httpServer.address() as any
-    const serveHost = address.address === '0.0.0.0' ? '127.0.0.1' : address.address
+    //const serveHost = address.address === '0.0.0.0' ? '127.0.0.1' : address.address
 
     let openHost = host === '0.0.0.0' ? '127.0.0.1' : host
     if (useLocalIp) openHost = getNetworkAddress() || openHost
 
-    const serveURL = `${this._protocol}://${serveHost}:${address.port}`
+    //const serveURL = `${this._protocol}://${serveHost}:${address.port}`
     this._openURL = `${this._protocol}://${openHost}:${address.port}`
 
-    let serveURLs: any = [serveURL]
-    if (this.logLevel > 2 && address.address === '0.0.0.0') {
-      const ifaces = os.networkInterfaces()
+    message.log('')
+    message.log(`  Five Server ${colors('running at:', 'green')}`)
+    // message.log(colors(`  (v${VERSION} http://npmjs.com/five-server)`, 'gray'))
+    message.log('')
 
-      serveURLs = Object.keys(ifaces).map(iface => {
-        return ifaces[iface]
-      })
-
-      serveURLs = serveURLs
-        // flatten address data, use only IPv4
-        .reduce(function (data, addresses) {
-          addresses
-            .filter(function (addr) {
-              return addr.family === 'IPv4'
-            })
-            .forEach(function (addr) {
-              data.push(addr)
-            })
-          return data
-        }, [])
-        .map(addr => {
-          return `${this._protocol}://${addr.address}:${address.port}`
-        })
-    }
-
-    // Output
+    //let serveURLs: any = [serveURL]
     if (this.logLevel >= 1) {
-      if (serveURL === this.openURL)
-        if (serveURLs.length === 1) {
-          console.log(colors('Serving "%s" at %s', 'green'), root, serveURLs[0])
-        } else {
-          console.log(colors('Serving "%s" at\n\t%s', 'green'), root, serveURLs.join('\n\t'))
-        }
-      else console.log(colors('Serving "%s" at %s (%s)', 'green'), root, this.openURL, serveURL)
+      if (address.address === '0.0.0.0') {
+        const interfaces = os.networkInterfaces()
+
+        Object.keys(interfaces).forEach(key =>
+          (interfaces[key] || [])
+            .filter(details => details.family === 'IPv4')
+            .map(detail => {
+              return {
+                type: detail.address.includes('127.0.0.1') ? 'Local:   ' : 'Network: ',
+                host: detail.address.replace('127.0.0.1', 'localhost')
+              }
+            })
+            .forEach(({ type, host }) => {
+              const url = `${this._protocol}://${host}:${colors(address.port, 'bold')}`
+              message.log(`  > ${type} ${colors(url, 'cyan')}`)
+            })
+        )
+      } else {
+        message.log(`  > Local: ${colors(`${this._protocol}://${openHost}:${colors(address.port, 'bold')}`, 'cyan')}`)
+      }
+      message.log('')
     }
 
     /**
@@ -559,11 +556,16 @@ export default class LiveServer {
         )
       }
 
+      // store ip
       ws.ip = req?.connection?.remoteAddress
-      ws.color = typeof remoteLogs === 'string' ? remoteLogs : this.newColor()
+
+      // store color
+      const clr = this.ipColors.get(ws.ip) || this.newColor()
+      this.ipColors.set(ws.ip, clr)
+      ws.color = clr
 
       // ws.on('error', err => {
-      //   console.log('WS ERROR:', err)
+      //   message.log('WS ERROR:', err)
       // })
 
       ws.on('message', data => {
@@ -579,9 +581,10 @@ export default class LiveServer {
               const ip = `[${ws.ip}]`
               const msg = json.console.message
               const T = json.console.type
-              const t = T === 'warn' ? ' (warn) ' : T === 'error' ? ' (error) ' : ' '
+              const clr = T === 'warn' ? 'yellow' : T === 'error' ? 'red' : ''
 
-              console[T](colors(`${ip}${t}${msg}`, ws.color))
+              const log = `${colors(ip, ws.color)} ${clr ? colors(msg, clr) : msg}`
+              message.pretty(log, { id: 'ws' })
             }
           }
         } catch (err) {
@@ -624,19 +627,24 @@ export default class LiveServer {
       ignored: ignored,
       ignoreInitial: true
     })
+
     const handleChange = changePath => {
       const htmlChange = path.extname(changePath) === '.html'
       if (htmlChange && injectBody) return
 
       const cssChange = path.extname(changePath) === '.css' && injectCss
       if (this.logLevel >= 1) {
-        if (cssChange) console.log(colors('CSS change detected', 'magenta'), changePath)
-        else console.log(colors('Change detected', 'cyan'), changePath)
+        const five = colors(colors('[Five Server]', 'bold'), 'cyan')
+        const msg = cssChange ? colors('CSS change detected', 'magenta') : colors('change detected', 'cyan')
+        const file = colors(changePath.replace(path.resolve(rootPath), ''), 'gray')
+
+        message.pretty(`${five} ${msg} ${file}`, { id: cssChange ? 'cssChange' : 'change' })
       }
       this.clients.forEach(ws => {
         if (ws) ws.sendWithDelay(cssChange ? 'refreshcss' : 'reload')
       })
     }
+
     this.watcher
       .on('change', handleChange)
       .on('add', handleChange)
@@ -644,10 +652,10 @@ export default class LiveServer {
       .on('addDir', handleChange)
       .on('unlinkDir', handleChange)
       .on('ready', () => {
-        if (this.logLevel >= 1) console.log(colors('Ready for changes', 'cyan'))
+        if (this.logLevel > 1) message.log(colors('Ready for changes', 'cyan'))
       })
       .on('error', err => {
-        console.log(colors('ERROR:', 'red'), err)
+        message.log(colors('ERROR:', 'red'), err)
       })
   }
 
@@ -657,13 +665,13 @@ export default class LiveServer {
       this.httpServer.once('error', e => {
         // @ts-ignore
         if (e.message === 'EADDRINUSE' || (e.code && e.code === 'EADDRINUSE')) {
-          const serveURL = `${this._protocol}://${host}:${port}`
-          console.log(colors('%s is already in use. Trying another port.', 'yellow'), serveURL)
+          // const serveURL = `${this._protocol}://${host}:${port}`
+          message.log(colors(`Port ${port} is already in use. Trying another port.`, 'yellow'))
           setTimeout(() => {
             this.listen(0, host) // 0 means random port
           }, 1000)
         } else {
-          console.error(colors(e.toString(), 'red'))
+          message.error(colors(e.toString(), 'red'), null, false)
           this.shutdown()
           reject(e.message)
         }
@@ -731,16 +739,16 @@ export default class LiveServer {
       res.once('exit', code => {
         if (code && code > 0) {
           if (typeof browser === 'string') {
-            console.log(colors(`Could not open browser "${browser}". Trying the default browser next.`, 'yellow'))
+            message.log(colors(`Could not open browser "${browser}". Trying the default browser next.`, 'yellow'))
             launchDefaultBrowser()
           } else if (Array.isArray(browser)) {
             if (typeof browser[index + 1] === 'undefined') {
-              console.log(
+              message.log(
                 colors(`Could not open browser "${browser[index]}". Trying the default browser next.`, 'yellow')
               )
               launchDefaultBrowser()
             } else {
-              console.log(
+              message.log(
                 colors(`Could not open browser "${browser[index]}". Trying "${browser[index + 1]}" next.`, 'yellow')
               )
 

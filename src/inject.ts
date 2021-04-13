@@ -7,6 +7,7 @@
 
 import { colors } from './colors'
 import fs from 'fs'
+import { message } from './msg'
 import path from 'path'
 import { removeTrailingSlash } from './misc'
 import send from './dependencies/send'
@@ -73,7 +74,7 @@ export const injectCode = (root: any, options: { logLevel: number; serverURL?: s
           }
         }
         if (injectTag === null && logLevel >= 3) {
-          console.warn(
+          message.warn(
             colors('Failed to inject refresh script!', 'yellow'),
             "Couldn't find any of the tags ",
             injectCandidates,

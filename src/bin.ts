@@ -7,9 +7,13 @@
  */
 
 import { NAME, VERSION } from './const'
-import { error, getConfigFile, removeLeadingSlash } from './misc'
+import { getConfigFile, removeLeadingSlash } from './misc'
 import LiveServer from './index'
+import { message } from './msg'
 import path from 'path'
+
+// clear the log
+console.clear()
 
 const liveServer = new LiveServer()
 let isTesting = false
@@ -95,7 +99,7 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
     // e.g. "--mount=/components:./node_modules" will be ['/components', '<process.cwd()>/node_modules']
     // split only on the first ":", as the path may contain ":" as well (e.g. C:\file.txt)
     const match = arg.substring(8).match(/([^:]+):(.+)$/)
-    if (!match) error('Option --mount is wrong')
+    if (!match) message.error('Option --mount is wrong', null, false)
     else {
       match[2] = path.resolve(process.cwd(), match[2])
       opts.mount.push([match[1], match[2]])
@@ -109,7 +113,7 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
       process.argv.splice(i, 1)
     }
   } else if (arg === '--version' || arg === '-v') {
-    console.log(NAME, VERSION)
+    message.log(NAME, VERSION)
     process.exit()
   } else if (arg.indexOf('--htpasswd=') > -1) {
     opts.htpasswd = arg.substring(11)
@@ -128,7 +132,7 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
   } else if (arg.indexOf('--proxy=') > -1) {
     // split only on the first ":", as the URL will contain ":" as well
     const match = arg.substring(8).match(/([^:]+):(.+)$/)
-    if (!match) error('Option --proxy is wrong')
+    if (!match) message.error('Option --proxy is wrong', null, false)
     else {
       opts.proxy.push([match[1], match[2]])
       process.argv.splice(i, 1)
@@ -137,7 +141,7 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
     opts.middleware.push(arg.substring(13))
     process.argv.splice(i, 1)
   } else if (arg === '--help' || arg === '-h') {
-    console.log(
+    message.log(
       'Usage: live-server [-v|--version] [-h|--help] [-q|--quiet] [--port=PORT] [--host=HOST] [--open=PATH] [--no-browser] [--browser=BROWSER] [--ignore=PATH] [--ignorePattern=RGXP] [--no-css-inject] [--entry-file=PATH] [--spa] [--mount=ROUTE:PATH] [--wait=MILLISECONDS] [--htpasswd=PATH] [--cors] [--https=PATH] [--https-module=MODULE_NAME] [--proxy=PATH] [PATH]'
     )
     process.exit()

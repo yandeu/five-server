@@ -16,6 +16,8 @@ export const colors = (str: string, clr: Colors) => {
 export type Colors = keyof typeof colorCodes
 
 const colorCodes = {
+  bold: [1, 22], // no color, but still useful
+
   black: [30, 39],
   red: [31, 39],
   green: [32, 39],

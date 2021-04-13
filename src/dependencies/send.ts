@@ -1,3 +1,4 @@
+/* eslint-disable sort-imports */
 /* eslint-disable prefer-template */
 /* eslint-disable prefer-spread */
 
@@ -11,6 +12,8 @@
 
 import { charsets } from '../utils/charset'
 import { createError } from '../misc' // const createError = require('http-errors')
+import { message } from '../msg'
+
 const debug = require('debug')('send')
 const destroy = require('destroy')
 const encodeUrl = require('encodeurl')
@@ -84,7 +87,7 @@ class SendStream extends Stream {
     this._hidden = Boolean(opts.hidden)
 
     if (opts.hidden !== undefined) {
-      console.warn("hidden: use dotfiles: '" + (this._hidden ? 'allow' : 'ignore') + "' instead")
+      message.warn("hidden: use dotfiles: '" + (this._hidden ? 'allow' : 'ignore') + "' instead")
     }
 
     // legacy support

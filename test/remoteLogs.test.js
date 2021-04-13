@@ -30,12 +30,11 @@ beforeAll(async () => {
     remoteLog = msg.text()
   })
 
-  await page.goto('http://localhost:40200/', { waitUntil: 'networkidle2' })
+  await page.goto('http://localhost:40200/index-log.html', { waitUntil: 'networkidle2' })
 })
 
 describe('remote logs', () => {
-  it('should be connected to fiveserver', () => {
-    expect(remoteLog.includes('connected')).toBeTruthy()
+  it('should be connected to one client', () => {
     expect(fiveServer.clients.length).toBe(1)
   })
 
@@ -45,7 +44,7 @@ describe('remote logs', () => {
     const logs = console.log.mock.calls
     const lastLog = logs[logs.length - 1][0]
 
-    expect(lastLog.includes('] Connected!')).toBeTruthy()
+    expect(lastLog.includes('Hi from remote!')).toBeTruthy()
     done()
   })
 })

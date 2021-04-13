@@ -5,23 +5,13 @@
  */
 
 import { LiveServerParams } from '.'
-import { colors } from './colors'
 import fs from 'fs'
+import { message } from './msg'
 import path from 'path'
-
-export const error = (msg: string, comment: null | string = '', exit = true) => {
-  if (comment === null) comment = ''
-  if (comment !== '') comment += ':'
-
-  if (msg) console.log(colors(`ERROR: ${comment} ${msg}`, 'red'))
-  else console.log(colors(`ERROR: ${comment} unknown`, 'red'))
-
-  if (exit) process.exit(1)
-}
 
 // just a fallback for removing http-errors dependency
 export const createError = (code: number, msg: string = 'unknown', _nothing?: any) => {
-  console.log(`ERROR: ${code} ${msg}`)
+  if (code !== 404) message.log(`ERROR: ${code} ${msg}`)
   return { message: msg, code, status: code, statusCode: code, name: code }
 }
 
@@ -55,7 +45,7 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
     mount: [],
     proxy: [],
     middleware: [],
-    logLevel: 2
+    logLevel: 1
   }
 
   if (configFile === false) return options
@@ -99,19 +89,19 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
             const config = require(configPath)
 
             if (Object.keys(config).length === 0) {
-              error(`Config file "${f}" is empty or has issues`, null, false)
+              message.warn(`Config file "${f}" is empty or has issues`)
             }
 
             options = { ...options, ...config }
           } catch (err) {
-            error(err.message, f, false)
+            message.error(err.message, f, false)
           }
         } else {
           const config = fs.readFileSync(configPath, 'utf8')
           try {
             options = { ...options, ...JSON.parse(config) }
           } catch (err) {
-            error(err.message, f, false)
+            message.error(err.message, f, false)
           }
         }
 

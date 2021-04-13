@@ -1,3 +1,4 @@
+/* eslint-disable sort-imports */
 /**
  * @copyright    Copyright JS Foundation and other contributors
  * @license      {@link https://github.com/webpack/webpack-dev-server/blob/master/LICENSE|MIT}
@@ -9,6 +10,7 @@ import { createCertificate } from './createCertificate'
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
+import { message } from '../msg'
 // import del from 'del'
 
 export const getCertificate = (cacheDir: string = '.cache') => {
@@ -27,14 +29,14 @@ export const getCertificate = (cacheDir: string = '.cache') => {
 
     // cert is more than 30 days old, kill it with fire
     if ((now - certificateStat.ctime) / certificateTtl > 30) {
-      console.info('SSL Certificate is more than 30 days old. Removing.')
+      message.info('SSL Certificate is more than 30 days old. Removing.')
 
       // del.sync([certificatePath], { force: true })
       try {
         fs.unlinkSync(certificatePath)
         //file removed
       } catch (err) {
-        console.error(err.message)
+        message.error(err.message, null, false)
       }
 
       certificateExists = false
@@ -42,7 +44,7 @@ export const getCertificate = (cacheDir: string = '.cache') => {
   }
 
   if (!certificateExists) {
-    console.info(`Generating SSL Certificate "${path.resolve(certificatePath)}"`)
+    message.info(`Generating SSL Certificate "${path.resolve(certificatePath)}"`)
 
     const attributes = [{ name: 'commonName', value: 'localhost' }]
     const pems = createCertificate(attributes)
