@@ -629,9 +629,6 @@ export default class LiveServer {
     })
 
     const handleChange = changePath => {
-      const htmlChange = path.extname(changePath) === '.html'
-      if (htmlChange && injectBody) return
-
       const cssChange = path.extname(changePath) === '.css' && injectCss
       if (this.logLevel >= 1) {
         const five = colors(colors('[Five Server]', 'bold'), 'cyan')
@@ -640,6 +637,10 @@ export default class LiveServer {
 
         message.pretty(`${five} ${msg} ${file}`, { id: cssChange ? 'cssChange' : 'change' })
       }
+
+      const htmlChange = path.extname(changePath) === '.html'
+      if (htmlChange && injectBody) return
+
       this.clients.forEach(ws => {
         if (ws) ws.sendWithDelay(cssChange ? 'refreshcss' : 'reload')
       })

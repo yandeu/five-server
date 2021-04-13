@@ -26,28 +26,31 @@ class Message extends EventEmitter {
     // counter
     const counter = count > 0 ? colors(` (x${count + 1})`, 'yellow') : ''
 
-    if (this.logLevel >= 1) message.log(`${t}${log}${counter}`)
+    const m = `${t}${log}${counter}`
+
+    if (this.logLevel >= 1) message.log(m)
+    this.emit('message', { type: 'pretty', msg: m })
   }
 
   log = (...msg: any[]) => {
     const m = msg.join(' ')
 
     if (this.logLevel >= 1) console.log(m)
-    this.emit('message', { type: 'log', msg })
+    this.emit('message', { type: 'log', msg: m })
   }
 
   warn = (...msg: any[]) => {
     const m = colors(msg.join(' '), 'yellow')
 
     if (this.logLevel >= 1) console.warn(m)
-    this.emit('message', { type: 'warn', msg })
+    this.emit('message', { type: 'warn', msg: m })
   }
 
   info = (...msg: any[]) => {
     const m = colors(msg.join(' '), 'blue')
 
     if (this.logLevel >= 1) console.log(m)
-    this.emit('message', { type: 'info', msg })
+    this.emit('message', { type: 'info', msg: m })
   }
 
   error = (msg: string, comment: null | string = '', exit) => {
@@ -57,7 +60,7 @@ class Message extends EventEmitter {
     const m = msg ? colors(`ERROR: ${comment} ${msg}`, 'red') : colors(`ERROR: ${comment} unknown`, 'red')
 
     console.error(m)
-    this.emit('message', { type: 'error', msg })
+    this.emit('message', { type: 'error', msg: m })
 
     if (exit) process.exit(1)
   }
