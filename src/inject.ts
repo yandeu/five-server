@@ -28,7 +28,7 @@ export const injectCode = (root: any, options: { logLevel: number; serverURL?: s
     if (e.code !== 'ENOENT') throw e
   }
   return function (req, res, next) {
-    const isRoot = req.url === '/'
+    const isRoot = /\/$/.test(req.url)
     if (!isRoot && !possibleExtensions.includes(path.extname(req.url))) return next()
 
     // should be able to POST to PHP files!

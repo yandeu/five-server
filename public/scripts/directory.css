@@ -123,7 +123,7 @@ a:hover {
 /*small*/
 @media (max-width: 768px) {
   body {
-    padding: 80px 24px;
+    padding: 80px 24px 40px 24px;
   }
 }
 

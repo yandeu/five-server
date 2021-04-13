@@ -373,7 +373,6 @@ function iconLookup(filename) {
   }
 
   const mimetype = mime.lookup(ext)
-  console.log('mimetype', mimetype)
 
   // default if no mime type
   if (mimetype === false) {
