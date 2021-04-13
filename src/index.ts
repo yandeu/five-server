@@ -439,6 +439,17 @@ export default class LiveServer {
     // serveIndex middleware
     app.use(serveIndex(rootPath, { icons: true, hidden: false, dotFiles: true }))
 
+    // no one want to see a 404 favicon error
+    let favicon
+    app.use((req: any, res: any, next: any) => {
+      if (/favicon\.ico$/.test(req.url)) {
+        if (!favicon) favicon = fs.readFileSync(join(__dirname, '../public/favicon.ico'))
+        res.type('ico').send(favicon)
+      } else {
+        return next()
+      }
+    })
+
     // serve 404 page
     app.use((req: any, res: any, next: any) => {
       // join / normalize from root dir
