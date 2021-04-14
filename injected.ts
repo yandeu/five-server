@@ -19,6 +19,8 @@ if ('WebSocket' in window) {
 
       el = document.createElement('span')
       el.id = 'fiveserver-info'
+      el.style.fontSize = '16px'
+      el.style.fontFamily = 'Arial, Helvetica, sans-serif'
       el.style.color = 'white'
       el.style.backgroundColor = 'black'
       el.style.position = 'absolute'
@@ -36,7 +38,7 @@ if ('WebSocket' in window) {
         el.style.backgroundColor = 'red'
       } else {
         // el.style.top = '4px'
-        el.style.top = '-30px'
+        el.style.top = '-40px'
         el.style.animation = 'fiveserverInfoPopup 3s forwards'
       }
 
@@ -85,7 +87,7 @@ if ('WebSocket' in window) {
       }
     }
 
-    function refreshCSS() {
+    const refreshCSS = () => {
       const sheets = document.getElementsByTagName('link')
       const head = document.getElementsByTagName('head')[0]
       for (let i = 0; i < sheets.length; ++i) {
@@ -101,7 +103,8 @@ if ('WebSocket' in window) {
 
       popup('css updated', 'info')
     }
-    function injectBody(body) {
+
+    const injectBody = body => {
       document.body.innerHTML = body
     }
 
@@ -217,10 +220,10 @@ if ('WebSocket' in window) {
         to {background-color: rgba(155,215,255,0);}
       }
       @keyframes fiveserverInfoPopup {
-        0%   {top:-30px;}
+        0%   {top:-40px;}
         15%  {top:4px;}
         85%  {top:4px;}
-        100% {top:-30px;}
+        100% {top:-40px;}
       }
       `
         document.head.appendChild(style)
