@@ -52,8 +52,6 @@ if ('WebSocket' in window) {
       el.innerText = message
     }
 
-    setTimeout(() => {}, 200)
-
     const send = (type: string, ...message: string[]) => {
       if (socket && socket?.readyState === 1) {
         socket.send(JSON.stringify({ console: { type, message } }))
@@ -87,21 +85,23 @@ if ('WebSocket' in window) {
       }
     }
 
-    const refreshCSS = () => {
-      const sheets = document.getElementsByTagName('link')
+    const refreshCSS = (showPopup: boolean) => {
       const head = document.getElementsByTagName('head')[0]
+
+      let sheets = Array.from(document.getElementsByTagName('link'))
+      sheets = sheets.filter(sheet => /\.css/gm.test(sheet.href) || sheet.rel.toLowerCase() == 'stylesheet')
+
       for (let i = 0; i < sheets.length; ++i) {
-        const elem = sheets[i]
-        head.removeChild(elem)
-        const rel = elem.rel
-        if ((elem.href && typeof rel != 'string') || rel.length == 0 || rel.toLowerCase() == 'stylesheet') {
-          const url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '')
-          elem.href = `${url}${url.indexOf('?') >= 0 ? '&' : '?'}_cacheOverride=${new Date().valueOf()}`
-        }
-        head.appendChild(elem)
+        const el = sheets[i]
+
+        // changing the href of the css file will make the browser refetch it
+        const url = el.href.replace(/(&|\?)_cacheOverride=\d+/, '')
+        el.href = `${url}${url.indexOf('?') >= 0 ? '&' : '?'}_cacheOverride=${new Date().valueOf()}`
+
+        head.appendChild(el)
       }
 
-      popup('css updated', 'info')
+      if (sheets.length > 0 && showPopup) popup('css updated', 'info')
     }
 
     const injectBody = body => {
@@ -116,7 +116,8 @@ if ('WebSocket' in window) {
         attempts = 0
 
         if (msg.data === 'reload') window.location.reload()
-        else if (msg.data === 'refreshcss') refreshCSS()
+        else if (msg.data === 'refreshcss') refreshCSS(true)
+        else if (msg.data === 'refreshcss-silent') refreshCSS(false)
         else if (msg.data === 'connected') console.log(CONNECTED_MSG)
         else if (msg.data === 'initRemoteLogs') overwriteLogs()
         else {

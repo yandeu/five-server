@@ -788,9 +788,9 @@ export default class LiveServer {
   }
 
   /** Manually refresh css */
-  public refreshCSS() {
+  public refreshCSS(showPopup = true) {
     this.clients.forEach(ws => {
-      if (ws) ws.sendWithDelay('refreshcss')
+      if (ws) ws.sendWithDelay(showPopup ? 'refreshcss' : 'refreshcss-silent')
     })
   }
 
