@@ -13,7 +13,7 @@ import http from 'http'
 import https from 'https'
 import logger from 'morgan'
 import os from 'os'
-import path from 'path'
+import path, { join, normalize } from 'path'
 
 // FIX: Packages are not maintained anymore (replace them!)
 import express from 'express' // const connect = require('connect')
@@ -35,10 +35,8 @@ import { getNetworkAddress } from './utils/getNetworkAddress'
 
 // execute php
 import { ExecPHP } from './utils/execPHP'
-import { INJECTED_CODE, NOT_FOUND, PREVIEW } from './public'
-import { join, normalize } from 'path'
+import { INJECTED_CODE, STATUS_CODE, PREVIEW } from './public'
 import { message } from './msg'
-import { VERSION } from './const'
 const PHP = new ExecPHP()
 
 export { LiveServerParams }
@@ -453,17 +451,37 @@ export default class LiveServer {
       }
     })
 
-    // serve 404 page
-    app.use((req: any, res: any, next: any) => {
+    const fileDoesExist = (path: string): Promise<boolean> => {
+      return new Promise(resolve => {
+        fs.stat(path, (err, stat) => {
+          if (err && err.code === 'ENOENT') {
+            return resolve(false)
+          } else return resolve(true)
+        })
+      })
+    }
+
+    // serve 403/404 page
+    app.use(async (req: any, res: any, next: any) => {
       // join / normalize from root dir
       const path = normalize(join(rootPath, req.url))
+      const file = req.url.replace(/^\//gm, '') // could be c:/Users/USERNAME/Desktop/website/ for example
 
-      fs.stat(path, function (err, stat) {
-        if (err && err.code === 'ENOENT') {
-          const html = NOT_FOUND.replace('{linked-path}', htmlPath(decodeURI(req.url)))
-          return res.status(404).send(html)
-        } else return next()
-      })
+      if (await fileDoesExist(file)) {
+        const html = STATUS_CODE.replace('{linked-path}', htmlPath(decodeURI(req.url)))
+          .replace('{status}', '403')
+          .replace('{message}', `Can't access files outside of root.`)
+        return res.status(403).send(html)
+      }
+
+      if (!(await fileDoesExist(path))) {
+        const html = STATUS_CODE.replace('{linked-path}', htmlPath(decodeURI(req.url)))
+          .replace('{status}', '404')
+          .replace('{message}', 'This page could not be found.')
+        return res.status(404).send(html)
+      }
+
+      return next()
     })
 
     // create http server
