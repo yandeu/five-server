@@ -5,8 +5,7 @@ if ('WebSocket' in window) {
 
     const script = document.querySelector('[data-id="five-server"]') as HTMLScriptElement
     const protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://'
-    // const address = `${protocol}${window.location.host}${window.location.pathname}/ws`
-    const address = `${protocol}${new URL(script.src).host}${window.location.pathname}/ws`
+    const address = `${protocol}${new URL(script.src).host}${window.location.pathname.replace(/\/+$/gm, '/fsws')}`
 
     const CONNECTED_MSG = '[Five Server] connected.'
     const MAX_ATTEMPTS = 25
