@@ -133,7 +133,7 @@ export default class LiveServer {
     else if (watch && !Array.isArray(watch)) watch = [watch]
 
     const root = options.root || process.cwd()
-    const rootPath = workspace ? path.join(workspace, options.root ? options.root : '') : root
+    const rootPath = workspace ? path.join(workspace, options.root ? options.root : '') : path.resolve(root)
     const watchPaths = watch || [workspace ? workspace : process.cwd()]
 
     let openPath = options.open
