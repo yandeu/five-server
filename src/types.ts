@@ -26,7 +26,7 @@ export interface LiveServerParams {
   htpasswd?: string
   /** Enable https in your browser. */
   https?: boolean | string | Certificate
-  /** Paths to ignore from watching changes. */
+  /** Files/Folders to ignore from watching. */
   ignore?: Array<string | RegExp | Glob>
   /** 0 = errors only, 1 = some, 2 = lots, 3 = all */
   logLevel?: 0 | 1 | 2 | 3
@@ -54,7 +54,7 @@ export interface LiveServerParams {
   useLocalIp?: boolean
   /** Waits for all changes, before reloading. Defaults to 0 sec. */
   wait?: number
-  /** Paths to exclusively watch for changes. */
+  /** Paths to exclusively watch for changes. Defaults to cwd. */
   watch?: boolean | Array<string | RegExp | Glob>
 
   /** Highlights the code you are working on. (VSCode Extension only) */

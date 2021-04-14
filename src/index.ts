@@ -134,7 +134,7 @@ export default class LiveServer {
 
     const root = options.root || process.cwd()
     const rootPath = workspace ? path.join(workspace, options.root ? options.root : '') : root
-    const watchPaths = watch || [rootPath]
+    const watchPaths = watch || [workspace ? workspace : process.cwd()]
 
     let openPath = options.open
     if (typeof openPath === 'string') openPath = removeLeadingSlash(openPath)
