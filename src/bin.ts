@@ -23,8 +23,11 @@ opts._cli = true
 
 for (let i = process.argv.length - 1; i >= 2; --i) {
   const arg = process.argv[i]
-
-  if (arg.indexOf('--useLocalIp') > -1) {
+  if (arg.indexOf('--root=') > -1) {
+    const root = arg.substring(7)
+    opts.root = root
+    process.argv.splice(i, 1)
+  } else if (arg.indexOf('--useLocalIp') > -1) {
     opts.useLocalIp = true
     process.argv.splice(i, 1)
   } else if (arg.indexOf('--php=') > -1) {
