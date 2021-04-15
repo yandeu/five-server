@@ -246,7 +246,46 @@ if ('WebSocket' in window) {
       }
     }
 
-    connect()
+    const MAX_STATUS_CHECK = 10
+    let statusChecks = 0
+    const reCheckStatus = () => {
+      if (statusChecks > MAX_STATUS_CHECK) {
+        console.error('[Five Server] status check failed')
+        console.log('[Five Server] browser reloads in 5 seconds')
+        setTimeout(() => {
+          window.location.reload()
+        }, 5000)
+        return
+      }
+      console.log('[Five Server] status check...')
+      setTimeout(() => {
+        checkStatus()
+      }, 1000)
+    }
+
+    const checkStatus = async () => {
+      statusChecks++
+      const p = new URL(script.src).protocol
+      const h = new URL(script.src).host
+
+      const url = `${p}//${h}/fiveserver/status`
+
+      try {
+        const res = await fetch(url)
+        const json = await res.json()
+
+        if (json && json.status && json.status === 'online') {
+          connect()
+          statusChecks = 0
+        } else {
+          reCheckStatus()
+        }
+      } catch (error) {
+        reCheckStatus()
+      }
+    }
+
+    checkStatus()
   })
 }
 // ]]>

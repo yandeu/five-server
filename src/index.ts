@@ -175,7 +175,7 @@ export default class LiveServer {
     // serve fiveserver files
     app.use((req, res, next) => {
       if (req.url === '/fiveserver.js') return res.type('.js').send(INJECTED_CODE)
-      if (req.url === '/fiveserver') return res.json({ status: 'online' })
+      if (req.url === '/fiveserver/status') return res.json({ status: 'online' })
 
       next()
     })
