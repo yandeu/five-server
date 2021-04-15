@@ -42,7 +42,7 @@ export interface LiveServerParams {
   php?: string
   /** Absolute path to php.ini file. */
   phpIni?: string
-  /** Set the server port. Defaults to 8080. */
+  /** Set the server port. Defaults to 5555. */
   port?: number
   /** Proxy all requests for ROUTE to URL. */
   proxy?: string[][]

@@ -40,7 +40,7 @@ export const removeTrailingSlash = (str: string) => {
 export const getConfigFile = (configFile: string | boolean = true, workspace?: string): LiveServerParams => {
   let options: LiveServerParams = {
     host: process.env.IP,
-    port: process.env.PORT ? parseInt(process.env.PORT) : 8080,
+    port: process.env.PORT ? parseInt(process.env.PORT) : 5555,
     open: true,
     mount: [],
     proxy: [],
