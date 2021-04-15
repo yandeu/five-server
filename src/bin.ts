@@ -161,12 +161,6 @@ opts.root = process.argv[2] ? removeLeadingSlash(process.argv[2]) : opts.root
 if (opts.watch) {
   if (opts.length === 1 && opts.watch[0] === 'true') opts.watch = true
   else if (opts.length === 1 && opts.watch[0] === 'false') opts.watch = false
-  else {
-    if (typeof opts.watch === 'string') opts.watch = [opts.watch]
-    opts.watch = opts.watch.map(function (relativePath) {
-      return path.join(path.resolve(), relativePath)
-    })
-  }
 }
 if (opts.ignore) {
   if (typeof opts.ignore === 'string') opts.ignore = [opts.ignore]

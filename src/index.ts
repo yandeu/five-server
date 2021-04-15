@@ -125,14 +125,26 @@ export default class LiveServer {
 
     this.injectBody = injectBody
 
-    let watch = options.watch
-    if (watch === true) watch = undefined
-    if (watch === false) watch = false
-    else if (watch && !Array.isArray(watch)) watch = [watch]
+    let _watch = options.watch
+    if (_watch === true) _watch = ['.']
 
-    const root = options.root || process.cwd()
-    const rootPath = workspace ? path.join(workspace, options.root ? options.root : '') : path.resolve(root)
-    const watchPaths = watch || [workspace ? workspace : process.cwd()]
+    if (_watch === false) _watch = false
+    else if (_watch && !Array.isArray(_watch)) _watch = [_watch]
+
+    if (typeof _watch === 'undefined') _watch = ['.']
+
+    // tmp
+    const _tmp = options.root || process.cwd()
+    /** CWD (absolute path) */
+    const cwd = workspace ? workspace : process.cwd()
+    /** root (absolute path) */
+    const root = workspace ? path.join(workspace, options.root ? options.root : '') : path.resolve(_tmp)
+    /** file, dir, glob, or array => passed to chokidar.watch() (relative path to CWD) */
+    const watch = _watch
+
+    // console.log('cwd', cwd)
+    // console.log('root', root)
+    // console.log('watch', watch)
 
     let openPath = options.open
     if (typeof openPath === 'string') openPath = removeLeadingSlash(openPath)
@@ -189,7 +201,7 @@ export default class LiveServer {
       // serve file without extension (if it exists)
       if (isNon) {
         // get the absolute path
-        const absolute = path.resolve(path.join(rootPath + req.url))
+        const absolute = path.resolve(path.join(root + req.url))
         // check if .html file exists
         if (fs.existsSync(`${absolute}.html`)) req.url = req.url += '.html'
         // check if .php file exists
@@ -204,7 +216,7 @@ export default class LiveServer {
       // check if the url has not dot
       if (/\/[\w-]+$/.test(req.url)) {
         // get the absolute path
-        const absolute = path.join(path.resolve(), rootPath + req.url)
+        const absolute = path.join(path.resolve(), root + req.url)
         // check if .html file exists
         if (fs.existsSync(`${absolute}.html`)) req.url = req.url += '.html'
         // check if .php file exists
@@ -217,7 +229,7 @@ export default class LiveServer {
     // serve php files as text/html
     app.use(async (req, res, next) => {
       if (/\.php$/.test(req.url)) {
-        const filePath = path.resolve(path.join(rootPath + req.url))
+        const filePath = path.resolve(path.join(root + req.url))
         if (!fs.existsSync(filePath)) return next()
 
         let html = await PHP.parseFile(filePath, res)
@@ -292,9 +304,10 @@ export default class LiveServer {
 
     mount.forEach(mountRule => {
       const mountPath = path.resolve(process.cwd(), mountRule[1])
-      if (!options.watch)
+
+      if (!options.watch && watch !== false)
         // Auto add mount paths to watching but only if exclusive path option is not given
-        watchPaths.push(mountPath)
+        watch.push(mountPath)
 
       // make sure mountRule[0] has a leading slash
       if (mountRule[0].indexOf('/') !== 0) mountRule[0] = `/${mountRule[0]}`
@@ -331,7 +344,7 @@ export default class LiveServer {
       if (this.logLevel >= 1) message.log('Mapping %s to "%s"', proxyRule[0], proxyRule[1])
     })
 
-    const injectHandler = injectCode(rootPath, { logLevel })
+    const injectHandler = injectCode(root, { logLevel })
 
     // inject to .html and .php files
     app.use(injectHandler)
@@ -345,7 +358,7 @@ export default class LiveServer {
 
     // serve static files (ignore php files) // don't serve index files!
     // TODO(yandeu): Make "index" optional // { index: false }
-    app.use(ignorePHP(express.static(rootPath)))
+    app.use(ignorePHP(express.static(root)))
 
     // inject to fallback "file"
     app.use(fallbackFile(injectHandler, file))
@@ -365,7 +378,7 @@ export default class LiveServer {
         : ''
 
       try {
-        const filePath = path.resolve(path.join(rootPath + URL))
+        const filePath = path.resolve(path.join(root + URL))
 
         const isFile = fs.statSync(filePath).isFile()
         if (!isFile) return next()
@@ -438,7 +451,7 @@ export default class LiveServer {
     })
 
     // serveIndex middleware
-    app.use(serveIndex(rootPath, { icons: true, hidden: false, dotFiles: true }))
+    app.use(serveIndex(root, { icons: true, hidden: false, dotFiles: true }))
 
     // no one want to see a 404 favicon error
     let favicon
@@ -464,7 +477,7 @@ export default class LiveServer {
     // serve 403/404 page
     app.use(async (req: any, res: any, next: any) => {
       // join / normalize from root dir
-      const path = normalize(join(rootPath, req.url))
+      const path = normalize(join(root, req.url))
       const file = req.url.replace(/^\//gm, '') // could be c:/Users/USERNAME/Desktop/website/ for example
 
       if (await fileDoesExist(file)) {
@@ -639,11 +652,13 @@ export default class LiveServer {
     if (options.ignorePattern) {
       ignored.push(options.ignorePattern)
     }
+
     // Setup file watcher
     if (watch === false) return
-    this.watcher = chokidar.watch(watchPaths as any, {
-      ignored: ignored,
-      ignoreInitial: true
+    this.watcher = chokidar.watch(watch as any, {
+      cwd: cwd,
+      ignoreInitial: true,
+      ignored: ignored
     })
 
     const handleChange = changePath => {
@@ -651,7 +666,7 @@ export default class LiveServer {
       if (this.logLevel >= 1) {
         const five = colors(colors('[Five Server]', 'bold'), 'cyan')
         const msg = cssChange ? colors('CSS change detected', 'magenta') : colors('change detected', 'cyan')
-        const file = colors(changePath.replace(path.resolve(rootPath), ''), 'gray')
+        const file = colors(changePath.replace(path.resolve(root), ''), 'gray')
 
         message.pretty(`${five} ${msg} ${file}`, { id: cssChange ? 'cssChange' : 'change' })
       }
