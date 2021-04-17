@@ -3,7 +3,7 @@
 /**
  * @package     batch (https://www.npmjs.com/package/batch)
  * @copyright   Copyright (c) 2013-2015 TJ Holowaychuk <tj@vision-media.ca>
- * @license     {@link https://github.com/visionmedia/batch/blob/master/LICENSE|MIT}
+ * @license     {@link https://github.com/visionmedia/batch/blob/master/LICENSE MIT}
  * @description modified version of batch@3.7.0 (https://github.com/visionmedia/batch/edit/master/index.js)
  */
 

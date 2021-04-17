@@ -1,9 +1,15 @@
 /* eslint-disable sort-imports */
 
 /**
- * @copyright   Copyright (c) 2012 Tapio Vierros (https://github.com/tapio)
- * @copyright   Copyright (c) 2021 Yannick Deubel (https://github.com/yandeu)
- * @license     {@link https://github.com/yandeu/five-server/blob/main/LICENSE.md|LICENSE}
+ * @copyright
+ * Copyright (c) 2012 Tapio Vierros (https://github.com/tapio)
+ * Copyright (c) 2021 Yannick Deubel (https://github.com/yandeu)
+ *
+ * @license {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
+ *
+ * @description
+ * forked from live-server@1.2.1 (https://github.com/tapio/live-server)
+ * previously licensed under MIT (https://github.com/tapio/live-server#license)
  */
 
 import chokidar from 'chokidar'
@@ -17,7 +23,7 @@ import path, { join, normalize } from 'path'
 
 // FIX: Packages are not maintained anymore (replace them!)
 import express from 'express' // const connect = require('connect')
-import serveIndex, { htmlPath } from './dependencies/serve-index' // const serveIndex = require('serve-index')
+import serveIndex, { htmlPath } from './serve-index' // const serveIndex = require('serve-index')
 
 // MOD: Replaced "faye-websocket" by "ws"
 // const WebSocket: any = require('faye-websocket')

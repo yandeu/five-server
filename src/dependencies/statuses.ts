@@ -1,8 +1,8 @@
 /**
- * @copyright    Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
- * @copyright    Copyright (c) 2016 Douglas Christopher Wilson <doug@somethingdoug.com>
- * @license      {@link https://github.com/jshttp/statuses/blob/master/LICENSE|MIT}
- * @description  Copied from https://github.com/jshttp/statuses/blob/master/codes.json
+ * @copyright   Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
+ * @copyright   Copyright (c) 2016 Douglas Christopher Wilson <doug@somethingdoug.com>
+ * @license     {@link https://github.com/jshttp/statuses/blob/master/LICENSE MIT}
+ * @description Copied from https://github.com/jshttp/statuses/blob/master/codes.json
  */
 
 export const statusToText = (statusCode: number) => {

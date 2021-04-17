@@ -3,11 +3,11 @@
 /* eslint-disable prefer-spread */
 
 /**
- * @package    send (https://www.npmjs.com/package/send)
- * @copyright  Copyright(c) 2012 TJ Holowaychuk
- * @copyright  Copyright(c) 2014-2016 Douglas Christopher Wilson
- * @license    {@link https://github.com/pillarjs/send/blob/master/LICENSE|MIT}
- * @description modified version of send@0.17.1 (https://github.com/pillarjs/send/blob/master/index.js)
+ * @package       send (https://www.npmjs.com/package/send)
+ * @copyright     Copyright(c) 2012 TJ Holowaychuk
+ * @copyright     Copyright(c) 2014-2016 Douglas Christopher Wilson
+ * @license       {@link https://github.com/pillarjs/send/blob/master/LICENSE MIT}
+ * @description   modified version of send@0.17.1 (https://github.com/pillarjs/send/blob/master/index.js)
  */
 
 import { charsets } from '../utils/charset'

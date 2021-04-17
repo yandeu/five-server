@@ -3,17 +3,22 @@
 /* eslint-disable prefer-spread */
 
 /**
- * @package     serve-index (https://www.npmjs.com/package/serve-index)
- * @copyright   Copyright (c) 2010 Sencha Inc.
- * @copyright   Copyright (c) 2011 LearnBoost
- * @copyright   Copyright (c) 2011 TJ Holowaychuk
- * @copyright   Copyright (c) 2014-2015 Douglas Christopher Wilson
- * @license     {@link https://github.com/expressjs/serve-index/blob/master/LICENSE|MIT}
- * @description modified version of serve-index@1.9.1 (https://github.com/expressjs/serve-index/blob/master/index.js)
+ * @copyright
+ * Copyright (c) 2010 Sencha Inc.
+ * Copyright (c) 2011 LearnBoost
+ * Copyright (c) 2011 TJ Holowaychuk
+ * Copyright (c) 2014-2015 Douglas Christopher Wilson
+ * Copyright (c) 2021 Yannick Deubel (https://github.com/yandeu)
+ *
+ * @license {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
+ *
+ * @description
+ * forked from serve-index@1.9.1 (https://github.com/expressjs/serve-index/blob/master/index.js)
+ * previously licensed under MIT (https://github.com/expressjs/serve-index/blob/master/LICENSE)
  */
 
 const accepts = require('accepts')
-import { createError } from '../misc' // const createError = require('http-errors')
+import { createError } from './misc' // const createError = require('http-errors')
 const debug = require('debug')('serve-index')
 const escapeHtml = require('escape-html')
 const fs = require('fs')
@@ -45,7 +50,7 @@ const parseUrl = require('parseurl')
 const resolve = require('path').resolve
 
 // FIX: Replaced batch by forking it
-const Batch = require('./batch') // const Batch = require('batch')
+const Batch = require('./dependencies/batch') // const Batch = require('batch')
 
 const cache = {}
 const defaultTemplate = join(__dirname, '../../public/serve-index', 'directory.html')

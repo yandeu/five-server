@@ -1,8 +1,13 @@
 /**
- * @copyright    Copyright (c) 2012 Tapio Vierros (https://github.com/tapio)
- * @copyright    Copyright (c) 2021 Yannick Deubel (https://github.com/yandeu)
- * @license      {@link https://github.com/yandeu/five-server/blob/main/LICENSE.md|LICENSE}
- * @description  copied and modified from https://github.com/tapio/live-server/blob/master/live-server.js
+ * @copyright
+ * Copyright (c) 2012 Tapio Vierros (https://github.com/tapio)
+ * Copyright (c) 2021 Yannick Deubel (https://github.com/yandeu)
+ *
+ * @license {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
+ *
+ * @description
+ * copied and modified from https://github.com/tapio/live-server/blob/master/index.js,
+ * which was licensed under MIT (https://github.com/tapio/live-server#license)
  */
 
 import { colors } from './colors'

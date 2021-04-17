@@ -1,8 +1,8 @@
 /**
- * @author       Leo Lamprecht (https://github.com/leo) - Vercel
- * @copyright    Copyright (c) 2018 ZEIT, Inc.
- * @license      {@link https://github.com/vercel/serve/blob/master/LICENSE|MIT}
- * @description  copied and modified from https://github.com/vercel/serve/blob/master/bin/serve.js
+ * @author      Leo Lamprecht (https://github.com/leo) - Vercel
+ * @copyright   Copyright (c) 2018 ZEIT, Inc.
+ * @license     {@link https://github.com/vercel/serve/blob/master/LICENSE MIT}
+ * @description copied and modified from https://github.com/vercel/serve/blob/master/bin/serve.js
  */
 
 import os from 'os'
