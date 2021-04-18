@@ -53,8 +53,8 @@ const resolve = require('path').resolve
 const Batch = require('./dependencies/batch') // const Batch = require('batch')
 
 const cache = {}
-const defaultTemplate = join(__dirname, '../../public/serve-index', 'directory.html')
-const defaultStylesheet = join(__dirname, '../../public/serve-index', 'style.css')
+const defaultTemplate = join(__dirname, '../public/serve-index', 'directory.html')
+const defaultStylesheet = join(__dirname, '../public/serve-index', 'style.css')
 const mediaTypes = ['text/html', 'text/plain', 'application/json']
 const mediaType = {
   'text/html': 'html',
