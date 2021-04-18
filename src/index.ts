@@ -87,7 +87,7 @@ export default class LiveServer {
   }
 
   public get parseBody() {
-    if (this._parseBody) return { updateBody: this._parseBody_updateBody.bind(this) }
+    if (this._parseBody) return { workers: this._parseBody, updateBody: this._parseBody_updateBody.bind(this) }
 
     this._parseBody = new WorkerPool('./workers/parseBody.js', {
       worker: 2,
@@ -121,7 +121,7 @@ export default class LiveServer {
       }
     })
 
-    return { updateBody: this._parseBody_updateBody.bind(this) }
+    return { workers: this._parseBody, updateBody: this._parseBody_updateBody.bind(this) }
   }
 
   private colors: Colors[] = ['magenta', 'cyan', 'blue', 'green', 'yellow', 'red']
