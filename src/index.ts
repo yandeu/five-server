@@ -45,8 +45,13 @@ import { INJECTED_CODE, STATUS_CODE, PREVIEW } from './public'
 import { message } from './msg'
 const PHP = new ExecPHP()
 
+// for hot body injections
+import WorkerPool from './workerPool'
+import type { Report } from 'html-validate'
+
 export { LiveServerParams }
 
+// extend WebSocket interface
 interface ExtendedWebSocket extends WebSocket {
   sendWithDelay: (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => void
   file: string
@@ -62,6 +67,62 @@ export default class LiveServer {
 
   /** inject stript to any file */
   public injectToAny = true
+
+  private _parseBody: WorkerPool | undefined
+  private _parseBody_IsValidHtml = true
+  private _parseBody_updateBody(
+    fileName: string,
+    text: string,
+    shouldHighlight: boolean = false,
+    cursorPosition: { line: number; character: number } = { line: 0, character: 0 }
+  ): void {
+    this._parseBody?.postMessage(
+      JSON.stringify({
+        fileName,
+        text,
+        shouldHighlight,
+        cursorPosition
+      })
+    )
+  }
+
+  public get parseBody() {
+    if (this._parseBody) return { updateBody: this._parseBody_updateBody.bind(this) }
+
+    this._parseBody = new WorkerPool('./workers/parseBody.js', {
+      worker: 2,
+      rateLimit: 50
+    })
+
+    this._parseBody.on('message', d => {
+      const data = JSON.parse(d)
+      if (data.ignore) return
+
+      const { body, report, fileName } = data as {
+        report: Report
+        body: string
+        fileName: string
+      }
+
+      if (report.valid) {
+        this.updateBody(fileName, body)
+
+        if (!this._parseBody_IsValidHtml) {
+          this._parseBody_IsValidHtml = true
+          this?.sendMessage(fileName, 'HIDE_MESSAGES')
+        }
+      } else {
+        this._parseBody_IsValidHtml = false
+        if (report.results.length > 0 && report.results[0].messages.length > 0) {
+          const errors = report.results[0].messages.map(m => `${m.message}\n  at line: ${m.line}`)
+
+          this.sendMessage(fileName, errors)
+        }
+      }
+    })
+
+    return { updateBody: this._parseBody_updateBody.bind(this) }
+  }
 
   private colors: Colors[] = ['magenta', 'cyan', 'blue', 'green', 'yellow', 'red']
   private colorIndex = -1
@@ -826,6 +887,15 @@ export default class LiveServer {
     })
   }
 
+  /** Send message to the client. (Will show a popup in the Browser) */
+  public sendMessage(file: string, msg: string | string[], type = 'info') {
+    this.clients.forEach(ws => {
+      // send message or message[s]
+      const content = typeof msg === 'string' ? { message: msg } : { messages: msg }
+      if (ws && ws.file === file) ws.send(JSON.stringify(content))
+    })
+  }
+
   /** Manually refresh css */
   public refreshCSS(showPopup = true) {
     this.clients.forEach(ws => {
@@ -833,13 +903,18 @@ export default class LiveServer {
     })
   }
 
-  /** Inject new HTML into the body (VSCode only) */
-  public updateBody(file: string, body: string, position?: { line: number; character: number }) {
+  /** Inject a a new <body> into the DOM. (Better prepend parseBody first) */
+  public updateBody(file: string, body: any) {
     this.clients.forEach(ws => {
-      if (ws && ws.file === file) ws.sendWithDelay(JSON.stringify({ body, position }))
+      if (ws && ws.file === file) ws.send(JSON.stringify({ body, hot: true }))
     })
   }
 
+  public highlightSelector(file: string, selector: string) {
+    // TODO(yandeu): add this
+  }
+
+  /** @deprecated */
   public highlight(file: string, position: { line: number; character: number }) {
     this.clients.forEach(ws => {
       if (ws && ws.file === file) ws.sendWithDelay(JSON.stringify({ position }))
@@ -853,6 +928,8 @@ export default class LiveServer {
 
   /** Shutdown five-server */
   public async shutdown(): Promise<void> {
+    this._parseBody?.terminate()
+
     if (this.watcher) {
       await this.watcher.close()
     }

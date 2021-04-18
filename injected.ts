@@ -1,4 +1,9 @@
-// <![CDATA[  <-- For SVG support
+declare const diffDOM: any
+
+// clone the current state of the body before any javascript
+// manipulates it inside window.addEventListener('load', (...))
+let _internalDOMBody = document.body.cloneNode(true)
+
 if ('WebSocket' in window) {
   window.addEventListener('load', () => {
     console.log('[Five Server] connecting...')
@@ -13,33 +18,65 @@ if ('WebSocket' in window) {
     let attempts = 0
     let socket!: WebSocket
 
-    const popup = (message: string, type: 'info' | 'success' | 'error' | 'warn') => {
-      let el = document.getElementById('fiveserver-info')
-      if (el) el.remove()
+    let lastPopUp = ''
+    const popup = (
+      message: string,
+      type: 'info' | 'success' | 'error' | 'warn',
+      options: { time?: number; animation?: boolean } = {}
+    ) => {
+      const str = JSON.stringify({ message, type, options })
 
-      el = document.createElement('span')
+      if (lastPopUp === str) return
+      lastPopUp = str
+
+      let wrapper = document.getElementById('fiveserver-info-wrapper')
+      if (wrapper) wrapper.remove()
+
+      const { time = 3, animation = true } = options
+
+      wrapper = document.createElement('div')
+      wrapper.id = 'fiveserver-info-wrapper'
+
+      wrapper.style.zIndex = '100'
+      wrapper.style.display = 'flex'
+      wrapper.style.justifyContent = 'center'
+      wrapper.style.position = 'fixed'
+      wrapper.style.top = 'flex'
+
+      wrapper.style.left = '50%'
+      wrapper.style.transform = 'translateX(-50%)'
+      wrapper.style.width = '100%'
+      wrapper.style.maxWidth = '80%'
+
+      const el = document.createElement('div')
       el.id = 'fiveserver-info'
       el.style.fontSize = '16px'
       el.style.fontFamily = 'Arial, Helvetica, sans-serif'
       el.style.color = 'white'
       el.style.backgroundColor = 'black'
-      el.style.position = 'absolute'
-      el.style.left = '50%'
-      el.style.transform = 'translateX(-50%)'
+
       el.style.padding = '4px 12px'
       el.style.borderRadius = '4px'
-      document.body.appendChild(el)
+      el.style.whiteSpace = 'pre-wrap'
+
+      wrapper.appendChild(el)
+
+      document.body.appendChild(wrapper)
 
       if (type === 'error') {
-        el.style.top = '4px'
-        el.style.animation = ''
+        wrapper.style.top = '4px'
+        wrapper.style.animation = ''
 
         el.style.color = 'black'
         el.style.backgroundColor = 'red'
       } else {
-        // el.style.top = '4px'
-        el.style.top = '-40px'
-        el.style.animation = 'fiveserverInfoPopup 3s forwards'
+        if (animation) {
+          wrapper.style.top = '-40px'
+          wrapper.style.animation = `fiveserverInfoPopup ${time}s forwards`
+        } else {
+          wrapper.style.top = '4px'
+          wrapper.style.animation = ''
+        }
       }
 
       if (type === 'success') {
@@ -49,7 +86,7 @@ if ('WebSocket' in window) {
         el.style.color = '#d2e1f0'
         el.style.backgroundColor = '#2996ff'
       }
-      el.innerText = message
+      el.innerHTML = message.replace(/</gm, '&lt;')
     }
 
     const send = (type: string, ...message: string[]) => {
@@ -108,6 +145,88 @@ if ('WebSocket' in window) {
       document.body.innerHTML = body
     }
 
+    let _diffDOMStatus = ''
+    let _dd
+
+    const addDiffDOM = (): Promise<void> => {
+      _diffDOMStatus = 'loading'
+      return new Promise(resolve => {
+        const url = `//${new URL(script.src).host}/fiveserver/scripts/diffDOM.js`
+        const s = document.createElement('script')
+        s.type = 'text/javascript'
+        s.src = url
+        s.onload = () => {
+          setTimeout(() => {
+            _dd = new diffDOM.DiffDOM()
+            _diffDOMStatus = 'ready'
+            resolve()
+          })
+        }
+        document.getElementsByTagName('head')[0].appendChild(s)
+      })
+    }
+
+    const domParser = new DOMParser()
+    let diffError = false
+    const updateBody = async (d: any) => {
+      if (_diffDOMStatus === '') await addDiffDOM()
+
+      if (_diffDOMStatus === 'ready') {
+        try {
+          const body = _internalDOMBody
+
+          const newBody = domParser.parseFromString(d, 'text/html')
+
+          const tmp = document.createElement('body')
+          tmp.innerHTML = d
+
+          const diff = _dd.diff(body, tmp)
+
+          const testBody = document.body.cloneNode(true)
+
+          const testSuccess = _dd.apply(testBody, diff)
+          if (testSuccess) {
+            const success = _dd.apply(document.body, diff)
+
+            if (success) {
+              _internalDOMBody = tmp
+
+              if (diffError) {
+                diffError = false
+                appendMessage('HIDE')
+              }
+
+              // scroll element into view (center of page)
+              const el = document.querySelector(`[data-highlight="true"]`)
+              if (el) {
+                const documentOffsetTop = el => {
+                  return el.offsetTop + (el.offsetParent ? documentOffsetTop(el.offsetParent) : 0)
+                }
+                const pos = documentOffsetTop(el) - window.innerHeight / 2
+                window.scrollTo(0, pos)
+              }
+            }
+          }
+        } catch (error) {
+          diffError = true
+          appendMessage('Having issues parsing the DOM.\nPlease verify that your HTML is valid...')
+        }
+      }
+    }
+
+    const appendMessages = (msg: string[]) => {
+      appendMessage(msg.join('\n\n'))
+    }
+
+    const appendMessage = (msg: string) => {
+      if (msg === 'HIDE' || msg === 'HIDE_MESSAGE' || msg === 'HIDE_MESSAGES') {
+        const wrapper = document.getElementById('fiveserver-info-wrapper')
+        if (wrapper) wrapper.remove()
+      } else {
+        popup(msg, 'info', { animation: false })
+      }
+    }
+
     const connect = () => {
       socket = new WebSocket(address)
 
@@ -123,73 +242,14 @@ if ('WebSocket' in window) {
         else {
           const d = JSON.parse(msg.data)
           if (d.navigate) window.location.replace(d.navigate)
-          if (d.body) injectBody(d.body)
-          if (d.position) {
-            // TODO: This highlight section needs improvement
+          // hot body injection
+          if (d.body && d.hot) updateBody(d.body)
+          // simple body replacement
+          else if (d.body) injectBody(d.body)
 
-            let line = d.position.line + 1
-            let char = d.position.character
-
-            if (line < 0) return
-
-            const body = document.body.innerHTML.replace(' data-highlight="true"', '')
-            const lines = body.split('\n')
-
-            let i = -1
-            while (i === -1 && line >= 0 && lines[line]) {
-              line--
-
-              if (lines[line] === '') continue
-
-              const htmlOpenTagRegex = /<[a-zA-Z]+(>|.*?[^?]>)/gm
-              const match = lines[line].match(htmlOpenTagRegex)
-
-              if (match) {
-                const firstIndex = lines[line].indexOf(match[0])
-                const lastIndex = lines[line].lastIndexOf(match[match.length - 1], char ? char : lines[line].length - 1)
-
-                // the open html tag to the left
-                if (lastIndex >= 0) i = lastIndex
-                // the open html tag to the right
-                else if (firstIndex >= 0) i = firstIndex
-
-                // shift i by tag length
-                if (i !== -1) i += match[0].length - 1
-              }
-
-              char = undefined
-            }
-
-            if (i === -1) {
-              // console.log("TODO: improve highlight");
-              return
-            }
-
-            let part1 = lines[line].slice(0, i).replace(/(<\w[^>]*)(>)(?!.*<\w[^>]*>)/gm, `$1 data-highlight="true">`)
-            const part2 = lines[line].slice(i)
-
-            if (!part1.includes('data-highlight="true"')) {
-              part1 += ' data-highlight="true"'
-            }
-
-            lines[line] = part1 + part2
-
-            const hasChanges = document.body.innerHTML.trim() !== lines.join('\n').trim()
-
-            if (hasChanges) {
-              document.body.innerHTML = lines.join('\n')
-
-              // scroll element into view (center of page)
-              const el = document.querySelector(`[data-highlight="true"]`)
-              if (el) {
-                const documentOffsetTop = el => {
-                  return el.offsetTop + (el.offsetParent ? documentOffsetTop(el.offsetParent) : 0)
-                }
-                const pos = documentOffsetTop(el) - window.innerHeight / 2
-                window.scrollTo(0, pos)
-              }
-            }
-          }
+          // message and messages 🤣
+          if (d.messages) appendMessages(d.messages)
+          if (d.message) appendMessage(d.message)
         }
       }
       socket.onopen = function () {
@@ -216,9 +276,20 @@ if ('WebSocket' in window) {
         background-color: rgba(155,215,255,0.5);
         animation: fadeOutHighlight 1s forwards 0.5s;
       }
+      img[data-highlight="true"] {
+        filter: sepia(100%) hue-rotate(180deg) saturate(200%);
+        animation: fadeOutHighlightIMG 0.5s forwards 0.5s;
+      }
       @keyframes fadeOutHighlight {
         from {background-color: rgba(155,215,255,0.5);}
         to {background-color: rgba(155,215,255,0);}
+      }      
+      @keyframes fadeOutHighlightIMG {
+        0% {filter: sepia(100%) hue-rotate(180deg) saturate(200%);}
+        33% {filter: sepia(66%) hue-rotate(180deg) saturate(100%);}
+        50% {filter: sepia(50%) hue-rotate(90deg) saturate(50%);}
+        66% {filter: sepia(33%) hue-rotate(0deg) saturate(100%);}
+        100% {filter: sepia(0%) hue-rotate(0deg) saturate(100%);}
       }
       @keyframes fiveserverInfoPopup {
         0%   {top:-40px;}
@@ -226,6 +297,16 @@ if ('WebSocket' in window) {
         85%  {top:4px;}
         100% {top:-40px;}
       }
+      /*smaller*/
+      @media (max-width: 640px) {
+        #fiveserver-info-wrapper {
+          max-width: 98%;
+        }
+        #fiveserver-info {
+          border-radius: 0px;
+        }      
+      }
+
       `
         document.head.appendChild(style)
       }
@@ -288,4 +369,3 @@ if ('WebSocket' in window) {
     checkStatus()
   })
 }
-// ]]>
