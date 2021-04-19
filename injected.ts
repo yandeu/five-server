@@ -237,8 +237,12 @@ if ('WebSocket' in window) {
         if (msg.data === 'reload') window.location.reload()
         else if (msg.data === 'refreshcss') refreshCSS(true)
         else if (msg.data === 'refreshcss-silent') refreshCSS(false)
-        else if (msg.data === 'connected') console.log(CONNECTED_MSG)
-        else if (msg.data === 'initRemoteLogs') overwriteLogs()
+        else if (msg.data === 'connected') {
+          console.log(CONNECTED_MSG)
+          // dispatch "connected" event when client is connected
+          const script = document.querySelector('[data-id="five-server"]')
+          if (script) script.dispatchEvent(new Event('connected'))
+        } else if (msg.data === 'initRemoteLogs') overwriteLogs()
         else {
           const d = JSON.parse(msg.data)
           if (d.navigate) window.location.replace(d.navigate)
