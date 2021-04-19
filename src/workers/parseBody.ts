@@ -10,9 +10,15 @@ import { HtmlValidate } from 'html-validate'
 import { parentPort } from 'worker_threads'
 
 const htmlvalidate = new HtmlValidate({
+  // https://html-validate.org/rules/index.html
   rules: {
-    'close-order': 'error',
-    'element-name': 'error'
+    'close-attr': 'error', // necessary
+    'close-order': 'error', // necessary
+    'element-name': 'error', // necessary
+    deprecated: 'error',
+    'no-dup-attr': 'error',
+    'no-dup-class': 'error',
+    'no-dup-id': 'error'
   }
 })
 
