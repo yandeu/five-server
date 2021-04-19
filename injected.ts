@@ -2,7 +2,7 @@ declare const diffDOM: any
 
 // clone the current state of the body before any javascript
 // manipulates it inside window.addEventListener('load', (...))
-let _internalDOMBody = document.body.cloneNode(true)
+let _internalDOMBody = document.body ? document.body.cloneNode(true) : undefined
 
 if ('WebSocket' in window) {
   window.addEventListener('load', () => {
