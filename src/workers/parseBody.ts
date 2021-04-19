@@ -34,6 +34,7 @@ const injectHighlight = (body: string, cursorPosition: any) => {
     line--
 
     if (lines[line] === '') continue
+    if (!lines[line]) continue
 
     const htmlOpenTagRegex = /<[a-zA-Z]+(>|.*?[^?]>)/gm
     const match = lines[line].match(htmlOpenTagRegex)

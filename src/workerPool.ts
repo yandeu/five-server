@@ -101,6 +101,18 @@ export default class WorkerPool extends EventEmitter {
       this.emit('message', msg)
     })
 
+    // worker.on('error', err => {
+    //   console.log('error:', err)
+    // })
+
+    // worker.on('exit', err => {
+    //   console.log('exit:', err)
+    // })
+
+    // worker.on('messageerror', err => {
+    //   console.log('messageerror:', err)
+    // })
+
     this.workers.push(worker)
   }
 }
