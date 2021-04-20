@@ -82,18 +82,11 @@ const injectHighlight = (body: string, cursorPosition: any) => {
 }
 
 parentPort?.on('message', (data: string) => {
-  if (data === 'test') {
-    parentPort?.postMessage('OK')
-    return
-  }
-
   const { text, shouldHighlight, cursorPosition, fileName } = JSON.parse(data)
 
-  parentPort?.postMessage(text)
+  const html = shouldHighlight ? injectHighlight(text, cursorPosition) : text
 
-  const t = shouldHighlight ? injectHighlight(text, cursorPosition) : text
-
-  const res = /(<body[^>]*>)((.|[\n\r])*)(<\/body>)/gim.exec(t)
+  const res = /(<body[^>]*>)((.|[\n\r])*)(<\/body>)/gim.exec(html)
 
   if (!res) {
     parentPort?.postMessage(JSON.stringify({ ignore: true }))
@@ -105,7 +98,7 @@ parentPort?.on('message', (data: string) => {
 
     const body = `${res[1]}${b}${res[4]}`
 
-    const report = htmlvalidate.validateString(t)
+    const report = htmlvalidate.validateString(html)
     parentPort?.postMessage(JSON.stringify({ report, body, fileName }))
   }
 })
