@@ -453,7 +453,7 @@ export default class LiveServer {
         let ext = path.extname(URL).replace(/^\./, '').toLowerCase()
         const fileName = path.basename(filePath, ext)
 
-        const isImage = /(gif|jpg|jpeg|tiff|png)$/i.test(ext)
+        const isImage = /(gif|jpg|jpeg|tiff|png|svg)$/i.test(ext)
         const isVideo = /(mpg|mpeg|avi|wmv|mov|ogg|webm|mp4|mkv)$/i.test(ext)
         const isAudio = /(mid|midi|wma|aac|wav|ogg|mp3|mp4)$/i.test(ext)
 

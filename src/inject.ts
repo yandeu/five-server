@@ -22,7 +22,7 @@ const es = require('event-stream') // looks ok for now (https://david-dm.org/dom
 export const injectCode = (root: any, options: { logLevel: number; serverURL?: string } = { logLevel: 1 }) => {
   const { logLevel, serverURL } = options
 
-  const possibleExtensions = ['.html', '.htm', '.xhtml', '.svg']
+  const possibleExtensions = ['.html', '.htm', '.xhtml']
 
   let isFile = false
   let filePath = ''
