@@ -456,6 +456,7 @@ export default class LiveServer {
         const isImage = /(gif|jpg|jpeg|tiff|png|svg)$/i.test(ext)
         const isVideo = /(mpg|mpeg|avi|wmv|mov|ogg|webm|mp4|mkv)$/i.test(ext)
         const isAudio = /(mid|midi|wma|aac|wav|ogg|mp3|mp4)$/i.test(ext)
+        const isPDF = /(pdf)$/i.test(ext)
 
         let preview = ''
 
@@ -474,10 +475,21 @@ export default class LiveServer {
           const format = ext === 'ogg' ? 'ogg' : ext === 'wav' ? 'wav' : 'mpeg'
           preview = `
             <div style="margin-top: 72px;">
-            <audio controls>
-              <source src="${URL}" type="audio/${format}">
-              Your browser does not support the audio element.
-            </audio>
+              <audio controls>
+                <source src="${URL}" type="audio/${format}">
+                Your browser does not support the audio element.
+              </audio>
+            </div>`
+        } else if (isPDF) {
+          preview = `
+            <div>
+              <iframe 
+                style="min-height: calc(100vh - 260px)"
+                frameborder="0" 
+                scrolling="no"                
+                width="100%" height="100%"
+                src="${URL}">
+              </iframe>
             </div>`
         } else {
           const MAX_FILE_SIZE = 250 // KB
