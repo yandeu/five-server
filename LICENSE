@@ -1,17 +1,37 @@
-Private License
+Five Server License
 
 Copyright (C) 2021, Yannick Deubel (https://github.com/yandeu)
 All rights reserved.
 
 This file is part of the "Five Server" project.
 
-The "Five Server" project can not be copied and/or distributed without the express
-permission of Yannick Deubel (https://github.com/yandeu).
+1. DEFINITIONS
+  a)  "Licensor" is Yannick Deubel (https://github.com/yandeu).
+  b)  "Software" is the software known as Five Server.
 
+2. RESTRICTIONS
+You are NOT permitted to:
+  a)  Edit, alter, modify, adapt, translate or otherwise change the whole or any 
+      part of the Software without the express permission of the Licensor. 
+  b)  Decompile, disassemble or reverse engineer the Software or attempt to do 
+      any such things.
+  c)  Reproduce, copy, distribute, resell or otherwise use the whole or any part 
+      of the Software for any commercial or non-commercial purpose.
+  d)  Disable, modify or hide notifications sent by the Software.
+
+3. OWNERSHIP
+The Software, copyright, and other intellectual property rights of whatever 
+nature in the Software, including any modifications made thereto are and shall 
+remain the property of the Licensor.
+
+4. WARRANTY DISCLAIMER
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+DISCLAIMED.
+
+5. LIMITATION OF LIABILITY
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
 SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
