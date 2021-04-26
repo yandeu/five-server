@@ -13,7 +13,7 @@
  */
 
 import chokidar from 'chokidar'
-import { getConfigFile, removeLeadingSlash } from './misc'
+import { donate, getConfigFile, removeLeadingSlash } from './misc'
 import http from 'http'
 import https from 'https'
 import logger from 'morgan'
@@ -440,6 +440,9 @@ export default class LiveServer {
       }
       message.log('')
     }
+
+    // donate
+    donate()
 
     /**
      * STEP: 2/4

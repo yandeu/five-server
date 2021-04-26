@@ -1,4 +1,5 @@
 import { LiveServerParams } from '.'
+import { colors } from './colors'
 import fs from 'fs'
 import { message } from './msg'
 import path from 'path'
@@ -123,4 +124,16 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
   if (options.https === 'true') options.https = true
 
   return options
+}
+
+export const donate = () => {
+  // show only 2% of the time
+  if (Math.random() > 0.02) return
+
+  message.log('')
+  message.log(`        ${colors('Thank you for using ', 'gray')}Five Server${colors('!', 'gray')}`)
+  message.log(`     ${colors('Please consider supporting it on GitHub.', 'gray')}`)
+  message.log('')
+  message.log(`    ${colors('Donate: https://github.com/sponsors/yandeu', 'yellow')}`)
+  message.log('')
 }
