@@ -18,9 +18,9 @@
  */
 
 import { createError } from '../misc' // const createError = require('http-errors')
-const debug = require('debug')('serve-explorer')
-const escapeHtml = require('escape-html')
-const fs = require('fs')
+const debug = require('debug')('explorer')
+import escapeHtml from '../dependencies/escape-html'
+import fs from 'fs'
 import { extname as _extname, normalize, sep, join } from 'path'
 
 // wrap extname for special files like .d.ts
@@ -122,8 +122,8 @@ const explorer = (root, options?: any) => {
       }
 
       if (err) {
-        err.status = err.code === 'ENAMETOOLONG' ? 414 : 500
-        return next(err)
+        err.code === 'ENAMETOOLONG' ? 414 : 500
+        return next({ ...err, status: err.code })
       }
 
       if (!stat.isDirectory()) return next()

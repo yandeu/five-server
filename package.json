@@ -58,7 +58,6 @@
     "chokidar": "^3.5.1",
     "cors": "^2.8.5",
     "debug": "^4.3.1",
-    "escape-html": "~1.0.3",
     "express": "^4.17.1",
     "html-validate": "^4.9.0",
     "mime-types": "~2.1.24",

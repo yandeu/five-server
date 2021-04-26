@@ -1,5 +1,6 @@
 import { LiveServerParams } from '.'
 import { colors } from './colors'
+import escapeHtml from './dependencies/escape-html'
 import fs from 'fs'
 import { message } from './msg'
 import path from 'path'
@@ -20,13 +21,7 @@ export const fileDoesExist = (path: string): Promise<boolean> => {
   })
 }
 
-export const escape = html => {
-  return String(html)
-    .replace(/&(?!\w+;)/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}
+export const escape = html => escapeHtml(html)
 
 export const removeLeadingSlash = (str: string): string => {
   return str.replace(/^\/+/g, '')
