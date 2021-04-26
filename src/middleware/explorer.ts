@@ -17,7 +17,6 @@
  * previously licensed under MIT (https://github.com/expressjs/serve-index/blob/master/LICENSE)
  */
 
-const accepts = require('accepts')
 import { createError } from '../misc' // const createError = require('http-errors')
 const debug = require('debug')('serve-explorer')
 const escapeHtml = require('escape-html')
@@ -141,13 +140,7 @@ const explorer = (root, options?: any) => {
           })
         files.sort()
 
-        // content-negotiation
-        const accept = accepts(req)
-        const type = accept.type(mediaTypes)
-
-        // not acceptable
-        if (!type) return next(createError(406))
-        explorer[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet)
+        explorer['html'](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet)
       })
     })
   }
