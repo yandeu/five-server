@@ -186,7 +186,7 @@ export default class LiveServer {
       php,
       phpIni,
       port = 5555,
-      proxy = [],
+      proxy = {},
       remoteLogs = false,
       useLocalIp = false,
       wait = 100,
@@ -330,8 +330,8 @@ export default class LiveServer {
       if (this.logLevel >= 1) message.log('Mapping %s to "%s"', mountRule[0], mountPath)
     })
 
-    proxy.forEach(proxyRule => {
-      const url = new URL(proxyRule[1])
+    for (const [ROUTE, TARGET] of Object.entries(proxy)) {
+      const url = new URL(TARGET)
 
       const proxyOpts: ProxyMiddlewareOptions = {
         hash: url.hash,
@@ -351,9 +351,9 @@ export default class LiveServer {
         via: true
       }
 
-      app.use(proxyRule[0], require('./dependencies/proxy-middleware')(proxyOpts))
-      if (this.logLevel >= 1) message.log('Mapping %s to "%s"', proxyRule[0], proxyRule[1])
-    })
+      app.use(ROUTE, require('./dependencies/proxy-middleware')(proxyOpts))
+      if (this.logLevel >= 1) message.log(`Mapping "${ROUTE}" to "${TARGET}"`)
+    }
 
     const injectHandler = injectCode(root, PHP)
 

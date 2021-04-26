@@ -14,6 +14,7 @@ module.exports = {
   // logLevel: 2,
   // php: '/usr/bin/php',
   php: 'C:\\xampp\\php\\php.exe'
+  // proxy: { '/': 'http://127.0.0.1:8080' }
   // withExtension: 'redirect'
   // logLevel: 2
 }

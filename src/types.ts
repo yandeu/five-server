@@ -46,8 +46,10 @@ export interface LiveServerParams {
   phpIni?: string
   /** Set the server port. Defaults to 5555. */
   port?: number
-  /** Proxy all requests for ROUTE to URL. */
-  proxy?: string[][]
+  /** Proxy all requests for ROUTE to TARGET.
+   * @example proxy: { "/": "http://127.0.0.1:8080" }
+   */
+  proxy?: { [route: string]: string }
   /** Displays the logs of your browser in your terminal. Default: false. */
   remoteLogs?: boolean | Colors
   /** Set root directory that's being served. Defaults to cwd. */

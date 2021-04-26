@@ -9,7 +9,7 @@ import { createReadStream, existsSync, fstat, statSync } from 'fs'
 import { extname, join, resolve } from 'path'
 import { Writable } from 'stream'
 
-class Inject extends Writable {
+export class Inject extends Writable {
   size: number = 0
   data: string = ''
   injectTag = ''
@@ -49,6 +49,12 @@ class Inject extends Writable {
   }
 }
 
+export const code = (filePath: string) => {
+  return `<!-- Code injected by Five-server -->
+  <script async data-id="five-server" data-file="${filePath}" type="application/javascript" src="/fiveserver.js"></script>
+  `
+}
+
 export const injectCode = (root: string, PHP: any) => {
   return async (req: Request, res: Response, next) => {
     if (req.url === '/' || extname(req.url) === '.html' || extname(req.url) === '.htm' || extname(req.url) === '.php') {
@@ -57,11 +63,7 @@ export const injectCode = (root: string, PHP: any) => {
       if (!existsSync(filePath)) return next()
       if (!statSync(filePath).isFile()) return next()
 
-      const code = `<!-- Code injected by Five-server -->
-            <script async data-id="five-server" data-file="${filePath}" type="application/javascript" src="/fiveserver.js"></script>
-            `
-
-      const inject = new Inject(['</head>', '</html>', '</body>'], code)
+      const inject = new Inject(['</head>', '</html>', '</body>'], code(filePath))
 
       if (extname(req.url) === '.php') {
         const html = await PHP.parseFile(filePath, res)

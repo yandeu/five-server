@@ -5,6 +5,9 @@
  * @description modified version of proxy-middleware@0.15.0 (https://github.com/gonzalocasas/node-proxy-middleware/blob/master/index.js)
  */
 
+import { IncomingMessage, ServerResponse } from 'http'
+import { Inject, code } from '../middleware/injectCode'
+
 const os = require('os')
 const http = require('http')
 const https = require('https')
@@ -34,8 +37,8 @@ module.exports = function proxyMiddleware(options: ProxyMiddlewareOptions) {
   options = options || {}
   options.pathname = options.pathname || '/'
 
-  return function (req, resp, next) {
-    let url = req.url
+  return function (req: IncomingMessage, resp: ServerResponse, next) {
+    let url = req.url as string
     // You can pass the route within the options, as well
     if (typeof options.route === 'string') {
       if (url === options.route) {
@@ -71,26 +74,47 @@ module.exports = function proxyMiddleware(options: ProxyMiddlewareOptions) {
       delete opts.headers.host
     }
 
-    const myReq = request(opts, function (myRes) {
+    const myReq = request(opts, function (myRes: IncomingMessage) {
       const statusCode = myRes.statusCode,
         headers = myRes.headers,
         location = headers.location
       // Fix the location
       if (
-        ((statusCode > 300 && statusCode < 304) || statusCode === 201) &&
+        ((statusCode && statusCode > 300 && statusCode < 304) || statusCode === 201) &&
         location &&
         location.indexOf(options.href) > -1
       ) {
         // absolute path
         headers.location = location.replace(options.href, slashJoin('/', slashJoin(options.route || '', '')))
       }
-      applyViaHeader(myRes.headers, opts, myRes.headers)
-      rewriteCookieHosts(myRes.headers, opts, myRes.headers, req)
-      resp.writeHead(myRes.statusCode, myRes.headers)
+
       myRes.on('error', function (err) {
         next(err)
       })
-      myRes.pipe(resp)
+      // MOD(yandeu): Do injection here
+      if (/\.(php|html)$/.test(url) || /html/.test(myRes.headers['content-type'] || '')) {
+        const inject = new Inject(['</head>', '</html>', '</body>'], code(url))
+
+        myRes.pipe(inject).on('finish', () => {
+          if (!inject.injectTag) return next()
+          else {
+            // myRes.headers['content-type'] = 'text/html; charset=utf-8'
+            myRes.headers['content-length'] = inject.data.length.toString()
+
+            applyViaHeader(myRes.headers, opts, myRes.headers)
+            rewriteCookieHosts(myRes.headers, opts, myRes.headers, req)
+            resp.writeHead(myRes.statusCode || 200, myRes.headers)
+
+            resp.end(inject.data)
+          }
+        })
+      } else {
+        applyViaHeader(myRes.headers, opts, myRes.headers)
+        rewriteCookieHosts(myRes.headers, opts, myRes.headers, req)
+        resp.writeHead(myRes.statusCode || 200, myRes.headers)
+
+        myRes.pipe(resp)
+      }
     })
     myReq.on('error', function (err) {
       next(err)
