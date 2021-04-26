@@ -626,6 +626,7 @@ export default class LiveServer {
   ) {
     const launch = async (target: string, browser: string | string[] | null = null, index = -1) => {
       if (!browser) return await open(target)
+      if (Array.isArray(browser) && browser.length === 0) return await open(target)
 
       let res: any
 
