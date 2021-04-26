@@ -42,7 +42,7 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
     host: process.env.IP,
     port: process.env.PORT ? parseInt(process.env.PORT) : 5555,
     open: true,
-    mount: [],
+    mount: {},
     proxy: {},
     middleware: [],
     logLevel: 1

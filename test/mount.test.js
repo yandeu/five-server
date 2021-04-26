@@ -9,10 +9,7 @@ beforeAll(async () => {
     root: path.join(__dirname, 'data'),
     port: 0,
     open: false,
-    mount: [
-      ['/mounted', path.join(__dirname, 'data', 'sub')],
-      ['/style', path.join(__dirname, 'data', 'style.css')]
-    ]
+    mount: { '/mounted': path.join(__dirname, 'data', 'sub'), '/style': path.join(__dirname, 'data', 'style.css') }
   })
 })
 

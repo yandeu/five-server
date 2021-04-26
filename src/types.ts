@@ -32,8 +32,10 @@ export interface LiveServerParams {
   ignore?: Array<string | RegExp | Glob>
   /** 0 = errors only, 1 = some, 2 = lots, 3 = all */
   logLevel?: 0 | 1 | 2 | 3
-  /** Mount a directory to a route, e.g. [['/components', './node_modules']]. */
-  mount?: string[][]
+  /** Mount a directory to a route.
+   * @example mount: { "/img": "C:\\Users\\USERNAME\\Pictures" }
+   */
+  mount?: { [route: string]: string }
   /** Takes an array of Connect-compatible middleware that are injected into the server middleware stack. */
   middleware?: Array<(req: any, res: any, next: any) => void>
   /** Set to false to not inject CSS changes, just reload as with any other file change. */

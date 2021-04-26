@@ -181,7 +181,7 @@ export default class LiveServer {
       injectCss = true,
       logLevel = 1,
       middleware = [],
-      mount = [],
+      mount = {},
       php,
       phpIni,
       port = 5555,
@@ -314,22 +314,25 @@ export default class LiveServer {
       app.use(mw)
     })
 
-    mount.forEach(mountRule => {
-      const mountPath = path.resolve(process.cwd(), mountRule[1])
+    for (const [ROUTE, TARGET] of Object.entries(mount)) {
+      const mountPath = path.resolve(process.cwd(), TARGET)
+      let R = ROUTE
 
-      if (!options.watch && watch !== false)
-        // Auto add mount paths to watching but only if exclusive path option is not given
-        watch.push(mountPath)
+      // automatically watch mount paths
+      if (!options.watch && watch !== false) watch.push(mountPath)
 
-      // make sure mountRule[0] has a leading slash
-      if (mountRule[0].indexOf('/') !== 0) mountRule[0] = `/${mountRule[0]}`
+      // make sure ROUTE has a leading slash
+      if (R.indexOf('/') !== 0) R = `/${R}`
 
-      // mount it with express.static
-      app.use(mountRule[0], express.static(mountPath))
+      // inject code to html and php files
+      app.use(R, injectCode(mountPath, PHP))
+
+      // serve static files via express.static()
+      app.use(R, express.static(mountPath))
 
       // log the mapping folder
-      if (this.logLevel >= 1) message.log('Mapping %s to "%s"', mountRule[0], mountPath)
-    })
+      if (this.logLevel >= 1) message.log(`Mapping "${R}" to "${TARGET}"`)
+    }
 
     for (const [ROUTE, TARGET] of Object.entries(proxy)) {
       const url = new URL(TARGET)
