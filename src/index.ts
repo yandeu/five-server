@@ -16,7 +16,6 @@ import chokidar from 'chokidar'
 import { donate, getConfigFile, removeLeadingSlash } from './misc'
 import http from 'http'
 import https from 'https'
-import logger from 'morgan'
 import os from 'os'
 import path from 'path'
 
@@ -286,18 +285,20 @@ export default class LiveServer {
     // find index file and modify req.url
     app.use(findIndex(root, withExtension, ['html', 'php']))
 
-    // Add logger. Level 2 logs only errors
-    if (this.logLevel === 2) {
-      app.use(
-        logger('dev', {
-          skip: (req, res) => res.statusCode < 400
-        })
-      )
-    }
-    // Level 2 or above logs all requests
-    else if (this.logLevel > 2) {
-      app.use(logger('dev'))
-    }
+    /*
+      // logger has been removed from the core
+      // if you want a logger, add a custom middleware to fiveserver.config.js
+    
+      const morgan = require('morgan')
+
+      module.exports = {
+        middleware: [morgan('dev')]
+      }
+
+      module.exports = {
+        middleware: [morgan('dev', { skip: (req, res) => res.statusCode < 400 })]
+      }
+    */
 
     // Add custom middleware
     middleware.map(function (mw) {
