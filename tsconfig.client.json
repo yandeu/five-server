@@ -4,11 +4,14 @@
 
     "noImplicitAny": false,
 
+    "allowJs": false,
+    "checkJs": false,
+
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["injected.ts"],
-  "exclude": ["node_modules", "**/*.spec.ts", "src/**/*"]
+  "include": ["client/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }

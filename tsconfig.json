@@ -5,6 +5,9 @@
     "target": "ES2015",
     "module": "CommonJS",
 
+    "allowJs": false,
+    "checkJs": false,
+
     "noImplicitAny": false,
     "declaration": true,
 
