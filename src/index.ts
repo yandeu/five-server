@@ -258,6 +258,12 @@ export default class LiveServer {
     // express.js
     const app = express()
 
+    // change x-powered-by
+    app.use((req, res, next) => {
+      res.setHeader('X-Powered-By', 'Five Server')
+      next()
+    })
+
     // enable CORS
     if (cors) app.use(require('cors')({ credentials: true }))
 
