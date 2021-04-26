@@ -14,6 +14,8 @@ export interface Certificate {
 export interface LiveServerParams {
   /** Open a specific browser instead of the default one. */
   browser?: string | string[]
+  /** Use the /.cache/URL route to cache resources in memory. */
+  cache?: boolean
   /** Enable or disable the use of a config file. Or specify a custom path to your config file. */
   configFile?: boolean | string
   /** Enable CORS. */

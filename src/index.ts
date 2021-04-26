@@ -58,6 +58,7 @@ import { preview } from './middleware/preview'
 import { ignoreExtension } from './middleware/ignoreExtension'
 import { favicon } from './middleware/favicon'
 import { notFound } from './middleware/notFound'
+import { cache as cacheMiddleware } from './middleware/cache'
 
 export { LiveServerParams }
 
@@ -172,6 +173,7 @@ export default class LiveServer {
 
     const {
       browser = null,
+      cache = true,
       cors = false,
       file,
       htpasswd = null,
@@ -266,6 +268,9 @@ export default class LiveServer {
 
     // enable CORS
     if (cors) app.use(require('cors')({ credentials: true }))
+
+    // .cache
+    if (cache) app.use('/.cache', cacheMiddleware)
 
     // serve fiveserver files
     app.use((req, res, next) => {
