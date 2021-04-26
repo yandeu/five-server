@@ -7,6 +7,7 @@
 import { basename, extname, join, resolve } from 'path'
 import { readFileSync, statSync } from 'fs'
 import { PREVIEW } from '../public'
+import { fileTypes } from '../fileTypes'
 import { htmlPath } from './explorer'
 
 export const preview = (root: string, injectToAny: boolean) => {
@@ -32,10 +33,10 @@ export const preview = (root: string, injectToAny: boolean) => {
       let ext = extname(URL).replace(/^\./, '').toLowerCase()
       const fileName = basename(filePath, ext)
 
-      const isImage = /(gif|jpg|jpeg|tiff|png|svg)$/i.test(ext)
-      const isVideo = /(mpg|mpeg|avi|wmv|mov|ogg|webm|mp4|mkv)$/i.test(ext)
-      const isAudio = /(mid|midi|wma|aac|wav|ogg|mp3|mp4)$/i.test(ext)
-      const isPDF = /(pdf)$/i.test(ext)
+      const isImage = fileTypes.isImage(ext)
+      const isVideo = fileTypes.isVideo(ext)
+      const isAudio = fileTypes.isAudio(ext)
+      const isPDF = fileTypes.isPDF(ext)
 
       let preview = ''
 
