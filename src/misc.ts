@@ -9,6 +9,16 @@ export const createError = (code: number, msg: string = 'unknown', _nothing?: an
   return { message: msg, code, status: code, statusCode: code, name: code }
 }
 
+export const fileDoesExist = (path: string): Promise<boolean> => {
+  return new Promise(resolve => {
+    fs.stat(path, (err, stat) => {
+      if (err && err.code === 'ENOENT') {
+        return resolve(false)
+      } else return resolve(true)
+    })
+  })
+}
+
 export const escape = html => {
   return String(html)
     .replace(/&(?!\w+;)/g, '&amp;')

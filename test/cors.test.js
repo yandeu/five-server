@@ -18,7 +18,7 @@ describe('cors tests', function () {
     request(liveServer.httpServer)
       .get('/index.html')
       .set('Origin', 'http://example.com')
-      .expect('Content-Type', 'text/html; charset=UTF-8')
+      .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect('Access-Control-Allow-Origin', '*')
       .expect(/Hello world/i)
       .expect(200, done)

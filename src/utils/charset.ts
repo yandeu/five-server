@@ -10,6 +10,6 @@
 export const charsets = {
   lookup: (mimeType, fallback?) => {
     // Assume text types are utf8
-    return /^text\/|^application\/(javascript|json)/.test(mimeType) ? 'UTF-8' : fallback
+    return /^text\/|^application\/(javascript|json)/.test(mimeType) ? 'utf-8' : fallback
   }
 }

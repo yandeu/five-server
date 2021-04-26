@@ -1,6 +1,6 @@
 const express = require('express')
 const request = require('supertest')
-const { injectCode } = require('../lib/inject')
+const { injectCode } = require('../lib/middleware/injectCode')
 const path = require('path')
 const app = express()
 const port = 40200
@@ -43,15 +43,15 @@ beforeAll(async () => {
 describe('basic functional tests', () => {
   it('should respond with index.html', done => {
     request(server)
-      .get('/')
-      .expect('Content-Type', 'text/html; charset=UTF-8')
+      .get('/index.html')
+      .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(/hello world/i)
       .expect(200, done)
   })
   it('should have injected script', done => {
     request(server)
-      .get('/')
-      .expect('Content-Type', 'text/html; charset=UTF-8')
+      .get('/index.html')
+      .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(/<script [^]+?fiveserver.js[^]+?<\/script>/i)
       .expect(200, done)
   })

@@ -13,13 +13,13 @@
  * @license {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
  *
  * @description
- * forked from serve-index@1.9.1 (https://github.com/expressjs/serve-index/blob/master/index.js)
+ * copied and modified from serve-index@1.9.1 (https://github.com/expressjs/serve-index/blob/master/index.js)
  * previously licensed under MIT (https://github.com/expressjs/serve-index/blob/master/LICENSE)
  */
 
 const accepts = require('accepts')
-import { createError } from './misc' // const createError = require('http-errors')
-const debug = require('debug')('serve-index')
+import { createError } from '../misc' // const createError = require('http-errors')
+const debug = require('debug')('serve-explorer')
 const escapeHtml = require('escape-html')
 const fs = require('fs')
 import { extname as _extname, normalize, sep, join } from 'path'
@@ -50,11 +50,11 @@ const parseUrl = require('parseurl')
 const resolve = require('path').resolve
 
 // FIX: Replaced batch by forking it
-const Batch = require('./dependencies/batch') // const Batch = require('batch')
+const Batch = require('../dependencies/batch') // const Batch = require('batch')
 
 const cache = {}
-const defaultTemplate = join(__dirname, '../public/serve-index', 'directory.html')
-const defaultStylesheet = join(__dirname, '../public/serve-index', 'style.css')
+const defaultTemplate = join(__dirname, '../../public/serve-explorer', 'explorer.html')
+const defaultStylesheet = join(__dirname, '../../public/serve-explorer', 'style.css')
 const mediaTypes = ['text/html', 'text/plain', 'application/json']
 const mediaType = {
   'text/html': 'html',
@@ -62,12 +62,12 @@ const mediaType = {
   'application/json': 'json'
 }
 
-const serveIndex = (root, options?: any) => {
+const explorer = (root, options?: any) => {
   const opts = options || {}
 
   // root required
   if (!root) {
-    throw new TypeError('serveIndex() root path required')
+    throw new TypeError('explorer() root path required')
   }
 
   // resolve root to absolute and normalize
@@ -147,14 +147,14 @@ const serveIndex = (root, options?: any) => {
 
         // not acceptable
         if (!type) return next(createError(406))
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet)
+        explorer[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet)
       })
     })
   }
 }
-export default serveIndex
+export default explorer
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+explorer.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
   const render = typeof template !== 'function' ? createHtmlRender(template) : template
 
   if (showUp) {
@@ -191,7 +191,7 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
   })
 }
 
-serveIndex.json = function _json(req, res, files, next, dir, showUp, icons, path) {
+explorer.json = function _json(req, res, files, next, dir, showUp, icons, path) {
   // stat all files
   stat(path, files, function (err, fileList) {
     if (err) return next(err)
@@ -210,7 +210,7 @@ serveIndex.json = function _json(req, res, files, next, dir, showUp, icons, path
   })
 }
 
-serveIndex.plain = function _plain(req, res, files, next, dir, showUp, icons, path) {
+explorer.plain = function _plain(req, res, files, next, dir, showUp, icons, path) {
   // stat all files
   stat(path, files, function (err, fileList) {
     if (err) return next(err)
@@ -271,11 +271,14 @@ function createHtmlFileList(files, dir, useIcons, view) {
 
       path.push(encodeURIComponent(file.name))
 
-      const date =
-        file.stat && file.name !== '..'
-          ? file.stat.mtime.toLocaleDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
-          : ''
-      const size = file.stat && !isDir ? file.stat.size : ''
+      // file modification date
+      // const date =
+      //   file.stat && file.name !== '..'
+      //     ? file.stat.mtime.toLocaleDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
+      //     : ''
+
+      // file size
+      // const size = file.stat && !isDir ? file.stat.size : ''
 
       let href = escapeHtml(normalizeSlashes(normalize(path.join('/'))))
 
@@ -460,7 +463,7 @@ function iconStyle(files, useIcons) {
 
 function load(icon) {
   if (cache[icon]) return cache[icon]
-  return (cache[icon] = 'background-image: url(/fiveserver/serve-index/icons/' + icon + ');')
+  return (cache[icon] = 'background-image: url(/fiveserver/serve-explorer/icons/' + icon + ');')
 }
 
 function normalizeSlashes(path) {

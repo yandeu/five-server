@@ -15,10 +15,7 @@ const options = {
   open: false
 }
 
-let remoteLog = ''
-
-// spy on localLog
-jest.spyOn(console, 'log')
+let remoteLog = []
 
 beforeAll(async () => {
   await fiveServer.start(options)
@@ -27,7 +24,7 @@ beforeAll(async () => {
 
   page = await browser.newPage()
   page.on('console', msg => {
-    remoteLog = msg.text()
+    remoteLog.push(msg.text())
   })
 
   await page.goto('http://localhost:40200/index-log.html', { waitUntil: 'networkidle2' })
@@ -41,10 +38,7 @@ describe('remote logs', () => {
   it('should receive logs', async done => {
     await pause(2000)
 
-    const logs = console.log.mock.calls
-    const lastLog = logs[logs.length - 1][0]
-
-    expect(lastLog.includes('Hi from remote!')).toBeTruthy()
+    expect(remoteLog.includes('Hi from remote!')).toBeTruthy()
     done()
   })
 })

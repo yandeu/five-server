@@ -16,28 +16,28 @@ describe('basic functional tests', function () {
   it('should respond with index.html', function (done) {
     request(liveServer.httpServer)
       .get('/')
-      .expect('Content-Type', 'text/html; charset=UTF-8')
+      .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(/hello world/i)
       .expect(200, done)
   })
   it('should have injected script', function (done) {
     request(liveServer.httpServer)
       .get('/')
-      .expect('Content-Type', 'text/html; charset=UTF-8')
+      .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(/<script [^]+?fiveserver.js[^]+?<\/script>/i)
       .expect(200, done)
   })
   it('should inject script when tags are in CAPS', function (done) {
     request(liveServer.httpServer)
       .get('/index-caps.htm')
-      .expect('Content-Type', 'text/html; charset=UTF-8')
+      .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(/<script [^]+?fiveserver.js[^]+?<\/script>/i)
       .expect(200, done)
   })
   it('should inject to <head> when no <body>', function (done) {
     request(liveServer.httpServer)
       .get('/index-head.html')
-      .expect('Content-Type', 'text/html; charset=UTF-8')
+      .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(/<script [^]+?fiveserver.js[^]+?<\/script>/i)
       .expect(200, done)
   })
@@ -54,7 +54,7 @@ describe('basic functional tests', function () {
   it('should not inject html fragments', function (done) {
     request(liveServer.httpServer)
       .get('/fragment.html')
-      .expect('Content-Type', 'text/html; charset=UTF-8')
+      .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(function (res) {
         if (res.text.toString().indexOf('fiveserver.js') > -1) throw new Error('injected code should not be found')
       })

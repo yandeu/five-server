@@ -1,0 +1,110 @@
+/**
+ * @author    Yannick Deubel (https://github.com/yandeu)
+ * @copyright Copyright (c) 2021 Yannick Deubel
+ * @license   {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
+ */
+
+import { basename, extname, join, resolve } from 'path'
+import { readFileSync, statSync } from 'fs'
+import { PREVIEW } from '../public'
+import { htmlPath } from './explorer'
+
+export const preview = (root: string, injectToAny: boolean) => {
+  return (req, res, next) => {
+    if (!injectToAny) return next()
+    if (!['.preview', '.php'].includes(extname(req.url))) return next()
+
+    // remove .preview
+    req.url = req.url.replace(/\.preview$/, '')
+    const URL = decodeURI(req.url)
+
+    const isPHP = extname(req.url) === '.php'
+    const phpMsg = isPHP
+      ? 'Why this preview? Five Server could not detect any head, body or html tag in your file.<br><br>'
+      : ''
+
+    try {
+      const filePath = resolve(join(root + URL))
+
+      const isFile = statSync(filePath).isFile()
+      if (!isFile) return next()
+
+      let ext = extname(URL).replace(/^\./, '').toLowerCase()
+      const fileName = basename(filePath, ext)
+
+      const isImage = /(gif|jpg|jpeg|tiff|png|svg)$/i.test(ext)
+      const isVideo = /(mpg|mpeg|avi|wmv|mov|ogg|webm|mp4|mkv)$/i.test(ext)
+      const isAudio = /(mid|midi|wma|aac|wav|ogg|mp3|mp4)$/i.test(ext)
+      const isPDF = /(pdf)$/i.test(ext)
+
+      let preview = ''
+
+      if (isImage)
+        preview = `<div class="image" text-align:center; line-height: 0; padding: 0;">
+        
+        <img style="max-width: 100%;" src="${URL}"></div>`
+      else if (isVideo) {
+        const format = ext === 'ogg' ? 'ogg' : ext === 'webm' ? 'webm' : 'mp4'
+        preview = `
+            <video style="max-width: 100%;" controls>
+            <source src="${URL}" type="video/${format}">
+            Your browser does not support the video tag.
+            </video>`
+      } else if (isAudio) {
+        const format = ext === 'ogg' ? 'ogg' : ext === 'wav' ? 'wav' : 'mpeg'
+        preview = `
+            <div style="margin-top: 72px;">
+            <audio controls>
+            <source src="${URL}" type="audio/${format}">
+            Your browser does not support the audio element.
+            </audio>
+            </div>`
+      } else if (isPDF) {
+        preview = `
+            <div>
+            <iframe 
+            style="min-height: calc(100vh - 260px)"
+            frameborder="0" 
+            scrolling="no"                
+            width="100%" height="100%"
+            src="${URL}">
+            </iframe>
+            </div>`
+      } else {
+        const MAX_FILE_SIZE = 250 // KB
+        const fileSize = Math.round(statSync(filePath).size / 1024) // KB
+        const tooBig = fileSize > MAX_FILE_SIZE
+
+        if (tooBig) ext = 'txt'
+
+        let fileContent = !tooBig
+          ? readFileSync(filePath, { encoding: 'utf-8' })
+          : `File is too big for a preview!\n\n\nFile Size: ${fileSize}KB\nAllowed Size: ${MAX_FILE_SIZE}KB`
+
+        // check for .rc file (can be yml or json)
+        if (/^\.[\w]+rc$/.test(fileName)) {
+          const content = fileContent.trim()
+          ext = content[0] === '{' ? 'json' : 'yml'
+        }
+
+        // replace all < with &lt;
+        fileContent = fileContent.replace(/</gm, '&lt;')
+
+        preview = `
+            <div>
+            <pre margin="0px;"><code class="">${fileContent}</code></pre>
+            </div>`
+      }
+
+      const html = PREVIEW.replace('{linked-path}', htmlPath(URL))
+        .replace('{fileName}', fileName)
+        .replace('{ext}', ext)
+        .replace('{phpMsg}', phpMsg)
+        .replace('{preview}', preview)
+
+      return res.type('html').send(html)
+    } catch (error) {
+      return next()
+    }
+  }
+}

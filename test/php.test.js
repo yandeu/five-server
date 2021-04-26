@@ -26,7 +26,7 @@ describe('serve PHP files', () => {
 
     request(liveServer.httpServer)
       .get('/bonjour.php')
-      .expect('Content-Type', 'text/html; charset=utf-8')
+      .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(/bonjour le monde!/i)
       .expect(200, done)
   })
@@ -34,7 +34,7 @@ describe('serve PHP files', () => {
   it('should respond without file extension', async done => {
     request(liveServer.httpServer)
       .get('/bonjour')
-      .expect('Content-Type', 'text/html; charset=utf-8')
+      .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(/bonjour le monde!/i)
       .expect(200, done)
   })
@@ -46,7 +46,7 @@ describe('serve PHP files', () => {
 
     request(liveServer.httpServer)
       .get('/bonjour.php')
-      .expect('Content-Type', 'text/html; charset=utf-8')
+      .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(/Follow the steps below/i)
       .expect(500, done)
   })

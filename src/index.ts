@@ -14,16 +14,15 @@
 
 import chokidar from 'chokidar'
 import { getConfigFile, removeLeadingSlash } from './misc'
-import fs from 'fs'
 import http from 'http'
 import https from 'https'
 import logger from 'morgan'
 import os from 'os'
-import path, { join, normalize } from 'path'
+import path from 'path'
 
-// FIX: Packages are not maintained anymore (replace them!)
-import express from 'express' // const connect = require('connect')
-import serveIndex, { htmlPath } from './serve-index' // const serveIndex = require('serve-index')
+// MOD: Replaced "connect" by "express"
+// const connect = require('connect')
+import express from 'express'
 
 // MOD: Replaced "faye-websocket" by "ws"
 // const WebSocket: any = require('faye-websocket')
@@ -32,22 +31,33 @@ import WebSocket from 'ws' // eslint-disable-line sort-imports
 // MOD: Replaced "opn" by "open"
 // const open = require('opn')
 import open from 'open'
+
+// some imports
 import { Colors, colors } from './colors'
 import { ProxyMiddlewareOptions } from './dependencies/proxy-middleware'
-import { injectCode, fallbackFile } from './inject'
 import { Certificate, LiveServerParams } from './types'
 import { getCertificate } from './utils/getCertificate'
 import { getNetworkAddress } from './utils/getNetworkAddress'
 
 // execute php
 import { ExecPHP } from './utils/execPHP'
-import { INJECTED_CODE, STATUS_CODE, PREVIEW } from './public'
+import { INJECTED_CODE } from './public'
 import { message } from './msg'
 const PHP = new ExecPHP()
 
 // for hot body injections
-import WorkerPool from './workerPool'
+import WorkerPool from './workers/workerPool'
 import type { Report } from 'html-validate'
+
+// middleware
+import explorer from './middleware/explorer' // const serveIndex = require('serve-index')
+import { findIndex } from './middleware/findIndex'
+import { injectCode } from './middleware/injectCode'
+import { fallbackFile } from './middleware/fallbackFile'
+import { preview } from './middleware/preview'
+import { ignoreExtension } from './middleware/ignoreExtension'
+import { favicon } from './middleware/favicon'
+import { notFound } from './middleware/notFound'
 
 export { LiveServerParams }
 
@@ -66,7 +76,7 @@ export default class LiveServer {
   public injectBody = false
 
   /** inject stript to any file */
-  public injectToAny = true
+  public servePreview = true
 
   private _parseBody: WorkerPool | undefined
   private _parseBody_IsValidHtml = true
@@ -229,6 +239,18 @@ export default class LiveServer {
     }
 
     /**
+     * deprecation notice
+     */
+    // Use http-auth if configured
+    if (htpasswd !== null) message.error('Sorry htpasswd does not work yet.', null, false)
+
+    // Custom https module
+    if (options.httpsModule) message.error('Sorry "httpsModule" has been removed.', null, false)
+
+    // SPA middleware
+    if (options.spa) message.error('Sorry SPA middleware has been removed.', null, false)
+
+    /**
      * STEP: 1/4
      * Set up "express" server (https://www.npmjs.com/package/express)
      */
@@ -250,112 +272,23 @@ export default class LiveServer {
     // fiveserver /public
     app.use('/fiveserver', express.static(path.join(__dirname, '../public')))
 
-    // serve files (.html, .php) with or without extension
-    app.use(async (req, res, next) => {
-      const isHtml = path.extname(req.url) === '.html'
-      const isPhp = path.extname(req.url) === '.php'
-      const isNon = path.extname(req.url) === ''
-
-      if (withExtension === 'always' && isNon) return next()
-      if (withExtension === 'avoid' && (isHtml || isPhp)) return next()
-      if (withExtension === 'redirect') {
-        if (isHtml || isPhp) {
-          const reg = new RegExp(`${path.extname(req.url)}$`)
-          return res.redirect(req.url.replace(reg, ''))
-        }
-      }
-
-      // serve file without extension (if it exists)
-      if (isNon) {
-        // get the absolute path
-        const absolute = path.resolve(path.join(root + req.url))
-        // check if .html file exists
-        if (fs.existsSync(`${absolute}.html`)) req.url = req.url += '.html'
-        // check if .php file exists
-        else if (fs.existsSync(`${absolute}.php`)) req.url = req.url += '.php'
-      }
-
-      next()
-    })
-
-    // serve without file extension
-    app.use(async (req, res, next) => {
-      // check if the url has not dot
-      if (/\/[\w-]+$/.test(req.url)) {
-        // get the absolute path
-        const absolute = path.join(path.resolve(), root + req.url)
-        // check if .html file exists
-        if (fs.existsSync(`${absolute}.html`)) req.url = req.url += '.html'
-        // check if .php file exists
-        else if (fs.existsSync(`${absolute}.php`)) req.url = req.url += '.php'
-      }
-
-      next()
-    })
-
-    // serve php files as text/html
-    app.use(async (req, res, next) => {
-      if (/\.php$/.test(req.url)) {
-        const filePath = path.resolve(path.join(root + req.url))
-        if (!fs.existsSync(filePath)) return next()
-
-        let html = await PHP.parseFile(filePath, res)
-
-        const injectCandidates = [new RegExp('</head>', 'i'), new RegExp('</html>', 'i'), new RegExp('</body>', 'i')]
-        let match
-        let injectTag = ''
-
-        for (let i = 0; i < injectCandidates.length; ++i) {
-          match = injectCandidates[i].exec(html)
-          if (match) {
-            injectTag = match[0]
-            break
-          }
-        }
-
-        if (!injectTag) return next()
-
-        res.setHeader('Content-Type', 'text/html; charset=UTF-8')
-
-        html = html.replace(
-          injectTag,
-          `
-    <!-- Code injected by Five-server -->
-    <script async data-id="five-server" data-file="${filePath}" type="application/javascript" src="/fiveserver.js"></script>
-
-  </html>`
-        )
-
-        res.send(html)
-      } else {
-        next()
-      }
-    })
+    // find index file and modify req.url
+    app.use(findIndex(root, withExtension, ['html', 'php']))
 
     // Add logger. Level 2 logs only errors
     if (this.logLevel === 2) {
       app.use(
         logger('dev', {
-          skip: function (req, res) {
-            return res.statusCode < 400
-          }
+          skip: (req, res) => res.statusCode < 400
         })
       )
-      // Level 2 or above logs all requests
-    } else if (this.logLevel > 2) {
+    }
+    // Level 2 or above logs all requests
+    else if (this.logLevel > 2) {
       app.use(logger('dev'))
     }
 
-    // Use http-auth if configured
-    if (htpasswd !== null) message.error('Sorry htpasswd does not work yet.', null, false)
-
-    // Custom https module
-    if (options.httpsModule) message.error('Sorry "httpsModule" has been removed.', null, false)
-
-    // SPA middleware
-    if (options.spa) message.error('Sorry SPA middleware has been removed.', null, false)
-
-    // Add middleware
+    // Add custom middleware
     middleware.map(function (mw) {
       if (typeof mw === 'string') {
         const ext = path.extname(mw).toLocaleLowerCase()
@@ -411,170 +344,29 @@ export default class LiveServer {
       if (this.logLevel >= 1) message.log('Mapping %s to "%s"', proxyRule[0], proxyRule[1])
     })
 
-    const injectHandler = injectCode(root, { logLevel })
+    const injectHandler = injectCode(root, PHP)
 
-    // inject to .html and .php files
+    // inject five-server script
     app.use(injectHandler)
 
-    const ignorePHP = handler => {
-      return function (req, res, next) {
-        if (path.extname(req.url) === '.php') next()
-        else handler(req, res, next)
-      }
-    }
-
-    // serve static files (ignore php files) // don't serve index files!
-    // TODO(yandeu): Make "index" optional // { index: false }
-    app.use(ignorePHP(express.static(root)))
+    // serve static files (ignore php files) (don't serve index files)
+    app.use(ignoreExtension(['php'], express.static(root, { index: false })))
 
     // inject to fallback "file"
     app.use(fallbackFile(injectHandler, file))
 
     // inject to any (converts and file to a .html file (if possible))
-    app.use((req, res, next) => {
-      if (!this.injectToAny) return next()
-      if (!['.preview', '.php'].includes(path.extname(req.url))) return next()
+    // (makes that nice preview page)
+    app.use(preview(root, this.servePreview))
 
-      // remove .preview
-      req.url = req.url.replace(/\.preview$/, '')
-      const URL = decodeURI(req.url)
-
-      const isPHP = path.extname(req.url) === '.php'
-      const phpMsg = isPHP
-        ? 'Why this preview? Five Server could not detect any head, body or html tag in your file.<br><br>'
-        : ''
-
-      try {
-        const filePath = path.resolve(path.join(root + URL))
-
-        const isFile = fs.statSync(filePath).isFile()
-        if (!isFile) return next()
-
-        let ext = path.extname(URL).replace(/^\./, '').toLowerCase()
-        const fileName = path.basename(filePath, ext)
-
-        const isImage = /(gif|jpg|jpeg|tiff|png|svg)$/i.test(ext)
-        const isVideo = /(mpg|mpeg|avi|wmv|mov|ogg|webm|mp4|mkv)$/i.test(ext)
-        const isAudio = /(mid|midi|wma|aac|wav|ogg|mp3|mp4)$/i.test(ext)
-        const isPDF = /(pdf)$/i.test(ext)
-
-        let preview = ''
-
-        if (isImage)
-          preview = `<div class="image" text-align:center; line-height: 0; padding: 0;">
-        
-        <img style="max-width: 100%;" src="${URL}"></div>`
-        else if (isVideo) {
-          const format = ext === 'ogg' ? 'ogg' : ext === 'webm' ? 'webm' : 'mp4'
-          preview = `
-          <video style="max-width: 100%;" controls>
-            <source src="${URL}" type="video/${format}">
-            Your browser does not support the video tag.
-          </video>`
-        } else if (isAudio) {
-          const format = ext === 'ogg' ? 'ogg' : ext === 'wav' ? 'wav' : 'mpeg'
-          preview = `
-            <div style="margin-top: 72px;">
-              <audio controls>
-                <source src="${URL}" type="audio/${format}">
-                Your browser does not support the audio element.
-              </audio>
-            </div>`
-        } else if (isPDF) {
-          preview = `
-            <div>
-              <iframe 
-                style="min-height: calc(100vh - 260px)"
-                frameborder="0" 
-                scrolling="no"                
-                width="100%" height="100%"
-                src="${URL}">
-              </iframe>
-            </div>`
-        } else {
-          const MAX_FILE_SIZE = 250 // KB
-          const fileSize = Math.round(fs.statSync(filePath).size / 1024) // KB
-          const tooBig = fileSize > MAX_FILE_SIZE
-
-          if (tooBig) ext = 'txt'
-
-          let fileContent = !tooBig
-            ? fs.readFileSync(filePath, { encoding: 'utf-8' })
-            : `File is too big for a preview!\n\n\nFile Size: ${fileSize}KB\nAllowed Size: ${MAX_FILE_SIZE}KB`
-
-          // check for .rc file (can be yml or json)
-          if (/^\.[\w]+rc$/.test(fileName)) {
-            const content = fileContent.trim()
-            ext = content[0] === '{' ? 'json' : 'yml'
-          }
-
-          // replace all < with &lt;
-          fileContent = fileContent.replace(/</gm, '&lt;')
-
-          preview = `
-            <div>
-              <pre margin="0px;"><code class="">${fileContent}</code></pre>
-            </div>`
-        }
-
-        const html = PREVIEW.replace('{linked-path}', htmlPath(URL))
-          .replace('{fileName}', fileName)
-          .replace('{ext}', ext)
-          .replace('{phpMsg}', phpMsg)
-          .replace('{preview}', preview)
-
-        return res.type('html').send(html)
-      } catch (error) {
-        return next()
-      }
-    })
-
-    // serveIndex middleware
-    app.use(serveIndex(root, { icons: true, hidden: false, dotFiles: true }))
+    // explorer middleware (previously serve-index)
+    app.use(explorer(root, { icons: true, hidden: false, dotFiles: true }))
 
     // no one want to see a 404 favicon error
-    let favicon
-    app.use((req: any, res: any, next: any) => {
-      if (/favicon\.ico$/.test(req.url)) {
-        if (!favicon) favicon = fs.readFileSync(join(__dirname, '../public/favicon.ico'))
-        res.type('ico').send(favicon)
-      } else {
-        return next()
-      }
-    })
-
-    const fileDoesExist = (path: string): Promise<boolean> => {
-      return new Promise(resolve => {
-        fs.stat(path, (err, stat) => {
-          if (err && err.code === 'ENOENT') {
-            return resolve(false)
-          } else return resolve(true)
-        })
-      })
-    }
+    app.use(favicon)
 
     // serve 403/404 page
-    app.use(async (req: any, res: any, next: any) => {
-      // join / normalize from root dir
-      const path = normalize(join(root, req.url))
-      const file = req.url.replace(/^\//gm, '') // could be c:/Users/USERNAME/Desktop/website/ for example
-
-      if (await fileDoesExist(file)) {
-        const html = STATUS_CODE.replace('{linked-path}', htmlPath(decodeURI(req.url)))
-          .replace('{status}', '403')
-          .replace('{message}', `Can't access files outside of root.`)
-        return res.status(403).send(html)
-      }
-
-      if (!(await fileDoesExist(path))) {
-        const html = STATUS_CODE.replace('{linked-path}', htmlPath(decodeURI(req.url)))
-          .replace('{status}', '404')
-          .replace('{message}', 'This page could not be found.')
-        return res.status(404).send(html)
-      }
-
-      return next()
-    })
+    app.use(notFound(root))
 
     // create http server
     if (_https !== null && _https !== false) {

@@ -20,14 +20,14 @@ describe('mount tests', function () {
   it('should respond with sub.html', function (done) {
     request(liveServer.httpServer)
       .get('/mounted/sub.html')
-      .expect('Content-Type', 'text/html; charset=UTF-8')
+      .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(/Subdirectory/i)
       .expect(200, done)
   })
   it('should respond with style.css', function (done) {
     request(liveServer.httpServer)
       .get('/style')
-      .expect('Content-Type', 'text/css; charset=UTF-8')
+      .expect('Content-Type', /text\/css; charset=utf-8/i)
       .expect(/color/i)
       .expect(200, done)
   })
