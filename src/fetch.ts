@@ -14,6 +14,8 @@ export const fetch = (url: string, options: http.RequestOptions = {}): Promise<B
   const module = /^https/.test(url) ? https : http
 
   return new Promise((resolve, reject) => {
+    if (!/^https?:\/\//.test(url)) return reject({ code: 400, message: `${url} is not a valid url` })
+
     module
       .get(url, options, res => {
         const code = res.statusCode

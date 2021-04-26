@@ -4,7 +4,7 @@
  * @license   {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
  */
 
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 import { extname } from 'path'
 import { fetch } from '../fetch'
 import { fileTypes } from '../fileTypes'
@@ -12,11 +12,18 @@ import { fileTypes } from '../fileTypes'
 const _cache: Map<string, { timestamp: number; file: string | Buffer }> = new Map()
 const _maxCacheTime = 3600 // one hour (in seconds)
 
-export const cache = async (req, res: Response, next) => {
-  const url = req.url.replace(/^\//, '')
-  const ext = extname(new URL(url, undefined).pathname)
+export const cache = async (req: Request, res: Response, next) => {
+  let url = req.url.replace(/^\//, '')
+
+  const protocol = req.protocol
+  const host = req.headers['host']
+  const method = req.method
+
+  const ext = extname(new URL(url, 'http://localhost:8080').pathname)
   const now = new Date().getTime()
-  const data = _cache.get(url)
+
+  const id = `${method}_${url}`
+  const data = _cache.get(id)
 
   if (data) {
     const age = Math.round((now - data?.timestamp) / 1000)
@@ -29,10 +36,13 @@ export const cache = async (req, res: Response, next) => {
   }
 
   try {
+    // if the url is a relative path, prepend protocol and host
+    if (!/^https?:\/\//.test(url)) url = `${protocol}://${host}/${url}`
+
     const data = await fetch(url)
     const file = fileTypes.isImage(ext) ? data : data.toString('utf-8')
 
-    _cache.set(url, { timestamp: now, file })
+    _cache.set(id, { timestamp: now, file })
 
     res.setHeader('Age', 0)
     res.setHeader('X-Cache', 'Miss from fiveserver')
