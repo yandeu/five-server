@@ -12,6 +12,14 @@ export class ExecPHP {
   private php: string | undefined
   private phpIni: string | undefined
 
+  get path() {
+    return this.php
+  }
+
+  get ini() {
+    return this.phpIni
+  }
+
   set path(path: string | undefined) {
     this.php = path
   }

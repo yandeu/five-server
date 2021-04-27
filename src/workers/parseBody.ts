@@ -5,9 +5,13 @@
  */
 
 // https://html-validate.org/dev/using-api.html
+import { ExecPHP } from '../utils/execPHP'
 import { HtmlValidate } from 'html-validate'
-
+import { basename } from 'path'
 import { parentPort } from 'worker_threads'
+import { writeFile } from 'fs'
+
+const PHP = new ExecPHP()
 
 const htmlvalidate = new HtmlValidate({
   // https://html-validate.org/rules/index.html
@@ -81,10 +85,46 @@ const injectHighlight = (body: string, cursorPosition: any) => {
   return lines.join('\n')
 }
 
-parentPort?.on('message', (data: string) => {
-  const { text, shouldHighlight, cursorPosition, fileName } = JSON.parse(data)
+const writeTmpFile = (fileName: string, text: string): Promise<void> => {
+  return new Promise(resolve => {
+    writeFile(fileName, text, { encoding: 'utf-8' }, () => {
+      return resolve()
+    })
+  })
+}
 
-  const html = shouldHighlight ? injectHighlight(text, cursorPosition) : text
+// let start
+
+// const reset_time = () => {
+//   start = process.hrtime()
+// }
+
+// const elapsed_time = (note = '') => {
+//   const precision = 3 // 3 decimal places
+//   const elapsed = process.hrtime(start)[1] / 1000000 // divide by a million to get nano to milliseconds
+//   // eslint-disable-next-line prefer-template
+//   return process.hrtime(start)[0] + ' s, ' + elapsed.toFixed(precision) + ' ms - ' + note // print message + time
+// }
+
+parentPort?.on('message', async (data: string) => {
+  // reset_time()
+
+  const { text, shouldHighlight, cursorPosition, fileName, init } = JSON.parse(data)
+
+  if (init) {
+    PHP.path = init.phpExecPath
+    PHP.ini = init.phpIniPath
+    parentPort?.postMessage(JSON.stringify({ ignore: true }))
+    return
+  }
+
+  const isPhp = /\.php$/.test(fileName)
+  const tmpFile = fileName.replace(basename(fileName), `.${basename(fileName)}`)
+
+  if (isPhp) await writeTmpFile(tmpFile, text)
+
+  const php = isPhp ? await PHP.parseFile(tmpFile, { status: () => {} }) : text
+  const html = shouldHighlight ? injectHighlight(php, cursorPosition) : php
 
   const res = /(<body[^>]*>)((.|[\n\r])*)(<\/body>)/gim.exec(html)
 
@@ -99,6 +139,6 @@ parentPort?.on('message', (data: string) => {
     const body = `${res[1]}${b}${res[4]}`
 
     const report = htmlvalidate.validateString(html)
-    parentPort?.postMessage(JSON.stringify({ report, body, fileName }))
+    parentPort?.postMessage(JSON.stringify({ report, body, fileName /*, time: elapsed_time()*/ }))
   }
 })

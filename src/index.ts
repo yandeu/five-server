@@ -99,14 +99,18 @@ export default class LiveServer {
   public get parseBody() {
     if (this._parseBody) return { workers: this._parseBody, updateBody: this._parseBody_updateBody.bind(this) }
 
-    this._parseBody = new WorkerPool('./workers/parseBody.js', {
+    this._parseBody = new WorkerPool('./parseBody.js', {
       worker: 2,
-      rateLimit: 50
+      rateLimit: 50,
+      logLevel: this.logLevel,
+      init: { phpExecPath: PHP.path, phpIniPath: PHP.ini }
     })
 
     this._parseBody.on('message', d => {
       const data = JSON.parse(d)
+
       if (data.ignore) return
+      if (data.time) console.log('TIME', data.time)
 
       const { body, report, fileName } = data as {
         report: Report
@@ -492,6 +496,7 @@ export default class LiveServer {
         try {
           if (typeof data === 'string') {
             const json = JSON.parse(data)
+
             if (json && json.file) {
               ws.file = json.file
             }
@@ -561,7 +566,8 @@ export default class LiveServer {
       }
 
       const htmlChange = path.extname(changePath) === '.html'
-      if (htmlChange && injectBody) return
+      const phpChange = path.extname(changePath) === '.php'
+      if ((htmlChange || phpChange) && injectBody) return
 
       this.clients.forEach(ws => {
         if (ws) ws.sendWithDelay(cssChange ? 'refreshcss' : 'reload')

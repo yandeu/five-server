@@ -13,6 +13,10 @@ interface WorkerPoolOptions {
   rateLimit?: number
   // Number of workers to initialize. (default: 1)
   worker?: number
+
+  logLevel?: number
+  // Object passed to process on init
+  init?: any
 }
 
 /** Handles multiple Workers. */
@@ -24,17 +28,19 @@ export default class WorkerPool extends EventEmitter {
   private queue: string[] = []
   private timer: 'idle' | 'running' = 'idle'
   private terminating = false
+  private logLevel = 1
 
   constructor(public script: string, options: WorkerPoolOptions = {}) {
     super()
 
-    const { rateLimit = 50, worker = 1 } = options
+    const { rateLimit = 50, worker = 1, logLevel = 1, init } = options
 
     this.rateLimit = rateLimit
     this.worker = worker
+    this.logLevel = logLevel
 
     for (let i = 0; i < this.worker; i++) {
-      this.create()
+      this.create(init)
     }
   }
 
@@ -61,10 +67,10 @@ export default class WorkerPool extends EventEmitter {
     if (this.terminating) return
 
     if (this.rateLimit <= 0) this.sendMessage(msg)
-    else this.addQueue(msg)
+    else this.addToQueue(msg)
   }
 
-  addQueue(msg: string) {
+  addToQueue(msg: string) {
     if (this.terminating) return
 
     // add new element to queue
@@ -74,44 +80,55 @@ export default class WorkerPool extends EventEmitter {
     this.runTimer()
 
     // remove last element from queue
-    if (length >= 5) {
-      this.queue.pop()
-    }
+    if (length >= 5) this.queue.pop()
   }
 
-  runTimer() {
-    if (this.terminating) return
+  sendFromQueue() {
+    const msg = this.queue.shift()
+    this.queue = [] // delete all other messages
 
-    if (this.timer === 'running') return
+    if (msg) this.sendMessage(msg)
+  }
+
+  runTimer(force = false) {
+    if (!force && this.timer === 'running') return
     this.timer = 'running'
 
+    this.sendFromQueue()
+
     setTimeout(() => {
-      this.timer = 'idle'
-      const msg = this.queue.shift()
-      if (msg) this.sendMessage(msg)
+      if (this.queue.length > 0) this.runTimer(true)
+      else this.timer = 'idle'
     }, this.rateLimit)
   }
 
-  private create() {
+  private create(init: any) {
     if (this.terminating) return
 
     const worker = new Worker(join(__dirname, this.script))
+
+    // pass init object once worker is online
+    worker.on('online', () => {
+      worker.postMessage(JSON.stringify({ init }))
+    })
 
     worker.on('message', msg => {
       this.emit('message', msg)
     })
 
-    // worker.on('error', err => {
-    //   console.log('error:', err)
-    // })
+    if (this.logLevel >= 2) {
+      worker.on('error', err => {
+        console.log('WORKER error:', err)
+      })
 
-    // worker.on('exit', err => {
-    //   console.log('exit:', err)
-    // })
+      worker.on('exit', err => {
+        console.log('WORKER exit:', err)
+      })
 
-    // worker.on('messageerror', err => {
-    //   console.log('messageerror:', err)
-    // })
+      worker.on('messageerror', err => {
+        console.log('WORKER messageerror:', err)
+      })
+    }
 
     this.workers.push(worker)
   }
