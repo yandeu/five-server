@@ -6,8 +6,8 @@
 
 import type { Request, Response } from 'express'
 import { extname } from 'path'
-import { fetch } from '../fetch'
 import { fileTypes } from '../fileTypes'
+import { nodeFetch } from '../nodeFetch'
 
 const _cache: Map<string, { timestamp: number; file: string | Buffer }> = new Map()
 const _maxCacheTime = 3600 // one hour (in seconds)
@@ -39,7 +39,7 @@ export const cache = async (req: Request, res: Response, next) => {
     // if the url is a relative path, prepend protocol and host
     if (!/^https?:\/\//.test(url)) url = `${protocol}://${host}/${url}`
 
-    const data = await fetch(url)
+    const data = await nodeFetch(url)
     const file = fileTypes.isImage(ext) ? data : data.toString('utf-8')
 
     _cache.set(id, { timestamp: now, file })
