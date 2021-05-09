@@ -185,7 +185,7 @@ export default class LiveServer {
       mount = {},
       php,
       phpIni,
-      port = 5555,
+      port = 5500,
       proxy = {},
       remoteLogs = false,
       useLocalIp = false,
