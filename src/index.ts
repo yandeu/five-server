@@ -27,16 +27,13 @@ import express from 'express'
 // const WebSocket: any = require('faye-websocket')
 import WebSocket from 'ws' // eslint-disable-line sort-imports
 
-// MOD: Replaced "opn" by "open"
-// const open = require('opn')
-import open from 'open'
-
 // some imports
 import { Colors, colors } from './colors'
 import { ProxyMiddlewareOptions } from './dependencies/proxy-middleware'
 import { Certificate, LiveServerParams } from './types'
 import { getCertificate } from './utils/getCertificate'
 import { getNetworkAddress } from './utils/getNetworkAddress'
+import { openBrowser } from './openBrowser'
 
 // execute php
 import { ExecPHP } from './utils/execPHP'
@@ -175,7 +172,7 @@ export default class LiveServer {
     }
 
     const {
-      browser = null,
+      browser = 'default',
       cache = true,
       cors = false,
       file,
@@ -238,8 +235,26 @@ export default class LiveServer {
 
     // if server is already running, just open a new browser window
     if (this.isRunning) {
-      message.log(colors(`Opening new window at ${this.openURL}`, 'green'))
-      this.launchBrowser(openPath, browser)
+      const printOpenNewMessage = (openPath: string) => {
+        const path = colors(openPath, 'bold')
+        const url = colors(`${this.openURL}/${path}`, 'cyan')
+        message.log(`Opening new window at ${url}`)
+      }
+
+      if (openPath === null) {
+        message.log(`Can't open new window for path "null"`)
+        return
+      }
+
+      if (Array.isArray(openPath)) {
+        openPath.forEach(p => {
+          printOpenNewMessage(p)
+        })
+      } else {
+        printOpenNewMessage(openPath)
+      }
+
+      this.launchBrowser(this.openURL, openPath, browser)
       return
     }
 
@@ -456,7 +471,7 @@ export default class LiveServer {
      * STEP: 2/4
      * Open Browser using "open" (https://www.npmjs.com/package/open)
      */
-    this.launchBrowser(openPath, browser)
+    this.launchBrowser(this.openURL, openPath, browser)
 
     /**
      * STEP: 3/4
@@ -631,82 +646,11 @@ export default class LiveServer {
 
   /** Launch a new browser window. */
   public async launchBrowser(
+    openURL: string,
     path: string | boolean | string[] | null | undefined,
-    browser: string | string[] | null = null
+    browser?: string | string[]
   ) {
-    const launch = async (target: string, browser: string | string[] | null = null, index = -1) => {
-      if (!browser) return await open(target)
-      if (Array.isArray(browser) && browser.length === 0) return await open(target)
-
-      let res: any
-
-      const opn = async (browser: string) => {
-        const hasArguments = browser.includes('--')
-
-        if (!hasArguments) {
-          res = await open(target, { app: { name: browser } })
-        }
-
-        if (hasArguments) {
-          const b = browser.split('--').map(c => c.trim())
-          res = await open(target, {
-            app: { name: b.shift() as string, arguments: b.map(arg => `--${arg}`) }
-          })
-        }
-      }
-
-      if (typeof browser === 'string') await opn(browser)
-
-      if (Array.isArray(browser)) {
-        index++
-        await opn(browser[index])
-      }
-
-      const launchDefaultBrowser = () => {
-        launch(target)
-      }
-
-      res.once('exit', code => {
-        if (code && code > 0) {
-          if (typeof browser === 'string') {
-            message.log(colors(`Could not open browser "${browser}". Trying the default browser next.`, 'yellow'))
-            launchDefaultBrowser()
-          } else if (Array.isArray(browser)) {
-            if (typeof browser[index + 1] === 'undefined') {
-              message.log(
-                colors(`Could not open browser "${browser[index]}". Trying the default browser next.`, 'yellow')
-              )
-              launchDefaultBrowser()
-            } else {
-              message.log(
-                colors(`Could not open browser "${browser[index]}". Trying "${browser[index + 1]}" next.`, 'yellow')
-              )
-
-              launch(target, browser, index)
-            }
-          }
-        }
-      })
-    }
-
-    // Don't open a browser
-    if (path === null) return
-
-    const isURL = path => /(www|http:|https:)+[^\s]+[\w]/gm.test(path)
-
-    // Try to open one browser from a list of browsers
-    if (Array.isArray(path)) {
-      for (const p of path) {
-        if (isURL(p)) await launch(p, browser)
-        else await launch(`${this.openURL}/${p}`, browser)
-      }
-    }
-
-    // Open browser "browser"
-    if (typeof path === 'string') {
-      if (isURL(path)) await launch(path, browser)
-      else await launch(`${this.openURL}/${path}`, browser)
-    }
+    await openBrowser(openURL, path, browser)
   }
 
   /** Reloads all browser windows */
