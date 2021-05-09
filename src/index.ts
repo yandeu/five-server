@@ -225,11 +225,17 @@ export default class LiveServer {
     // console.log('root', root)
     // console.log('watch', watch)
 
+    /** the path(s) to be opened in the browser */
     let openPath = options.open
     if (typeof openPath === 'string') openPath = removeLeadingSlash(openPath)
     else if (Array.isArray(openPath)) openPath.map(o => removeLeadingSlash(o))
     else if (openPath === undefined || openPath === true) openPath = ''
     else if (openPath === null || openPath === false) openPath = null
+    // replace \ by /
+    if (typeof openPath === 'string') openPath = openPath.replace(/\\/, '/')
+    else if (Array.isArray(openPath)) {
+      openPath.map(p => p.replace(/\\/, '/'))
+    }
 
     if (options.noBrowser) openPath = null // Backwards compatibility
 
