@@ -3,11 +3,19 @@
   "version": "0.0.24",
   "description": "Development Server with Live Reload Capability. (Maintained Fork of Live Server)",
   "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "module": "lib-esm/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./lib-esm/index.mjs",
+      "require": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "bin": {
     "live-server": "./lib/bin.js",
     "five-server": "./lib/bin.js"
   },
+  "types": "lib/index.d.ts",
   "keywords": [
     "browser",
     "development",
