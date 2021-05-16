@@ -307,9 +307,6 @@ export default class LiveServer {
     // fiveserver /public
     app.use('/fiveserver', express.static(path.join(__dirname, '../public')))
 
-    // find index file and modify req.url
-    app.use(findIndex(root, withExtension, ['html', 'php']))
-
     /*
       // logger has been removed from the core
       // if you want a logger, add a custom middleware to fiveserver.config.js
@@ -325,7 +322,7 @@ export default class LiveServer {
       }
     */
 
-    // Add custom middleware
+    // middleware
     middleware.map(function (mw) {
       if (typeof mw === 'string') {
         const ext = path.extname(mw).toLocaleLowerCase()
@@ -339,6 +336,7 @@ export default class LiveServer {
       app.use(mw)
     })
 
+    // mount
     for (const [ROUTE, TARGET] of Object.entries(mount)) {
       const mountPath = path.resolve(process.cwd(), TARGET)
       let R = ROUTE
@@ -359,6 +357,7 @@ export default class LiveServer {
       if (this.logLevel >= 1) message.log(`Mapping "${R}" to "${TARGET}"`)
     }
 
+    // proxy
     for (const [ROUTE, TARGET] of Object.entries(proxy)) {
       const url = new URL(TARGET)
 
@@ -383,6 +382,9 @@ export default class LiveServer {
       app.use(ROUTE, require('./dependencies/proxy-middleware')(proxyOpts))
       if (this.logLevel >= 1) message.log(`Mapping "${ROUTE}" to "${TARGET}"`)
     }
+
+    // find index file and modify req.url
+    app.use(findIndex(root, withExtension, ['html', 'php']))
 
     const injectHandler = injectCode(root, PHP)
 
