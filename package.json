@@ -4,11 +4,6 @@
   "description": "Development Server with Live Reload Capability. (Maintained Fork of Live Server)",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "type": "commonjs",
-  "exports": {
-    "require": "./lib/index.js",
-    "import": "./esm/index.mjs"
-  },
   "bin": {
     "live-server": "./lib/bin.js",
     "five-server": "./lib/bin.js"

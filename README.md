@@ -62,7 +62,28 @@ $ npm -g i five-server@latest
 
 ## Usage
 
-Similar to [Live Server](https://www.npmjs.com/package/live-server).
+_Five Server is written in TypeScript. Since it is nearly impossible to have a clean import for all module resolvers without restricting/adding explicit access to submodules via the exports property in package.json (which I don't want), I just list some very simple import examples._
+
+_Once everyone uses Modules in Node.js, I'm happy to make adjustments._
+
+```ts
+// TypeScript
+import FiveServer from 'five-server'
+new FiveServer().start({ open: false })
+
+// Node.js Module
+import FiveServer from 'five-server/esm.mjs'
+new FiveServer().start({ open: false })
+
+// Node.js Module (alternative)
+import pkg from 'five-server'
+const { default: FiveServer } = pkg
+new FiveServer().start({ open: false })
+
+// CommonJS
+const FiveServer = require('five-server').default
+new FiveServer().start({ open: false })
+```
 
 ## Documentation
 
