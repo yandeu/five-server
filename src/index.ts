@@ -29,7 +29,7 @@ import WebSocket from 'ws' // eslint-disable-line sort-imports
 
 // some imports
 import { Colors, colors } from './colors'
-import { ProxyMiddlewareOptions } from './dependencies/proxy-middleware'
+import { ProxyMiddlewareOptions } from './middleware/proxy'
 import { Certificate, LiveServerParams } from './types'
 import { getCertificate } from './utils/getCertificate'
 import { getNetworkAddress } from './utils/getNetworkAddress'
@@ -379,7 +379,7 @@ export default class LiveServer {
         via: true
       }
 
-      app.use(ROUTE, require('./dependencies/proxy-middleware')(proxyOpts))
+      app.use(ROUTE, require('./middleware/proxy')(proxyOpts))
       if (this.logLevel >= 1) message.log(`Mapping "${ROUTE}" to "${TARGET}"`)
     }
 

@@ -8,13 +8,13 @@ module.exports = {
   // browser: ['edge', 'chrome', 'firefox', 'chrome --incognito', 'firefox --incognito'],
   // browser: ['C:\\Program Files\\Firefox Developer Edition\\firefox.exe --private-window'],
   watch: 'dev',
-  ignore: [/\.s[ac]ss$/i, /\.tsx?$/i],
+  // ignore: [/\.s[ac]ss$/i, /\.tsx?$/i],
   // mount: { '/img': 'C:\\Users\\yanni\\Pictures' },
-  remoteLogs: 'yellow',
+  // remoteLogs: 'yellow',
   // logLevel: 2,
   // php: '/usr/bin/php',
-  php: 'C:\\xampp\\php\\php.exe'
-  // proxy: { '/': 'http://127.0.0.1:8080' }
+  // php: 'C:\\xampp\\php\\php.exe',
+  // proxy: { '/': 'http://localhost:5000' }
   // withExtension: 'redirect'
   // logLevel: 2
 }

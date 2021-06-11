@@ -8,10 +8,25 @@ import { Request, Response } from 'express'
 import { createReadStream, existsSync, fstat, statSync } from 'fs'
 import { extname, join, resolve } from 'path'
 import { Writable } from 'stream'
+import { unzip as _unzip } from 'zlib'
+
+/**
+ * unzip: Decompress either a Gzip- or Deflate-compressed stream by auto-detecting the header.
+ * https://nodejs.org/api/zlib.html#zlib_class_zlib_unzip
+ */
+const unzip = (buffer: Buffer): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    _unzip(buffer, (err: Error | null, buffer: Buffer) => {
+      if (err) return reject(err)
+      return resolve(buffer.toString())
+    })
+  })
+}
 
 export class Inject extends Writable {
   size: number = 0
-  data: string = ''
+  chunks: Buffer[] = []
+  data = ''
   injectTag = ''
 
   constructor(public tags, public code) {
@@ -37,14 +52,19 @@ export class Inject extends Writable {
     this.data = data
   }
 
-  _write(chunk, encoding, callback) {
-    this.data += chunk.toString()
+  _write(chunk: Buffer, encoding: BufferEncoding, callback) {
+    this.chunks.push(chunk)
     callback()
   }
 
-  _final(callback) {
-    this.doInjection(this.data)
+  async _final(callback) {
+    const buffer = Buffer.concat(this.chunks)
+    this.data = buffer.toString()
 
+    const raw = await unzip(buffer).catch(() => {})
+    if (raw) this.data = raw
+
+    this.doInjection(this.data)
     callback()
   }
 }

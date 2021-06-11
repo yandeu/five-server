@@ -1,17 +1,24 @@
 /**
- * @package     proxy-middleware (https://www.npmjs.com/package/proxy-middleware)
- * @copyright   Copyright (c) 2014 Andrew Kelley
- * @license     {@link https://github.com/gonzalocasas/node-proxy-middleware/blob/master/LICENSE MIT}
- * @description modified version of proxy-middleware@0.15.0 (https://github.com/gonzalocasas/node-proxy-middleware/blob/master/index.js)
+ * @copyright
+ * Copyright (c) 2014 Andrew Kelley
+ * Copyright (c) 2021 Yannick Deubel (https://github.com/yandeu)
+ *
+ * @license {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
+ *
+ * @description
+ * copied and modified from roxy-middleware@0.15.0 (https://github.com/gonzalocasas/node-proxy-middleware/blob/master/index.js)
+ * previously licensed under MIT (https://github.com/gonzalocasas/node-proxy-middleware/blob/master/LICENSE)
  */
 
 import { IncomingMessage, ServerResponse } from 'http'
-import { Inject, code } from '../middleware/injectCode'
+import { Inject, code } from './injectCode'
 
 const os = require('os')
 const http = require('http')
 const https = require('https')
 const owns = {}.hasOwnProperty
+
+import type { request as requestFnc } from 'http'
 
 export interface ProxyMiddlewareOptions extends Omit<URL, 'toJSON'> {
   cookieRewrite?: boolean
@@ -26,18 +33,19 @@ export interface ProxyMiddlewareOptions extends Omit<URL, 'toJSON'> {
 
 module.exports = function proxyMiddleware(options: ProxyMiddlewareOptions) {
   // enable ability to quickly pass a url for shorthand setup
-  // not implemented yet
-  // if (typeof options === 'string') {
-  //   options = require('url').parse(options)
-  // }
+  if (typeof options === 'string') {
+    options = require('url').parse(options)
+  }
 
   const httpLib = options.protocol === 'https:' ? https : http
-  const request = httpLib.request
+  const request = httpLib.request as typeof requestFnc
 
   options = options || {}
+  // options.hostname = options.hostname
+  // options.port = options.port
   options.pathname = options.pathname || '/'
 
-  return function (req: IncomingMessage, resp: ServerResponse, next) {
+  return async function (req: IncomingMessage, res: ServerResponse, next) {
     let url = req.url as string
     // You can pass the route within the options, as well
     if (typeof options.route === 'string') {
@@ -50,8 +58,8 @@ module.exports = function proxyMiddleware(options: ProxyMiddlewareOptions) {
       }
     }
 
-    //options for this request
-    const opts = { ...options }
+    // options for this request
+    const opts = extend({}, options)
     if (url && url.charAt(0) === '?') {
       // prevent /api/resource/?offset=0
       if (options.pathname.length > 1 && options.pathname.charAt(options.pathname.length - 1) === '/') {
@@ -74,56 +82,70 @@ module.exports = function proxyMiddleware(options: ProxyMiddlewareOptions) {
       delete opts.headers.host
     }
 
-    const myReq = request(opts, function (myRes: IncomingMessage) {
-      const statusCode = myRes.statusCode,
-        headers = myRes.headers,
-        location = headers.location
-      // Fix the location
-      if (
-        ((statusCode && statusCode > 300 && statusCode < 304) || statusCode === 201) &&
-        location &&
-        location.indexOf(options.href) > -1
-      ) {
-        // absolute path
+    const myReq = request(opts, (request: IncomingMessage) => {
+      const statusCode = request.statusCode
+      const headers = request.headers
+      const location = headers.location
+      const redirectCodes: boolean = !!statusCode && statusCode > 300 && statusCode < 304
+
+      // Fix the location (makes absolute path)
+      if ((redirectCodes || statusCode === 201) && location && location.indexOf(options.href) > -1)
         headers.location = location.replace(options.href, slashJoin('/', slashJoin(options.route || '', '')))
+
+      // handle redirects
+      if (statusCode && redirectCodes && url !== location) {
+        res.writeHead(statusCode, { Location: headers.location })
+        return res.end()
       }
 
-      myRes.on('error', function (err) {
+      request.on('error', function (err) {
         next(err)
       })
-      // MOD(yandeu): Do injection here
-      if (/\.(php|html)$/.test(url) || /html/.test(myRes.headers['content-type'] || '')) {
+
+      // do injection here
+      const htmlOrPhp = /\.(php|html)$/.test(url)
+      const contentType1 = /html/.test(request.headers['content-type'] || '')
+      const contentType2 = /html/.test((request.headers['Content-Type'] as string) || '')
+      const shouldInject = htmlOrPhp || contentType1 || contentType2
+
+      // inject the reload script before proxying
+      if (shouldInject) {
         const inject = new Inject(['</head>', '</html>', '</body>'], code(url))
 
-        myRes.pipe(inject).on('finish', () => {
-          if (!inject.injectTag) return next()
-          else {
-            // myRes.headers['content-type'] = 'text/html; charset=utf-8'
-            myRes.headers['content-length'] = inject.data.length.toString()
+        request.pipe(inject).on('finish', () => {
+          // could not inject the script :/
+          if (!inject.injectTag)
+            inject.data += `<script>console.warn("[Five Server] Could not inject script. Why? This file does probably not include a head, html or body tag.");</script>`
 
-            applyViaHeader(myRes.headers, opts, myRes.headers)
-            rewriteCookieHosts(myRes.headers, opts, myRes.headers, req)
-            resp.writeHead(myRes.statusCode || 200, myRes.headers)
+          applyViaHeader(request.headers, opts, request.headers)
+          rewriteCookieHosts(request.headers, opts, request.headers, req)
 
-            resp.end(inject.data)
-          }
+          // request.headers['content-type'] = 'text/html; charset=utf-8'
+          request.headers['content-length'] = inject.data.length.toString()
+          // to inject the script, we had to decode the compression, hence we remove the content-encoding header
+          request.headers['content-encoding'] = ''
+
+          res.writeHead(request.statusCode || 200, request.headers)
+
+          res.end(inject.data)
         })
-      } else {
-        applyViaHeader(myRes.headers, opts, myRes.headers)
-        rewriteCookieHosts(myRes.headers, opts, myRes.headers, req)
-        resp.writeHead(myRes.statusCode || 200, myRes.headers)
+      }
 
-        myRes.pipe(resp)
+      if (!shouldInject) {
+        // simply proxy the request
+        applyViaHeader(request.headers, opts, request.headers)
+        rewriteCookieHosts(request.headers, opts, request.headers, req)
+        res.writeHead(request.statusCode || 500, request.headers)
+        request.pipe(res)
       }
     })
+
     myReq.on('error', function (err) {
       next(err)
     })
-    if (!req.readable) {
-      myReq.end()
-    } else {
-      req.pipe(myReq)
-    }
+
+    if (req.readable) req.pipe(myReq)
+    else myReq.end()
   }
 }
 
