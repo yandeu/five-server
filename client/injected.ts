@@ -315,7 +315,9 @@ if ('WebSocket' in window) {
         document.head.appendChild(style)
       }
       socket.onclose = function (e) {
-        popup('lost connection to dev server', 'error')
+        setTimeout(function () {
+          popup('lost connection to dev server', 'error')
+        }, 300)
         if (attempts === 0) console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason)
 
         setTimeout(function () {
