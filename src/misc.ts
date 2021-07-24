@@ -56,8 +56,10 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
     '.fiveserverrc.json',
     '.fiveserverrc.js',
     '.fiveserverrc.cjs',
+    '.fiveserverrc.mjs',
     'fiveserver.config.js',
     'fiveserver.config.cjs',
+    'fiveserver.config.mjs',
     '.live-server.json'
   ]
 
@@ -75,7 +77,7 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
 
   dirs.push(process.cwd())
 
-  const isJSReg = /\.c?js$/
+  const isJSReg = /\.c?m?js$/
 
   loop: for (const d of dirs) {
     for (const f of files) {
