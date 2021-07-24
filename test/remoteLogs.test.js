@@ -35,11 +35,10 @@ describe('remote logs', () => {
     expect(fiveServer.clients.length).toBe(1)
   })
 
-  it('should receive logs', async done => {
+  it('should receive logs', async () => {
     await pause(2000)
 
     expect(remoteLog.includes('Hi from remote!')).toBeTruthy()
-    done()
   })
 })
 

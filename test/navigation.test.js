@@ -39,23 +39,19 @@ beforeAll(async () => {
 })
 
 describe('navigation test', () => {
-  it('should open index.html at /', async done => {
+  it('should open index.html at /', async () => {
     const h1 = await getInnerText('h1')
     expect(page.url()).toBe('http://localhost:40200/')
     expect(h1).toBe('Hello world.')
-
-    done()
   })
 
-  it('should navigate to /sub/sub.html', async done => {
+  it('should navigate to /sub/sub.html', async () => {
     await fiveServer.navigate('/sub/sub.html')
     await pause()
 
     const h1 = await getInnerText('h1')
     expect(page.url()).toBe('http://localhost:40200/sub/sub.html')
     expect(h1).toBe('Subdirectory')
-
-    done()
   })
 })
 

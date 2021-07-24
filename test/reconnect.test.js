@@ -36,20 +36,18 @@ describe('websocket reconnection', () => {
     expect(fiveServer.clients.length).toBe(1)
   })
 
-  it('connection should be closed', async done => {
+  it('connection should be closed', async () => {
     await fiveServer.shutdown()
     await pause()
     expect(log.includes('closed')).toBeTruthy()
     expect(fiveServer.clients.length).toBe(0)
-    done()
   })
 
-  it('should reconnect after five-server restarted', async done => {
+  it('should reconnect after five-server restarted', async () => {
     await fiveServer.start(options)
     await pause(5000)
     expect(log.includes('connected')).toBeTruthy()
     expect(fiveServer.clients.length).toBe(1)
-    done()
   })
 })
 

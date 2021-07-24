@@ -21,34 +21,34 @@ const close = async () => {
 }
 
 describe('serve PHP files', () => {
-  it('should respond to bonjour.php', async done => {
+  it('should respond to bonjour.php', async () => {
     await open()
 
-    request(liveServer.httpServer)
+    await request(liveServer.httpServer)
       .get('/bonjour.php')
       .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(/bonjour le monde!/i)
-      .expect(200, done)
+      .expect(200)
   })
 
-  it('should respond without file extension', async done => {
-    request(liveServer.httpServer)
+  it('should respond without file extension', async () => {
+    await request(liveServer.httpServer)
       .get('/bonjour')
       .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(/bonjour le monde!/i)
-      .expect(200, done)
+      .expect(200)
   })
 
-  it('should respond without instructions', async done => {
+  it('should respond without instructions', async () => {
     await close()
     phpPath = 'invalid_path'
     await open()
 
-    request(liveServer.httpServer)
+    await request(liveServer.httpServer)
       .get('/bonjour.php')
       .expect('Content-Type', /text\/html; charset=utf-8/i)
       .expect(/Follow the steps below/i)
-      .expect(500, done)
+      .expect(500)
   })
 })
 
