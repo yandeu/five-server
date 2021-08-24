@@ -142,8 +142,10 @@ export default class LiveServer {
     return this.colors[this.colorIndex % this.colors.length]
   }
 
-  // WebSocket clients
-  public clients: ExtendedWebSocket[] = []
+  /** WebSocket Server */
+  private wss!: WebSocket.Server
+  /** WebSocket Clients Array */
+  public wsc: ExtendedWebSocket[] = []
 
   // http sockets
   public sockets: Set<any> = new Set()
@@ -485,9 +487,9 @@ export default class LiveServer {
      * STEP: 3/4
      * Make WebSocket Connection using "ws" (https://www.npmjs.com/package/ws)
      */
-    const wss = new WebSocket.Server({ server: this.httpServer })
+    this.wss = new WebSocket.Server({ server: this.httpServer })
 
-    wss.on('connection', (ws: ExtendedWebSocket, req: any) => {
+    this.wss.on('connection', (ws: ExtendedWebSocket, req: any) => {
       if (remoteLogs !== false) ws.send('initRemoteLogs')
       ws.send('connected')
 
@@ -515,8 +517,11 @@ export default class LiveServer {
       //   message.log('WS ERROR:', err)
       // })
 
-      ws.on('message', data => {
+      ws.on('message', (data, isBinary) => {
         try {
+          // see: https://github.com/websockets/ws/releases/tag/8.0.0
+          data = isBinary ? data : data.toString()
+
           if (typeof data === 'string') {
             const json = JSON.parse(data)
 
@@ -541,12 +546,12 @@ export default class LiveServer {
       })
 
       ws.on('close', () => {
-        this.clients = this.clients.filter(function (x) {
+        this.wsc = this.wsc.filter(function (x) {
           return x !== ws
         })
       })
 
-      this.clients.push(ws)
+      this.wsc.push(ws)
     })
 
     /**
@@ -592,7 +597,7 @@ export default class LiveServer {
       const phpChange = path.extname(changePath) === '.php'
       if ((htmlChange || phpChange) && injectBody) return
 
-      this.clients.forEach(ws => {
+      this.wsc.forEach(ws => {
         if (ws) ws.sendWithDelay(cssChange ? 'refreshcss' : 'reload')
       })
     }
@@ -647,7 +652,7 @@ export default class LiveServer {
    * @param url Navigates to the given URL.
    */
   public navigate(url: string) {
-    this.clients.forEach(ws => {
+    this.wsc.forEach(ws => {
       if (ws) ws.sendWithDelay(JSON.stringify({ navigate: url }))
     })
   }
@@ -663,14 +668,14 @@ export default class LiveServer {
 
   /** Reloads all browser windows */
   public reloadBrowserWindow() {
-    this.clients.forEach(ws => {
+    this.wsc.forEach(ws => {
       if (ws) ws.sendWithDelay('reload')
     })
   }
 
   /** Send message to the client. (Will show a popup in the Browser) */
   public sendMessage(file: string, msg: string | string[], type = 'info') {
-    this.clients.forEach(ws => {
+    this.wsc.forEach(ws => {
       // send message or message[s]
       const content = typeof msg === 'string' ? { message: msg } : { messages: msg }
       if (ws && ws.file === file) ws.send(JSON.stringify(content))
@@ -679,14 +684,14 @@ export default class LiveServer {
 
   /** Manually refresh css */
   public refreshCSS(showPopup = true) {
-    this.clients.forEach(ws => {
+    this.wsc.forEach(ws => {
       if (ws) ws.sendWithDelay(showPopup ? 'refreshcss' : 'refreshcss-silent')
     })
   }
 
   /** Inject a a new <body> into the DOM. (Better prepend parseBody first) */
   public updateBody(file: string, body: any) {
-    this.clients.forEach(ws => {
+    this.wsc.forEach(ws => {
       if (ws && ws.file === file) ws.send(JSON.stringify({ body, hot: true }))
     })
   }
@@ -697,7 +702,7 @@ export default class LiveServer {
 
   /** @deprecated */
   public highlight(file: string, position: { line: number; character: number }) {
-    this.clients.forEach(ws => {
+    this.wsc.forEach(ws => {
       if (ws && ws.file === file) ws.sendWithDelay(JSON.stringify({ position }))
     })
   }
@@ -715,8 +720,9 @@ export default class LiveServer {
       await this.watcher.close()
     }
 
-    for (const client of this.clients) {
-      await client.close()
+    this.wss.close()
+    for (const ws of this.wsc) {
+      ws.terminate()
     }
 
     for (const socket of this.sockets) {

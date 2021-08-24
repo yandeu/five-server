@@ -32,7 +32,7 @@ beforeAll(async () => {
 
 describe('remote logs', () => {
   it('should be connected to one client', () => {
-    expect(fiveServer.clients.length).toBe(1)
+    expect(fiveServer.wsc.length).toBe(1)
   })
 
   it('should receive logs', async () => {
