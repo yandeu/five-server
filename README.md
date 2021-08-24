@@ -164,10 +164,12 @@ _If you provide an array, the first browser found will be opened._
 
 Following options are all valid:
 
-```
+```bash
 'chrome'
 ['firefox', 'chrome --incognito']
 ['C:\\Program Files\\Firefox Developer Edition\\firefox.exe --private-window']
+
+# if 'chrome' does not work, try 'google chrome' or 'google-chrome'
 ```
 
 ### PHP Server
