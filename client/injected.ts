@@ -8,6 +8,8 @@ if ('WebSocket' in window) {
   window.addEventListener('load', () => {
     console.log('[Five Server] connecting...')
 
+    let timer: any = null
+
     const script = document.querySelector('[data-id="five-server"]') as HTMLScriptElement
     const protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://'
     const address = `${protocol}${new URL(script.src).host}${window.location.pathname.replace(/\/+$/gm, '/fsws')}`
@@ -63,6 +65,15 @@ if ('WebSocket' in window) {
       wrapper.appendChild(el)
 
       document.body.appendChild(wrapper)
+
+      // remove popup from DOM after 'time'
+      if (timer) {
+        clearTimeout(timer)
+        timer = null
+      }
+      timer = setTimeout(() => {
+        if (wrapper && wrapper.isConnected) wrapper.remove()
+      }, time * 1000)
 
       if (type === 'error') {
         wrapper.style.top = '4px'
