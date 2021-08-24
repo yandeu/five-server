@@ -39,6 +39,7 @@ if ('WebSocket' in window) {
 
       wrapper = document.createElement('div')
       wrapper.id = 'fiveserver-info-wrapper'
+      wrapper.classList.add(`fiveserver-info-wrapper_${type}`)
 
       wrapper.style.zIndex = '100'
       wrapper.style.display = 'flex'
