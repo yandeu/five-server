@@ -26,7 +26,8 @@ if ('WebSocket' in window) {
     ) => {
       const str = JSON.stringify({ message, type, options })
 
-      if (lastPopUp === str) return
+      // block identical popups, except "css update"
+      if (lastPopUp === str && message !== 'css updated') return
       lastPopUp = str
 
       let wrapper = document.getElementById('fiveserver-info-wrapper')
