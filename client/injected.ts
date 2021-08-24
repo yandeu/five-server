@@ -143,11 +143,17 @@ if ('WebSocket' in window) {
       for (let i = 0; i < sheets.length; ++i) {
         const el = sheets[i]
 
-        // changing the href of the css file will make the browser refetch it
-        const url = el.href.replace(/(&|\?)_cacheOverride=\d+/, '')
-        el.href = `${url}${url.indexOf('?') >= 0 ? '&' : '?'}_cacheOverride=${new Date().valueOf()}`
+        const newEl = el.cloneNode(true) as HTMLLinkElement
 
-        head.appendChild(el)
+        // changing the href of the css file will make the browser refetch it
+        const url = newEl.href.replace(/(&|\?)_cacheOverride=\d+/, '')
+        newEl.href = `${url}${url.indexOf('?') >= 0 ? '&' : '?'}_cacheOverride=${new Date().valueOf()}`
+
+        newEl.onload = () => {
+          setTimeout(() => el.remove(), 0)
+        }
+
+        head.appendChild(newEl)
       }
 
       if (sheets.length > 0 && showPopup) popup('css updated', 'info')
