@@ -87,14 +87,14 @@ export const getConfigFile = (configFile: string | boolean = true, workspace?: s
             }
 
             options = { ...options, ...config }
-          } catch (err) {
+          } catch (err: any) {
             message.error(err.message, f, false)
           }
         } else {
           const config = fs.readFileSync(configPath, 'utf8')
           try {
             options = { ...options, ...JSON.parse(config) }
-          } catch (err) {
+          } catch (err: any) {
             message.error(err.message, f, false)
           }
         }

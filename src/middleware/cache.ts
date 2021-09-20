@@ -47,7 +47,7 @@ export const cache = async (req: Request, res: Response, next) => {
     res.setHeader('Age', 0)
     res.setHeader('X-Cache', 'Miss from fiveserver')
     return res.type(ext).send(file)
-  } catch (error) {
+  } catch (error: any) {
     return res.status(error.code).send(error.message)
   }
 }

@@ -36,7 +36,7 @@ export const getCertificate = (cacheDir: string = '.cache') => {
       try {
         fs.unlinkSync(certificatePath)
         //file removed
-      } catch (err) {
+      } catch (err: any) {
         message.error(err.message, null, false)
       }
 
