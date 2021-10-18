@@ -517,10 +517,10 @@ export default class LiveServer {
       //   message.log('WS ERROR:', err)
       // })
 
-      ws.on('message', (data, isBinary) => {
+      ws.on('message', (_data, isBinary) => {
         try {
           // see: https://github.com/websockets/ws/releases/tag/8.0.0
-          data = isBinary ? data : data.toString()
+          const data = isBinary ? _data : _data.toString()
 
           if (typeof data === 'string') {
             const json = JSON.parse(data)
