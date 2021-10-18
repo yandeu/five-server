@@ -194,10 +194,15 @@ if ('WebSocket' in window) {
         try {
           const body = _internalDOMBody
 
-          const newBody = domParser.parseFromString(d, 'text/html')
+          const newBody = domParser.parseFromString(d, 'text/html').querySelector('body')
 
           const tmp = document.createElement('body')
           tmp.innerHTML = d
+
+          if (newBody) {
+            tmp.id = newBody.id
+            tmp.classList.add(newBody.classList.value)
+          }
 
           const diff = _dd.diff(body, tmp)
 
