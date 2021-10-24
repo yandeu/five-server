@@ -78,7 +78,8 @@ export const code = (filePath: string) => {
 export const injectCode = (root: string, PHP: any) => {
   return async (req: Request, res: Response, next) => {
     if (req.url === '/' || extname(req.url) === '.html' || extname(req.url) === '.htm' || extname(req.url) === '.php') {
-      const filePath = resolve(join(root + req.url))
+      let filePath = resolve(join(root + req.url))
+      filePath = decodeURI(filePath)
 
       if (!existsSync(filePath)) return next()
       if (!statSync(filePath).isFile()) return next()

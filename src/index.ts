@@ -678,7 +678,7 @@ export default class LiveServer {
     this.wsc.forEach(ws => {
       // send message or message[s]
       const content = typeof msg === 'string' ? { message: msg } : { messages: msg }
-      if (ws && ws.file === file) ws.send(JSON.stringify(content))
+      if (ws && ws.file === decodeURI(file)) ws.send(JSON.stringify(content))
     })
   }
 
@@ -692,7 +692,7 @@ export default class LiveServer {
   /** Inject a a new <body> into the DOM. (Better prepend parseBody first) */
   public updateBody(file: string, body: any) {
     this.wsc.forEach(ws => {
-      if (ws && ws.file === file) ws.send(JSON.stringify({ body, hot: true }))
+      if (ws && ws.file === decodeURI(file)) ws.send(JSON.stringify({ body, hot: true }))
     })
   }
 
@@ -703,7 +703,7 @@ export default class LiveServer {
   /** @deprecated */
   public highlight(file: string, position: { line: number; character: number }) {
     this.wsc.forEach(ws => {
-      if (ws && ws.file === file) ws.sendWithDelay(JSON.stringify({ position }))
+      if (ws && ws.file === decodeURI(file)) ws.sendWithDelay(JSON.stringify({ position }))
     })
   }
 
