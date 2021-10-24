@@ -199,9 +199,17 @@ if ('WebSocket' in window) {
           const tmp = document.createElement('body')
           tmp.innerHTML = d
 
+          // copy all attributes
           if (newBody) {
-            tmp.id = newBody.id
-            tmp.classList.add(newBody.classList.value)
+            if (newBody.attributes.length > 0)
+              for (let i = 0; i < newBody.attributes.length; i++) {
+                const attr = newBody.attributes.item(i)
+                if (attr) {
+                  const newAttr = document.createAttribute(attr.name)
+                  newAttr.value = attr.value
+                  tmp.attributes.setNamedItem(newAttr)
+                }
+              }
           }
 
           const diff = _dd.diff(body, tmp)
