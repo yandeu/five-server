@@ -1,5 +1,7 @@
 declare const diffDOM: any
 
+import { Highlight } from './highlight'
+
 // clone the current state of the body before any javascript
 // manipulates it inside window.addEventListener('load', (...))
 let _internalDOMBody = document.body ? document.body.cloneNode(true) : undefined
@@ -7,6 +9,12 @@ let _internalDOMBody = document.body ? document.body.cloneNode(true) : undefined
 if ('WebSocket' in window) {
   window.addEventListener('load', () => {
     console.log('[Five Server] connecting...')
+
+    const highlight = new Highlight(true)
+    highlight.redraw()
+    window.addEventListener('resize', () => {
+      highlight.redraw()
+    })
 
     let timer: any = null
 
@@ -286,6 +294,9 @@ if ('WebSocket' in window) {
           // message and messages 🤣
           if (d.messages) appendMessages(d.messages)
           if (d.message) appendMessage(d.message)
+
+          // redraw the highlight on body update
+          if (d.body) highlight.redraw()
         }
       }
       socket.onopen = function () {
@@ -307,7 +318,7 @@ if ('WebSocket' in window) {
         const style = document.createElement('style')
         style.innerHTML = `      
       /* Injected by five-server */
-      [data-highlight="true"] {
+      /*[data-highlight="true"] {
         border: 1px rgb(90,170,255) solid !important;
         background-color: rgba(155,215,255,0.5);
         animation: fadeOutHighlight 1s forwards 0.5s;
@@ -315,7 +326,7 @@ if ('WebSocket' in window) {
       img[data-highlight="true"] {
         filter: sepia(100%) hue-rotate(180deg) saturate(200%);
         animation: fadeOutHighlightIMG 0.5s forwards 0.5s;
-      }
+      }*/
       @keyframes fadeOutHighlight {
         from {background-color: rgba(155,215,255,0.5);}
         to {background-color: rgba(155,215,255,0);}
