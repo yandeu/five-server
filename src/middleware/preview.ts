@@ -4,19 +4,21 @@
  * @license   {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
  */
 
+import { PREVIEW, PREVIEW_FULLSCREEN } from '../public'
 import { basename, extname, join, resolve } from 'path'
 import { readFileSync, statSync } from 'fs'
-import { PREVIEW } from '../public'
 import { fileTypes } from '../fileTypes'
 import { htmlPath } from './explorer'
 
 export const preview = (root: string, injectToAny: boolean) => {
   return (req, res, next) => {
     if (!injectToAny) return next()
-    if (!['.preview', '.php'].includes(extname(req.url))) return next()
+    if (!['.preview', '.fullscreen', '.php'].includes(extname(req.url))) return next()
+
+    const isFullscreenPreview = /\.fullscreen$/.test(req.url)
 
     // remove .preview
-    req.url = req.url.replace(/\.preview$/, '')
+    req.url = req.url.replace(/\.preview$|\.fullscreen$/, '')
     const URL = decodeURI(req.url)
 
     const isPHP = extname(req.url) === '.php'
@@ -41,7 +43,7 @@ export const preview = (root: string, injectToAny: boolean) => {
       let preview = ''
 
       if (isImage)
-        preview = `<div class="image" text-align:center; line-height: 0; padding: 0;">
+        preview = `<div class="image" style="background: white;">
         
         <img style="max-width: 100%;" src="${URL}"></div>`
       else if (isVideo) {
@@ -97,10 +99,12 @@ export const preview = (root: string, injectToAny: boolean) => {
             </div>`
       }
 
-      const html = PREVIEW.replace('{linked-path}', htmlPath(URL))
-        .replace('{fileName}', fileName)
-        .replace('{ext}', ext)
-        .replace('{phpMsg}', phpMsg)
+      const TEMPLATE = isFullscreenPreview ? PREVIEW_FULLSCREEN : PREVIEW
+
+      const html = TEMPLATE.replace('{linked-path}', htmlPath(URL))
+        .replace(/{fileName}/gm, fileName)
+        .replace(/{ext}/gm, ext)
+        .replace('{phpMsg}', phpMsg ? `<div class="message"><p>${phpMsg}</p></div>` : '')
         .replace('{preview}', preview)
 
       return res.type('html').send(html)

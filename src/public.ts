@@ -6,3 +6,7 @@ export const STATUS_CODE = readFileSync(join(__dirname, '../public/serve-preview
 export const PHP_ERROR = readFileSync(join(__dirname, '../public/serve-php/error.html'), 'utf8')
 export const PHP_TEMPLATE = readFileSync(join(__dirname, '../public/serve-php/index.html'), 'utf8')
 export const PREVIEW = readFileSync(join(__dirname, '../public/serve-preview/preview.html'), 'utf8')
+export const PREVIEW_FULLSCREEN = readFileSync(
+  join(__dirname, '../public/serve-preview/preview-fullscreen.html'),
+  'utf8'
+)

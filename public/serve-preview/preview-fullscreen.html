@@ -18,30 +18,42 @@
     <script src="/fiveserver/serve-preview/highlight.min.js"></script>
 
     <link rel="stylesheet" href="/fiveserver/scripts/directory.css" />
+
+    <style>
+      html {
+        background: white !important;
+      }
+      body {
+        padding: 0;
+        margin: 0;
+        min-height: unset;
+        max-width: unset;
+        /* overflow: hidden; */
+      }
+      .preview-fullscreen iframe {
+        min-height: 100vh !important;
+      }
+      .preview-fullscreen img,
+      .preview-fullscreen video {
+        width: 100%;
+        max-height: 100vh;
+        margin: 0 auto;
+      }
+      .preview-fullscreen code {
+        min-height: calc(100vh - 64px) !important;
+        margin: 16px !important;
+        margin-bottom: 32px !important;
+      }
+    </style>
   </head>
   <body>
-    <div id="wrapper">
-      <div class="directory">
-        <h1>
-          <a href="/">~</a>{linked-path}<small style="margin-left: 12px">
-            <a href="{fileName}{ext}.fullscreen">[fullscreen]</a>
-          </small>
-        </h1>
-
-        {phpMsg}
-
-        <div class="preview">{preview}</div>
-      </div>
-
-      <div class="footer">
-        <p>Preview Developed by <a href="https://github.com/yandeu">@yandeu</a></p>
-      </div>
-    </div>
-
+    <div class="preview-fullscreen">{preview}</div>
     <script>
       let fileName = "{fileName}";
       let ext = "{ext}";
       let lang = hljs.getLanguage(ext);
+
+      if (ext === "pdf") document.body.style.overflow = "hidden";
 
       if (lang && lang.aliases && typeof lang.aliases[0] === "string") {
         lang = lang.aliases[0];
