@@ -18,7 +18,7 @@ export interface LiveServerParams {
   cache?: boolean
   /** Enable or disable the use of a config file. Or specify a custom path to your config file. */
   configFile?: boolean | string
-  /** Enable CORS. */
+  /** Enable CORS. (default: true) */
   cors?: boolean
   /** When set, serve this file (server root relative) for every 404 (useful for single-page applications). */
   file?: string

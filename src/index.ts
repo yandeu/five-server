@@ -176,7 +176,7 @@ export default class LiveServer {
     const {
       browser = 'default',
       cache = true,
-      cors = false,
+      cors = true,
       file,
       htpasswd = null,
       https: _https = null,
