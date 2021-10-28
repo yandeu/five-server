@@ -189,16 +189,19 @@ module.exports = {
 
 By default, the caching route (`/.cache`) is activated.
 
-If in development you often load files from a CDN (styles, images, scripts, etc.), you might not want to make a http request to the CDN server on every reload. To prevent this and load your assets faster, simply prepend `/.cache/` to your resources.
+If in development you often load files from a CDN (styles, images, scripts, etc.), you might not want to make a http request to the CDN server on every reload. To prevent this and load your assets faster, simply add the `cache` attribute or manually prepend `/.cache/` to your resources.
 
 Example:
 
 ```html
-<!-- do this -->
-<link rel="stylesheet" href="/.cache/https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css" />
+<!-- adding "cache" ... -->
+<link cache rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css" />
 
-<!-- instead of this -->
+<!-- will convert this ... -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css" />
+
+<!-- into this. -->
+<link rel="stylesheet" href="/.cache/https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css" />
 ```
 
 ### Server Side Rendering (like express.js)

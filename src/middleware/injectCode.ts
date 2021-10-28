@@ -49,6 +49,11 @@ export class Inject extends Writable {
       data = data.replace(this.injectTag, this.code + this.injectTag)
     }
 
+    // convert cache to [src|href]="/.cache/.."
+    const replacer = (match, p1, p2, _offset, _string) =>
+      match.replace(p1, '').replace(p2, `/.cache/${p2.replace(/^\//, '')}`)
+    data = data.replace(/<[^>]*(cache.)[^>]*[src|href]="(\S+)"[^>]*>/gm, replacer)
+
     this.data = data
   }
 
@@ -75,6 +80,7 @@ export const code = (filePath: string) => {
   `
 }
 
+/** Injects the five-server script into the html page and converts the cache attributes. */
 export const injectCode = (root: string, PHP: any) => {
   return async (req: Request, res: Response, next) => {
     if (req.url === '/' || extname(req.url) === '.html' || extname(req.url) === '.htm' || extname(req.url) === '.php') {
