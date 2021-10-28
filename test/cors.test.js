@@ -43,6 +43,14 @@ describe('cors tests', function () {
       .expect('Access-Control-Allow-Credentials', 'true')
       .expect(204, done)
   })
+  // see: https://github.com/yandeu/five-server-vscode/issues/9
+  it('should add custom headers', function (done) {
+    request(liveServer.httpServer)
+      .get('/index.html')
+      .expect('Cross-Origin-Opener-Policy', 'same-origin')
+      .expect('Cross-Origin-Embedder-Policy', 'require-corp')
+      .expect(200, done)
+  })
 })
 
 afterAll(async () => {
