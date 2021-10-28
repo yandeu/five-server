@@ -18,6 +18,7 @@ const http = require('http')
 const https = require('https')
 const owns = {}.hasOwnProperty
 
+import type { NextFunction, Request, Response } from 'express'
 import type { request as requestFnc } from 'http'
 
 export interface ProxyMiddlewareOptions extends Omit<URL, 'toJSON'> {
@@ -29,6 +30,10 @@ export interface ProxyMiddlewareOptions extends Omit<URL, 'toJSON'> {
   via: boolean
   /** @deprecated The path property is a concatenation of the pathname and search components. */
   path: string
+}
+
+interface RequestWithRetry extends Request {
+  retries: number
 }
 
 module.exports = function proxyMiddleware(options: ProxyMiddlewareOptions) {
@@ -45,7 +50,7 @@ module.exports = function proxyMiddleware(options: ProxyMiddlewareOptions) {
   // options.port = options.port
   options.pathname = options.pathname || '/'
 
-  return async function (req: IncomingMessage, res: ServerResponse, next) {
+  return async function doRequest(req: RequestWithRetry, res: Response, next: NextFunction) {
     let url = req.url as string
     // You can pass the route within the options, as well
     if (typeof options.route === 'string') {
@@ -81,6 +86,9 @@ module.exports = function proxyMiddleware(options: ProxyMiddlewareOptions) {
       // Forwarding the host breaks dotcloud
       delete opts.headers.host
     }
+
+    const MAX_RETRY = 20
+    const RETRY_TIMEOUT = 200
 
     const myReq = request(opts, (request: IncomingMessage) => {
       const statusCode = request.statusCode
@@ -141,7 +149,20 @@ module.exports = function proxyMiddleware(options: ProxyMiddlewareOptions) {
     })
 
     myReq.on('error', function (err) {
-      next(err)
+      if (!req.retries) req.retries = 0
+
+      // retry every x ms (in case your dev-server needs some time to restart)
+      if (req.retries < MAX_RETRY) {
+        setTimeout(() => {
+          req.retries++
+          return doRequest(req, res, next)
+        }, RETRY_TIMEOUT)
+      }
+
+      // exit with error
+      else {
+        return next(err)
+      }
     })
 
     if (req.readable) req.pipe(myReq)
