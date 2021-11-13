@@ -4,7 +4,7 @@
  * @license   {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
  */
 
-import type { Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express6'
 import { extname } from 'path'
 import { fileTypes } from '../fileTypes'
 import { nodeFetch } from '../nodeFetch'
@@ -12,8 +12,8 @@ import { nodeFetch } from '../nodeFetch'
 const _cache: Map<string, { timestamp: number; file: string | Buffer }> = new Map()
 const _maxCacheTime = 3600 // one hour (in seconds)
 
-export const cache = async (req: Request, res: Response, next) => {
-  let url = req.url.replace(/^\//, '')
+export const cache = async (req: Request, res: Response, next: NextFunction) => {
+  let url = req.url?.replace(/^\//, '') as string
 
   const protocol = req.protocol
   const host = req.headers['host']

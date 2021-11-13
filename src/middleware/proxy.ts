@@ -18,7 +18,7 @@ const http = require('http')
 const https = require('https')
 const owns = {}.hasOwnProperty
 
-import type { NextFunction, Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express6'
 import type { request as requestFnc } from 'http'
 
 export interface ProxyMiddlewareOptions extends Omit<URL, 'toJSON'> {

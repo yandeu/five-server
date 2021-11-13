@@ -4,7 +4,7 @@
  * @license   {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
  */
 
-import { Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express6'
 import { createReadStream, existsSync, fstat, statSync } from 'fs'
 import { extname, join, resolve } from 'path'
 import { Writable } from 'stream'
@@ -82,8 +82,11 @@ export const code = (filePath: string) => {
 
 /** Injects the five-server script into the html page and converts the cache attributes. */
 export const injectCode = (root: string, PHP: any) => {
-  return async (req: Request, res: Response, next) => {
-    if (req.url === '/' || extname(req.url) === '.html' || extname(req.url) === '.htm' || extname(req.url) === '.php') {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    if (
+      req.url &&
+      (req.url === '/' || extname(req.url) === '.html' || extname(req.url) === '.htm' || extname(req.url) === '.php')
+    ) {
       let filePath = resolve(join(root + req.url))
       filePath = decodeURI(filePath)
 

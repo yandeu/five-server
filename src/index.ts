@@ -19,9 +19,7 @@ import https from 'https'
 import os from 'os'
 import path from 'path'
 
-// MOD: Replaced "connect" by "express"
-// const connect = require('connect')
-import express from 'express'
+import { express, Static as serveStatic } from 'express6'
 
 import WebSocket, { WebSocketServer } from 'ws'
 
@@ -283,7 +281,7 @@ export default class LiveServer {
      */
 
     // express.js
-    const app = express()
+    const app: any = express()
 
     // change x-powered-by
     app.use((req, res, next) => {
@@ -314,7 +312,7 @@ export default class LiveServer {
     })
 
     // fiveserver /public
-    app.use('/fiveserver', express.static(path.join(__dirname, '../public')))
+    app.use('/fiveserver', serveStatic(path.join(__dirname, '../public')))
 
     /*
       // logger has been removed from the core
@@ -360,7 +358,7 @@ export default class LiveServer {
       app.use(R, injectCode(mountPath, PHP))
 
       // serve static files via express.static()
-      app.use(R, express.static(mountPath))
+      app.use(R, serveStatic(mountPath))
 
       // log the mapping folder
       if (this.logLevel >= 1) message.log(`Mapping "${R}" to "${TARGET}"`)
@@ -401,7 +399,7 @@ export default class LiveServer {
     app.use(injectHandler)
 
     // serve static files (ignore php files) (don't serve index files)
-    app.use(ignoreExtension(['php'], express.static(root, { index: false })))
+    app.use(ignoreExtension(['php'], serveStatic(root, { index: false })))
 
     // inject to fallback "file"
     app.use(fallbackFile(injectHandler, file))
