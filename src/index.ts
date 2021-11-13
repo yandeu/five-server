@@ -23,9 +23,7 @@ import path from 'path'
 // const connect = require('connect')
 import express from 'express'
 
-// MOD: Replaced "faye-websocket" by "ws"
-// const WebSocket: any = require('faye-websocket')
-import WebSocket from 'ws' // eslint-disable-line sort-imports
+import WebSocket, { WebSocketServer } from 'ws'
 
 // some imports
 import { Colors, colors } from './colors'
@@ -55,6 +53,7 @@ import { ignoreExtension } from './middleware/ignoreExtension'
 import { favicon } from './middleware/favicon'
 import { notFound } from './middleware/notFound'
 import { cache as cacheMiddleware } from './middleware/cache'
+import type { Socket } from 'net'
 
 export { LiveServerParams }
 
@@ -143,12 +142,12 @@ export default class LiveServer {
   }
 
   /** WebSocket Server */
-  private wss!: WebSocket.Server
+  private wss!: WebSocketServer
   /** WebSocket Clients Array */
   public wsc: ExtendedWebSocket[] = []
 
   // http sockets
-  public sockets: Set<any> = new Set()
+  public sockets: Set<Socket> = new Set()
   public ipColors: Map<string, Colors> = new Map()
 
   private _openURL!: string
@@ -495,7 +494,7 @@ export default class LiveServer {
      * STEP: 3/4
      * Make WebSocket Connection using "ws" (https://www.npmjs.com/package/ws)
      */
-    this.wss = new WebSocket.Server({ server: this.httpServer })
+    this.wss = new WebSocketServer({ server: this.httpServer })
 
     this.wss.on('connection', (ws: ExtendedWebSocket, req: any) => {
       if (remoteLogs !== false) ws.send('initRemoteLogs')
