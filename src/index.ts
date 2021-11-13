@@ -231,9 +231,9 @@ export default class LiveServer {
     else if (openPath === undefined || openPath === true) openPath = ''
     else if (openPath === null || openPath === false) openPath = null
     // replace \ by /
-    if (typeof openPath === 'string') openPath = openPath.replace(/\\/, '/')
+    if (typeof openPath === 'string') openPath = openPath.replace(/\\/gm, '/')
     else if (Array.isArray(openPath)) {
-      openPath.map(p => p.replace(/\\/, '/'))
+      openPath.map(p => p.replace(/\\/gm, '/'))
     }
 
     if (options.noBrowser) openPath = null // Backwards compatibility
