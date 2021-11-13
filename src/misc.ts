@@ -21,6 +21,11 @@ export const fileDoesExist = (path: string): Promise<boolean> => {
   })
 }
 
+// https://docs.python.org/3/library/stdtypes.html#str.splitlines
+export const splitLines = (str: string): string => {
+  return str.replace(/\r\n|\r|\n/gm, '')
+}
+
 export const escape = html => escapeHtml(html)
 
 export const removeLeadingSlash = (str: string): string => {
