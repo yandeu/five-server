@@ -3,14 +3,16 @@ name: CI
 on:
   push:
     paths:
+      - '.github/**'
       - 'client/**'
       - 'src/**'
-      - '.github/**'
+      - 'test/**'
   pull_request:
     paths:
+      - '.github/**'
       - 'client/**'
       - 'src/**'
-      - '.github/**'
+      - 'test/**'
 
 jobs:
   build:
