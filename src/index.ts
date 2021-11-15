@@ -281,7 +281,7 @@ export default class LiveServer {
      */
 
     // express.js
-    const app: any = express()
+    const app = express()
 
     // change x-powered-by
     app.use((req, res, next) => {
@@ -430,10 +430,10 @@ export default class LiveServer {
         httpsConfig = { key: fakeCert, cert: fakeCert }
       }
 
-      this.httpServer = https.createServer(httpsConfig, app)
+      this.httpServer = https.createServer(httpsConfig, app as any)
       this._protocol = 'https'
     } else {
-      this.httpServer = http.createServer(app)
+      this.httpServer = http.createServer(app as any)
       this._protocol = 'http'
     }
 
