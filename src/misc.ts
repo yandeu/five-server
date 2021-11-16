@@ -1,9 +1,9 @@
-import { LiveServerParams } from '.'
+import { LiveServerParams } from './types'
 import { colors } from './colors'
-import escapeHtml from './dependencies/escape-html'
 import fs from 'fs'
 import { message } from './msg'
 import path from 'path'
+export * from './helpers'
 
 // just a fallback for removing http-errors dependency
 export const createError = (code: number, msg: string = 'unknown', _nothing?: any) => {
@@ -19,21 +19,6 @@ export const fileDoesExist = (path: string): Promise<boolean> => {
       } else return resolve(true)
     })
   })
-}
-
-// https://docs.python.org/3/library/stdtypes.html#str.splitlines
-export const splitLines = (str: string): string => {
-  return str.replace(/\r\n|\r|\n/gm, '')
-}
-
-export const escape = html => escapeHtml(html)
-
-export const removeLeadingSlash = (str: string): string => {
-  return str.replace(/^\/+/g, '')
-}
-
-export const removeTrailingSlash = (str: string) => {
-  return str.replace(/\/+$/g, '')
 }
 
 /**

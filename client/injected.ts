@@ -1,6 +1,7 @@
 declare const diffDOM: any
 
 import { Highlight } from './highlight'
+import { appendPathToUrl } from '../src/helpers'
 
 // clone the current state of the body before any javascript
 // manipulates it inside window.addEventListener('load', (...))
@@ -20,7 +21,7 @@ if ('WebSocket' in window) {
 
     const script = document.querySelector('[data-id="five-server"]') as HTMLScriptElement
     const protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://'
-    const address = `${protocol}${new URL(script.src).host}${window.location.pathname.replace(/\/+$/gm, '/fsws')}`
+    const address = appendPathToUrl(`${protocol}${new URL(script.src).host}`, 'fsws')
 
     const CONNECTED_MSG = '[Five Server] connected.'
     const MAX_ATTEMPTS = 25

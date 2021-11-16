@@ -10,8 +10,9 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node"
   },
-  "include": ["client/**/*"],
+  "include": ["client/**/*", "src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }
