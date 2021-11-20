@@ -1,18 +1,6 @@
 name: CI
 
-on:
-  push:
-    paths:
-      - '.github/**'
-      - 'client/**'
-      - 'src/**'
-      - 'test/**'
-  pull_request:
-    paths:
-      - '.github/**'
-      - 'client/**'
-      - 'src/**'
-      - 'test/**'
+on: [push, pull_request]
 
 jobs:
   build:

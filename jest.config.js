@@ -1,6 +1,7 @@
 module.exports = {
   collectCoverage: true,
   collectCoverageFrom: ['lib/*.js', 'lib/utils/*.js', 'lib/middleware/*.js'],
+  maxConcurrency: 1,
   maxWorkers: 1,
-  testTimeout: 15_000
+  testTimeout: 30_000
 }
