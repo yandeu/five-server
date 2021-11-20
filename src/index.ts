@@ -355,7 +355,7 @@ export default class LiveServer {
       if (R.indexOf('/') !== 0) R = `/${R}`
 
       // inject code to html and php files
-      app.use(R, injectCode(mountPath, PHP))
+      app.use(R, injectCode(mountPath, PHP, injectBody || false))
 
       // serve static files via express.static()
       app.use(R, serveStatic(mountPath))
@@ -386,14 +386,14 @@ export default class LiveServer {
         via: true
       }
 
-      app.use(ROUTE, require('./middleware/proxy')(proxyOpts))
+      app.use(ROUTE, require('./middleware/proxy')(proxyOpts, injectBody || false))
       if (this.logLevel >= 1) message.log(`Mapping "${ROUTE}" to "${TARGET}"`)
     }
 
     // find index file and modify req.url
     app.use(findIndex(root, withExtension, ['html', 'php']))
 
-    const injectHandler = injectCode(root, PHP)
+    const injectHandler = injectCode(root, PHP, injectBody || false)
 
     // inject five-server script
     app.use(injectHandler)

@@ -5,23 +5,29 @@ import { appendPathToUrl } from '../src/helpers'
 
 // clone the current state of the body before any javascript
 // manipulates it inside window.addEventListener('load', (...))
-let _internalDOMBody = document.body ? document.body.cloneNode(true) : undefined
+let _internalDOMBody
 
 if ('WebSocket' in window) {
   window.addEventListener('load', () => {
     console.log('[Five Server] connecting...')
+
+    const script = document.querySelector('[data-id="five-server"]') as HTMLScriptElement
+
+    const protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://'
+    const address = appendPathToUrl(`${protocol}${new URL(script.src).host}`, 'fsws')
+
+    // check if we need to clone the body for the "injectBody" feature or not
+    const optionsInjectBody = script.getAttribute('data-inject-body')
+    if (optionsInjectBody && optionsInjectBody.toString() === 'true')
+      _internalDOMBody = document.body ? document.body.cloneNode(true) : undefined
+
+    let timer: any = null
 
     const highlight = new Highlight(true)
     highlight.redraw()
     window.addEventListener('resize', () => {
       highlight.redraw()
     })
-
-    let timer: any = null
-
-    const script = document.querySelector('[data-id="five-server"]') as HTMLScriptElement
-    const protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://'
-    const address = appendPathToUrl(`${protocol}${new URL(script.src).host}`, 'fsws')
 
     const CONNECTED_MSG = '[Five Server] connected.'
     const MAX_ATTEMPTS = 25

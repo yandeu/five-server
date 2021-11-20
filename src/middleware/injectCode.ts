@@ -74,14 +74,15 @@ export class Inject extends Writable {
   }
 }
 
-export const code = (filePath: string) => {
+export const code = (filePath: string, injectBodyOptions: boolean) => {
+  const a = injectBodyOptions ? ' data-inject-body="true"' : ''
   return `<!-- Code injected by Five-server -->
-  <script async data-id="five-server" data-file="${filePath}" type="application/javascript" src="/fiveserver.js"></script>
+  <script async data-id="five-server" data-file="${filePath}"${a} type="application/javascript" src="/fiveserver.js"></script>
   `
 }
 
 /** Injects the five-server script into the html page and converts the cache attributes. */
-export const injectCode = (root: string, PHP: any) => {
+export const injectCode = (root: string, PHP: any, injectBodyOptions: boolean) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     if (
       req.url &&
@@ -93,7 +94,7 @@ export const injectCode = (root: string, PHP: any) => {
       if (!existsSync(filePath)) return next()
       if (!statSync(filePath).isFile()) return next()
 
-      const inject = new Inject(['</head>', '</html>', '</body>'], code(filePath))
+      const inject = new Inject(['</head>', '</html>', '</body>'], code(filePath, injectBodyOptions))
 
       if (extname(req.url) === '.php') {
         const html = await PHP.parseFile(filePath, res)
