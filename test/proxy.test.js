@@ -16,7 +16,7 @@ beforeAll(async () => {
     root: path.join(__dirname, 'data'),
     port: 0,
     open: false,
-    proxy: { '/server1': 'http://localhost:' + port }
+    proxy: { '/server1': 'http://127.0.0.1:' + port }
   })
 })
 
