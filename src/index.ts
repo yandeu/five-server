@@ -290,15 +290,7 @@ export default class LiveServer {
     })
 
     // enable CORS
-    if (cors) {
-      app.use(require('cors')({ credentials: true }))
-      // custom headers (see: https://github.com/yandeu/five-server-vscode/issues/9)
-      app.use((req, res, next) => {
-        res.setHeader('Cross-Origin-Opener-Policy', 'same-origin')
-        res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp')
-        next()
-      })
-    }
+    if (cors) app.use(require('cors')({ credentials: true }))
 
     // .cache
     if (cache) app.use('/.cache', cacheMiddleware)
