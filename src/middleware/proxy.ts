@@ -6,20 +6,19 @@
  * @license {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
  *
  * @description
- * copied and modified from roxy-middleware@0.15.0 (https://github.com/gonzalocasas/node-proxy-middleware/blob/master/index.js)
+ * copied and modified from proxy-middleware@0.15.0 (https://github.com/gonzalocasas/node-proxy-middleware/blob/master/index.js)
  * previously licensed under MIT (https://github.com/gonzalocasas/node-proxy-middleware/blob/master/LICENSE)
  */
 
-import { IncomingMessage, ServerResponse } from 'http'
 import { Inject, code } from './injectCode'
-
-const os = require('os')
-const http = require('http')
-const https = require('https')
-const owns = {}.hasOwnProperty
-
 import type { NextFunction, Request, Response } from 'express6'
+import { IncomingMessage } from 'http'
+import http from 'http'
+import https from 'https'
+import os from 'os'
 import type { request as requestFnc } from 'http'
+
+const owns = {}.hasOwnProperty
 
 export interface ProxyMiddlewareOptions extends Omit<URL, 'toJSON'> {
   cookieRewrite?: boolean
@@ -36,7 +35,7 @@ interface RequestWithRetry extends Request {
   retries: number
 }
 
-module.exports = function proxyMiddleware(options: ProxyMiddlewareOptions, injectBody: boolean) {
+export const proxyMiddleware = (options: ProxyMiddlewareOptions, injectBody: boolean) => {
   // enable ability to quickly pass a url for shorthand setup
   if (typeof options === 'string') {
     options = require('url').parse(options)
@@ -50,7 +49,7 @@ module.exports = function proxyMiddleware(options: ProxyMiddlewareOptions, injec
   // options.port = options.port
   options.pathname = options.pathname || '/'
 
-  return async function doRequest(req: RequestWithRetry, res: Response, next: NextFunction) {
+  const doRequest = async (req: RequestWithRetry, res: Response, next: NextFunction) => {
     let url = req.url as string
     // You can pass the route within the options, as well
     if (typeof options.route === 'string') {
@@ -168,6 +167,8 @@ module.exports = function proxyMiddleware(options: ProxyMiddlewareOptions, injec
     if (req.readable) req.pipe(myReq)
     else myReq.end()
   }
+
+  return doRequest
 }
 
 function applyViaHeader(existingHeaders, opts: ProxyMiddlewareOptions, applyTo) {

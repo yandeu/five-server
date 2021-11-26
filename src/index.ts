@@ -378,7 +378,8 @@ export default class LiveServer {
         via: true
       }
 
-      app.use(ROUTE, require('./middleware/proxy')(proxyOpts, injectBody || false))
+      const { proxyMiddleware } = require('./middleware/proxy')
+      app.use(ROUTE, proxyMiddleware(proxyOpts, injectBody || false))
       if (this.logLevel >= 1) message.log(`Mapping "${ROUTE}" to "${TARGET}"`)
     }
 
