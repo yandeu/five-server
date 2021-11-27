@@ -9,7 +9,9 @@
     "checkJs": false,
 
     "noImplicitAny": false,
+    "sourceMap": true,
     "declaration": true,
+    "declarationMap": true,
 
     "strict": true,
     "esModuleInterop": true,
