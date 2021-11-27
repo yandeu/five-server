@@ -7,6 +7,13 @@
 import { EventEmitter } from 'events'
 import { Worker } from 'worker_threads'
 import { join } from 'path'
+import { removeTmpDirectory } from './parseBody'
+
+interface Init {
+  phpExecPath?: string
+  phpIniPath?: string
+  cwd: string
+}
 
 interface WorkerPoolOptions {
   // Limit the send rate in milliseconds. (default: 50)
@@ -16,7 +23,7 @@ interface WorkerPoolOptions {
 
   logLevel?: number
   // Object passed to process on init
-  init?: any
+  init?: Init
 }
 
 /** Handles multiple Workers. */
@@ -30,7 +37,7 @@ export default class WorkerPool extends EventEmitter {
   private terminating = false
   private logLevel = 1
 
-  constructor(public script: string, options: WorkerPoolOptions = {}) {
+  constructor(public script: string, public options: WorkerPoolOptions = {}) {
     super()
 
     const { rateLimit = 50, worker = 1, logLevel = 1, init } = options
@@ -44,8 +51,10 @@ export default class WorkerPool extends EventEmitter {
     }
   }
 
-  public terminate() {
+  public async terminate() {
     this.terminating = true
+
+    await removeTmpDirectory(this.options.init?.cwd)
 
     this.removeAllListeners()
 
@@ -102,7 +111,7 @@ export default class WorkerPool extends EventEmitter {
     }, this.rateLimit)
   }
 
-  private create(init: any) {
+  private create(init: Init | object = {}) {
     if (this.terminating) return
 
     const worker = new Worker(join(__dirname, this.script))

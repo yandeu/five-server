@@ -11,6 +11,7 @@ import fs from 'fs'
 export class ExecPHP {
   private php: string | undefined
   private phpIni: string | undefined
+  public cwd!: string
 
   get path() {
     return this.php

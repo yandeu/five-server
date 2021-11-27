@@ -69,6 +69,9 @@ export default class LiveServer {
   public logLevel = 1
   public injectBody = false
 
+  /** Absolute path of workspace or process.cwd() */
+  private cwd: string = ''
+
   /** inject stript to any file */
   public servePreview = true
 
@@ -97,7 +100,7 @@ export default class LiveServer {
       worker: 2,
       rateLimit: 50,
       logLevel: this.logLevel,
-      init: { phpExecPath: PHP.path, phpIniPath: PHP.ini }
+      init: { phpExecPath: PHP.path, phpIniPath: PHP.ini, cwd: this.cwd }
     })
 
     this._parseBody.on('message', d => {
@@ -214,7 +217,7 @@ export default class LiveServer {
     // tmp
     const _tmp = options.root || process.cwd()
     /** CWD (absolute path) */
-    const cwd = workspace ? workspace : process.cwd()
+    this.cwd = workspace ? workspace : process.cwd()
     /** root (absolute path) */
     const root = workspace ? path.join(workspace, options.root ? options.root : '') : path.resolve(_tmp)
     /** file, dir, glob, or array => passed to chokidar.watch() (relative path to CWD) */
@@ -576,7 +579,7 @@ export default class LiveServer {
     // Setup file watcher
     if (watch === false) return
     this.watcher = chokidar.watch(watch as any, {
-      cwd: cwd,
+      cwd: this.cwd,
       ignoreInitial: true,
       ignored: ignored
     })
@@ -712,7 +715,7 @@ export default class LiveServer {
 
   /** Shutdown five-server */
   public async shutdown(): Promise<void> {
-    this._parseBody?.terminate()
+    await this._parseBody?.terminate()
 
     if (this.watcher) {
       await this.watcher.close()

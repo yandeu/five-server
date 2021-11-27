@@ -5,11 +5,12 @@
  */
 
 // https://html-validate.org/dev/using-api.html
+import { basename, join } from 'path'
+import { existsSync, writeFile } from 'fs'
+import { mkdir, rm } from 'fs/promises'
 import { ExecPHP } from '../utils/execPHP'
 import { HtmlValidate } from 'html-validate'
-import { basename } from 'path'
 import { parentPort } from 'worker_threads'
-import { writeFile } from 'fs'
 
 const PHP = new ExecPHP()
 
@@ -93,6 +94,19 @@ const writeTmpFile = (fileName: string, text: string): Promise<void> => {
   })
 }
 
+export const createTmpDirectory = async (cwd: string) => {
+  const tmpDir = join(cwd, '.php_tmp')
+  if (!existsSync(tmpDir)) await mkdir(tmpDir)
+  return tmpDir
+}
+
+export const removeTmpDirectory = async (cwd: string | undefined) => {
+  if (cwd) {
+    const tmpDir = join(cwd, '.php_tmp')
+    if (existsSync(tmpDir)) await rm(tmpDir, { recursive: true, force: true })
+  }
+}
+
 // let start
 
 // const reset_time = () => {
@@ -109,19 +123,25 @@ const writeTmpFile = (fileName: string, text: string): Promise<void> => {
 parentPort?.on('message', async (data: string) => {
   // reset_time()
 
-  const { text, shouldHighlight, cursorPosition, fileName, init } = JSON.parse(data)
+  const { text, shouldHighlight, cursorPosition, fileName, init, close } = JSON.parse(data)
 
   if (init) {
     PHP.path = init.phpExecPath
     PHP.ini = init.phpIniPath
+    PHP.cwd = init.cwd
     parentPort?.postMessage(JSON.stringify({ ignore: true }))
     return
   }
 
   const isPhp = /\.php$/.test(fileName)
-  const tmpFile = fileName.replace(basename(fileName), `.${basename(fileName)}`)
+  let tmpDir = '',
+    tmpFile = ''
 
-  if (isPhp) await writeTmpFile(tmpFile, text)
+  if (isPhp) {
+    tmpDir = await createTmpDirectory(PHP.cwd)
+    tmpFile = join(tmpDir, basename(fileName))
+    await writeTmpFile(tmpFile, text)
+  }
 
   const php = isPhp ? await PHP.parseFile(tmpFile, { status: () => {} }) : text
   const html = shouldHighlight ? injectHighlight(php, cursorPosition) : php
