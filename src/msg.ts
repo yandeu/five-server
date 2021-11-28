@@ -59,16 +59,16 @@ class Message extends EventEmitter {
     this.emit('message', { type: 'info', msg: m })
   }
 
-  error = (msg: string, comment: null | string = '', exit) => {
-    if (comment === null) comment = ''
-    if (comment !== '') comment += ':'
+  error = (msg: string, comment: null | string = ' ', exit = false, errorCode: number = 1) => {
+    if (comment === null) comment = ' '
+    if (comment !== ' ') comment = ` ${comment}: `
 
-    const m = msg ? colors(`ERROR: ${comment} ${msg}`, 'red') : colors(`ERROR: ${comment} unknown`, 'red')
+    const m = msg ? colors(`ERROR:${comment}${msg}`, 'red') : colors(`ERROR:${comment}unknown`, 'red')
 
     console.error(m)
     this.emit('message', { type: 'error', msg: m })
 
-    if (exit) process.exit(1)
+    if (exit) process.exit(errorCode)
   }
 }
 

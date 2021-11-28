@@ -13,6 +13,12 @@ export const colors = (str: string, clr: Colors) => {
   return `${open}${str}${close}`
 }
 
+export const removeColors = str => {
+  let _str = encodeURI(str)
+  _str = _str.replace(/%1B%5B\d+m/gm, '')
+  return decodeURI(_str)
+}
+
 export type Colors = keyof typeof colorCodes
 
 const colorCodes = {
