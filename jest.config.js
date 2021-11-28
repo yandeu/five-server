@@ -1,6 +1,6 @@
 module.exports = {
   collectCoverage: true,
-  collectCoverageFrom: ['lib/*.js', 'lib/utils/*.js', 'lib/middleware/*.js'],
+  collectCoverageFrom: ['lib/*.js', 'lib/**/*.js', '!lib/dependencies/**', '!lib/bin.js'],
   coverageReporters: ['html', 'lcov', 'text'],
   maxConcurrency: 1,
   maxWorkers: 1,
