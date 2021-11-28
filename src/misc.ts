@@ -6,7 +6,7 @@ import path from 'path'
 export * from './helpers'
 
 // just a fallback for removing http-errors dependency
-export const createError = (code: number, msg: string = 'unknown', _nothing?: any) => {
+export const createHttpError = (code: number = 500, msg: string = 'unknown', _nothing?: any) => {
   if (code !== 404) message.log(`ERROR: ${code} ${msg}`)
   return { message: msg, code, status: code, statusCode: code, name: code }
 }

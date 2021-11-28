@@ -17,7 +17,7 @@
  * previously licensed under MIT (https://github.com/expressjs/serve-index/blob/master/LICENSE)
  */
 
-import { createError } from '../misc' // const createError = require('http-errors')
+import { createHttpError } from '../misc' // const createHttpError = require('http-errors')
 const debug = require('debug')('explorer')
 import escapeHtml from '../dependencies/escape-html'
 import fs from 'fs'
@@ -93,7 +93,7 @@ const explorer = (root, options?: any) => {
     const dir = getRequestedDir(req)
 
     // bad request
-    if (dir === null) return next(createError(400))
+    if (dir === null) return next(createHttpError(400))
 
     // parse URLs
     const originalUrl = parseUrl.original(req)
@@ -103,12 +103,12 @@ const explorer = (root, options?: any) => {
     const path = normalize(join(rootPath, dir))
 
     // null byte(s), bad request
-    if (~path.indexOf('\0')) return next(createError(400))
+    if (~path.indexOf('\0')) return next(createHttpError(400))
 
     // malicious path
     if ((path + sep).substr(0, rootPath.length) !== rootPath) {
       debug('malicious path "%s"', path)
-      return next(createError(403))
+      return next(createHttpError(403))
     }
 
     // determine ".." display
