@@ -2,7 +2,7 @@ const path = require('path')
 const os = require('os')
 const { ExecPHP } = require('../lib/utils/execPHP')
 
-let phpPath = os.platform() === 'win32' ? 'C:\\xampp\\php\\php.exe' : '/usr/bin/php'
+let phpPath = os.platform() === 'win32' ? 'C:\\tools\\php81\\php.exe' : '/usr/bin/php'
 
 const PHP = new ExecPHP()
 PHP.php = phpPath

@@ -5,7 +5,7 @@ const LiveServer = require('../lib').default
 
 const liveServer = new LiveServer()
 
-let phpPath = os.platform() === 'win32' ? 'C:\\xampp\\php\\php.exe' : '/usr/bin/php'
+let phpPath = os.platform() === 'win32' ? 'C:\\tools\\php81\\php.exe' : '/usr/bin/php'
 
 const open = async () => {
   await liveServer.start({
