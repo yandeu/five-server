@@ -209,7 +209,6 @@ Example:
 ### Server Side Rendering (like express.js)
 
 You can enable live reload for any server side generated content.  
-(_Additional Plugin for Chrome available soon!_)
 
 Check out the express.js example at [/examples/express](https://github.com/yandeu/five-server/tree/main/examples/express).
 
