@@ -19,7 +19,12 @@ const htmlvalidate = new HtmlValidate({
   rules: {
     'close-attr': 'error', // necessary
     'close-order': 'error', // necessary
-    'element-name': 'error', // necessary
+    'element-name': [
+      'error',
+      {
+        whitelist: ['dialog']
+      }
+    ], // necessary
     deprecated: 'error',
     'no-dup-attr': 'error',
     'no-dup-class': 'error',
