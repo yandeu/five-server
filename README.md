@@ -159,6 +159,22 @@ module.exports = {
 }
 ```
 
+To prevent a single page from automatically reloading, add `data-server-no-reload` to the `<body>` tag:
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+    ...
+</head>
+<body data-server-no-reload>
+  ...
+</body>
+</html>
+```
+
+This will omit the usually injected Javascript from being instantiated on that given page.
+
 ### Browser of your choice
 
 The option browser can be a `string` or an `string[]`.  
