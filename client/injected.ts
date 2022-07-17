@@ -7,7 +7,7 @@ import { appendPathToUrl } from '../src/helpers'
 // manipulates it inside window.addEventListener('load', (...))
 let _internalDOMBody
 
-const block = (document.body) ? document.body.hasAttribute('data-server-no-reload') : false;
+const block = document.body.hasAttribute('data-server-no-reload');
 
 if (block) {
   console.info('[Five Server] Reload disabled due to \'data-server-no-reload\' attribute on BODY element')
