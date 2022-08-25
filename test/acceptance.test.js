@@ -27,6 +27,13 @@ describe('basic functional tests', function () {
       .expect(/<script [^]+?fiveserver.js[^]+?<\/script>/i)
       .expect(200, done)
   })
+  it('with query params: should have injected script', function (done) {
+    request(liveServer.httpServer)
+      .get('/index.html?a=b')
+      .expect('Content-Type', /text\/html; charset=utf-8/i)
+      .expect(/<script [^]+?fiveserver.js[^]+?<\/script>/i)
+      .expect(200, done)
+  })
   it('should inject script when tags are in CAPS', function (done) {
     request(liveServer.httpServer)
       .get('/index-caps.htm')

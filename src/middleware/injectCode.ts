@@ -9,6 +9,7 @@ import { createReadStream, existsSync, fstat, statSync } from 'fs'
 import { extname, join, resolve } from 'path'
 import { Writable } from 'stream'
 import { unzip as _unzip } from 'zlib'
+import url from 'url'
 
 /**
  * unzip: Decompress either a Gzip- or Deflate-compressed stream by auto-detecting the header.
@@ -84,11 +85,16 @@ export const code = (filePath: string, injectBodyOptions: boolean) => {
 /** Injects the five-server script into the html page and converts the cache attributes. */
 export const injectCode = (root: string, PHP: any, injectBodyOptions: boolean) => {
   return async (req: Request, res: Response, next: NextFunction) => {
+    const { pathname } = url.parse(req.url)
+
     if (
-      req.url &&
-      (req.url === '/' || extname(req.url) === '.html' || extname(req.url) === '.htm' || extname(req.url) === '.php')
+      pathname &&
+      (pathname === '/' ||
+        extname(pathname) === '.html' ||
+        extname(pathname) === '.htm' ||
+        extname(pathname) === '.php')
     ) {
-      let filePath = resolve(join(root + req.url))
+      let filePath = resolve(join(root + pathname))
       filePath = decodeURI(filePath)
 
       if (!existsSync(filePath)) return next()
@@ -96,7 +102,7 @@ export const injectCode = (root: string, PHP: any, injectBodyOptions: boolean) =
 
       const inject = new Inject(['</head>', '</html>', '</body>'], code(filePath, injectBodyOptions))
 
-      if (extname(req.url) === '.php') {
+      if (extname(pathname) === '.php') {
         const html = await PHP.parseFile(filePath, res)
         inject.doInjection(html)
         res.type('html')
