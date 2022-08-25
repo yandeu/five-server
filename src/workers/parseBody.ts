@@ -42,8 +42,18 @@ export const injectHighlight = (body: string, cursorPosition: { line: number; ch
     const char = cursorPosition.character
 
     // add five-server-cursor tag where cursor is
+    const part1 = lines[line].slice(0, char)
+    const part2 = lines[line].slice(char)
+
+    // simple check if cursor is inside a <> block
+    if (
+      part2.indexOf('<') > part2.indexOf('>') ||
+      (part2.indexOf('<') === -1 && part2.indexOf('<') < part2.indexOf('>'))
+    )
+      return body
+
     // eslint-disable-next-line prefer-template
-    lines[line] = lines[line].slice(0, char) + '<five-server-cursor></five-server-cursor>' + lines[line].slice(char)
+    lines[line] = part1 + '<five-server-cursor></five-server-cursor>' + part2
 
     let new_body = lines.join('\n')
     const root = parse(new_body)
