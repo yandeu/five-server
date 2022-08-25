@@ -2,7 +2,7 @@ const { injectHighlight } = require('../lib/workers/parseBody')
 
 // see: https://github.com/yandeu/five-server-vscode/issues/22
 
-// <body> is line -1
+// <body> is line 0
 
 const body = /* html */ `<body>
 <p>Working normally <br> Still Working</p>
@@ -15,7 +15,7 @@ const body = /* html */ `<body>
 </body>`
 
 it('should work', () => {
-  const parsed = injectHighlight(body, { line: 0, character: 4 })
+  const parsed = injectHighlight(body, { line: 1, character: 4 })
   const expected = body.replace(
     '<p>Working normally <br> Still Working</p>',
     '<p data-highlight="true">Working normally <br> Still Working</p>'
@@ -24,13 +24,13 @@ it('should work', () => {
 })
 
 it('should work', () => {
-  const parsed = injectHighlight(body, { line: 1, character: 12 })
+  const parsed = injectHighlight(body, { line: 2, character: 12 })
   const expected = body.replace('<p>With <b>bold</b> also</p>', '<p>With <b data-highlight="true">bold</b> also</p>')
   expect(expected).toBe(parsed)
 })
 
 it('should work', () => {
-  const parsed = injectHighlight(body, { line: 6, character: 36 })
+  const parsed = injectHighlight(body, { line: 7, character: 36 })
   const expected = body.replace(
     '<p>A <span>span</span> and a <span>span</span> not</p>',
     '<p>A <span>span</span> and a <span data-highlight="true">span</span> not</p>'
@@ -39,7 +39,7 @@ it('should work', () => {
 })
 
 it('should work', () => {
-  const parsed = injectHighlight(body, { line: 6, character: 24 })
+  const parsed = injectHighlight(body, { line: 7, character: 24 })
   const expected = body.replace(
     '<p>A <span>span</span> and a <span>span</span> not</p>',
     '<p data-highlight="true">A <span>span</span> and a <span>span</span> not</p>'

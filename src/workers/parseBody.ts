@@ -38,7 +38,7 @@ export const injectHighlight = (body: string, cursorPosition: { line: number; ch
 
   try {
     const lines = body.split('\n')
-    const line = cursorPosition.line + 1
+    const line = cursorPosition.line
     const char = cursorPosition.character
 
     // add five-server-cursor tag where cursor is
