@@ -11,6 +11,7 @@ import { mkdir, rm } from 'fs/promises'
 import { ExecPHP } from '../utils/execPHP'
 import { HtmlValidate } from 'html-validate'
 import { parentPort } from 'worker_threads'
+import { parse } from 'node-html-parser'
 
 const PHP = new ExecPHP()
 
@@ -32,63 +33,31 @@ const htmlvalidate = new HtmlValidate({
   }
 })
 
-const injectHighlight = (body: string, cursorPosition: any) => {
+export const injectHighlight = (body: string, cursorPosition: { line: number; character: number }) => {
   if (!cursorPosition) return body
 
-  const lines = body.split('\n')
-  let line = cursorPosition.line + 1
-  let char: any = cursorPosition.character
+  try {
+    const lines = body.split('\n')
+    const line = cursorPosition.line + 1
+    const char = cursorPosition.character
 
-  let i = -1
-  while (i === -1 && line >= 0 && lines[line]) {
-    line--
+    // add five-server-cursor tag where cursor is
+    // eslint-disable-next-line prefer-template
+    lines[line] = lines[line].slice(0, char) + '<five-server-cursor></five-server-cursor>' + lines[line].slice(char)
 
-    if (lines[line] === '') continue
-    if (!lines[line]) continue
+    let new_body = lines.join('\n')
+    const root = parse(new_body)
+    const span = root.querySelector('five-server-cursor')
+    const parent = span?.parentNode
+    if (!parent) throw new Error()
 
-    const htmlOpenTagRegex = /<[a-zA-Z]+(>|.*?[^?]>)/gm
-    const match = lines[line].match(htmlOpenTagRegex)
-
-    if (match) {
-      const firstIndex = lines[line].indexOf(match[0])
-      const lastIndex = lines[line].lastIndexOf(match[match.length - 1], char ? char : lines[line].length - 1)
-
-      // the open html tag to the left
-      if (lastIndex >= 0) i = lastIndex
-      // the open html tag to the right
-      else if (firstIndex >= 0) i = firstIndex
-
-      // shift i by tag length
-      if (i !== -1) i += match[0].length - 1
-    }
-
-    char = undefined
-  }
-
-  if (i === -1) {
-    // console.log("TODO: improve highlight");
+    // don't highlight if here is an H
+    if (!parent.getAttribute('H')) parent?.setAttribute('data-highlight', 'true')
+    new_body = root.toString().replace('<five-server-cursor></five-server-cursor>', '')
+    return new_body
+  } catch {
     return body
   }
-
-  let part1 = lines[line].slice(0, i).replace(/(<\w[^>]*)(>)(?!.*<\w[^>]*>)/gm, `$1 data-highlight="true">`)
-  const part2 = lines[line].slice(i)
-
-  if (!part1.includes('data-highlight="true"')) {
-    part1 += ' data-highlight="true"'
-  }
-
-  // don't highlight if here is an H
-  if (part1.includes(' H ')) {
-    part1 = part1.replace(' data-highlight="true"', '')
-  }
-
-  // quick fix self closing tags
-  // just move the "/" to the end :D
-  part1 = part1.replace(' / data-highlight="true"', ' data-highlight="true"/')
-
-  lines[line] = part1 + part2
-
-  return lines.join('\n')
 }
 
 const writeTmpFile = (fileName: string, text: string): Promise<void> => {
