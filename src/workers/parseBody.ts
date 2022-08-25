@@ -62,7 +62,7 @@ export const injectHighlight = (body: string, cursorPosition: { line: number; ch
     if (!parent) throw new Error()
 
     // don't highlight if here is an H
-    if (!parent.getAttribute('H')) parent?.setAttribute('data-highlight', 'true')
+    if (!parent.hasAttribute('H')) parent?.setAttribute('data-highlight', 'true')
     new_body = root.toString().replace('<five-server-cursor></five-server-cursor>', '')
     return new_body
   } catch {
