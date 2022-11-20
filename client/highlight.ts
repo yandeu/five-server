@@ -66,6 +66,8 @@ function isInViewport(element) {
 
 // set an event on a element
 function _trigger(element, name, value, autoRemove?) {
+  // MOD(yandeu): Do not automatically remove the highlight.
+  /*
   const key = 'data-ld-' + name
   if (value !== undefined && value !== null) {
     element.setAttribute(key, value)
@@ -75,6 +77,7 @@ function _trigger(element, name, value, autoRemove?) {
   } else {
     element.removeAttribute(key)
   }
+  */
 }
 
 // compute the screen offset of an element
