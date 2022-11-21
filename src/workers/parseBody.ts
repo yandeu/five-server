@@ -23,7 +23,7 @@ const htmlvalidate = new HtmlValidate({
     'element-name': [
       'error',
       {
-        whitelist: ['dialog']
+        pattern: '[a-z][a-z0-9\\-._]*-?[a-z0-9\\-._]*$'
       }
     ], // necessary
     deprecated: 'error',
