@@ -142,7 +142,7 @@ parentPort?.on('message', async (data: string) => {
 
     const body = `${res[1]}${b}${res[4]}`
 
-    const report = htmlvalidate.validateString(html)
+    const report = htmlvalidate.validateString(php)
     parentPort?.postMessage(JSON.stringify({ report, body, fileName /*, time: elapsed_time()*/ }))
   }
 })
