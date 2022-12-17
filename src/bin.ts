@@ -153,9 +153,17 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
     opts.middleware.push(arg.substring(13))
     process.argv.splice(i, 1)
   } else if (arg === '--help' || arg === '-h') {
-    message.log(
-      'Usage: live-server [-v|--version] [-h|--help] [-q|--quiet] [--port=PORT] [--host=HOST] [--open=PATH] [--no-browser] [--browser=BROWSER] [--ignore=PATH] [--ignorePattern=RGXP] [--no-css-inject] [--entry-file=PATH] [--spa] [--mount=ROUTE:PATH] [--wait=MILLISECONDS] [--htpasswd=PATH] [--cors] [--no-cors] [--https=PATH] [--https-module=MODULE_NAME] [--proxy=PATH] [PATH]'
-    )
+    const cli_options = `Usage: five-server [OPTIONS]
+
+Options:
+  -h, --help                 Print help information
+  -v, --version              Print version information
+  
+More:
+  https://github.com/yandeu/five-server/blob/main/src/bin.ts
+  https://github.com/yandeu/five-server/blob/main/src/types.ts
+`
+    console.log(cli_options)
     process.exit()
   } else if (arg === '--test') {
     // Hidden param for tests (with jest) to exit automatically

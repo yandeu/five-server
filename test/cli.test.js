@@ -41,7 +41,7 @@ describe('command line usage', () => {
   it('--help', async () => {
     const error = await exec_test(['--help'])
     assert(!error, error)
-    assert(stdout.indexOf('Usage: live-server') === 0, 'usage not found')
+    assert(stdout.indexOf('Usage: five-server') === 0, 'usage not found')
   })
   it('--quiet', async () => {
     const error = await exec_test(['--quiet', '--no-browser', '--test'])
