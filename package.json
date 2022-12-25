@@ -39,7 +39,7 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx",
     "extract": "extract version name src/const.ts",
     "test": "jest --forceExit --silent",
-    "test:full": "npm i && npm run clean && npm run build && npm run format:write && npm run lint:fi && npm run test",
+    "test:full": "npm i && npm run clean && npm run build && npm run format:write && npm run lint:fix && npm run test",
     "publish": "publish",
     "push": "npm run publish",
     "preReleaseHook": "clean build format:write lint:fix"
