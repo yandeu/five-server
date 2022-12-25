@@ -196,8 +196,9 @@ function rewriteCookieHosts(existingHeaders, opts: ProxyMiddlewareOptions, apply
     existingCookies = [existingCookies]
   }
 
+  const replacer = (match, _p1, p2) => match.replace(p2, rewriteHostname)
   for (let i = 0; i < existingCookies.length; i++) {
-    let rewrittenCookie = existingCookies[i].replace(/(Domain)=[a-z.-_]*?(;|$)/gi, `$1=${rewriteHostname}$2`)
+    let rewrittenCookie = existingCookies[i].replace(/(Domain=)([^;]+)/i, replacer)
 
     if (!req.connection.encrypted) {
       rewrittenCookie = rewrittenCookie.replace(/;\s*?(Secure)/i, '')
