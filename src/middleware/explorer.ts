@@ -278,6 +278,9 @@ function createHtmlFileList(files, dir, useIcons, view) {
       // use serve-preview
       if (!isDir && !['.html', '.htm', '.php'].includes(extname(file.name))) href += '.preview'
 
+      // append slash to directory
+      if (isDir) href += '/'
+
       return (
         '<li><a href="' +
         href +
