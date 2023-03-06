@@ -51,7 +51,8 @@ export class ExecPHP {
 
       const cmd = `"${this.php}" "${absolutePath}"`
 
-      exec(cmd, function (error, stdout, stderr) {
+      // https://nodejs.org/docs/latest-v18.x/api/child_process.html#child_processexeccommand-options-callback
+      exec(cmd, { maxBuffer: 1024 * 1024 * 2 }, function (error, stdout, stderr) {
         if (error) returnWithError(`<p>error: ${error.message}</p>`, PHP_ERROR)
         if (stderr) returnWithError(`<p>stderr: ${stderr}</p>`, PHP_ERROR)
 
