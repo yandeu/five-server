@@ -279,7 +279,7 @@ function createHtmlFileList(files, dir, useIcons, view) {
       if (!isDir && !['.html', '.htm', '.php'].includes(extname(file.name))) href += '.preview'
 
       // append slash to directory
-      if (isDir) href += '/'
+      if (isDir && href !== '/') href += '/'
 
       return (
         '<li><a href="' +
