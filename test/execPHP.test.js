@@ -1,14 +1,14 @@
 const path = require('path')
-const os = require('os')
+const { defaultPHPPath } = require('../lib/misc')
 const { ExecPHP } = require('../lib/utils/execPHP')
 
-let phpPath = os.platform() === 'win32' ? 'C:\\tools\\php81\\php.exe' : '/usr/bin/php'
+let phpPath = defaultPHPPath()
 
 const PHP = new ExecPHP()
 PHP.php = phpPath
 
 const mock_res = {
-  status: _status => {}
+  status: _status => { }
 }
 
 describe('parse from file', function () {

@@ -3,6 +3,7 @@ import { colors } from './colors'
 import fs from 'fs'
 import { message } from './msg'
 import path from 'path'
+import os from 'os'
 export * from './helpers'
 
 // just a fallback for removing http-errors dependency
@@ -19,6 +20,18 @@ export const fileDoesExist = (path: string): Promise<boolean> => {
       } else return resolve(true)
     })
   })
+}
+
+export const defaultPHPPath = () => {
+  switch (os.platform()) {
+    case 'darwin':
+      return '/usr/local/bin/php'
+    case 'linux':
+      return '/usr/bin/php'
+    case 'win32':
+      return 'c:\\tools\\php\\php.exe'
+  }
+  return ''
 }
 
 /**

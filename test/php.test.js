@@ -1,11 +1,11 @@
 const request = require('supertest')
 const path = require('path')
-const os = require('os')
+const { defaultPHPPath } = require('../lib/misc')
 const LiveServer = require('../lib').default
 
 const liveServer = new LiveServer()
 
-let phpPath = os.platform() === 'win32' ? 'C:\\tools\\php81\\php.exe' : '/usr/bin/php'
+let phpPath = defaultPHPPath()
 
 const open = async () => {
   await liveServer.start({
