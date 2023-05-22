@@ -6,7 +6,7 @@
 
 import { colors } from './colors'
 import { message } from './msg'
-import open from 'open'
+import open from 'open/bundle.js'
 
 export class OpenBrowser {
   constructor(public _open: any) {}
