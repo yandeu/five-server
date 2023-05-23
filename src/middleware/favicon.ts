@@ -4,14 +4,13 @@
  * @license   {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
  */
 
-import { join } from 'path'
-import { readFileSync } from 'fs'
+import { FAVICON } from '../public'
 
 let icon
 
 export const favicon = (req: any, res: any, next: any) => {
   if (/favicon\.ico$/.test(req.url)) {
-    if (!icon) icon = readFileSync(join(__dirname, '../../public/favicon.ico'))
+    if (!icon) icon = FAVICON
     res.type('ico').send(icon)
   } else {
     return next()

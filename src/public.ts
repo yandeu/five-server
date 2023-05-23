@@ -10,3 +10,4 @@ export const PREVIEW_FULLSCREEN = readFileSync(
   join(__dirname, '../public/serve-preview/preview-fullscreen.html'),
   'utf8'
 )
+export const FAVICON = readFileSync(join(__dirname, '../public/favicon.ico'), 'utf8')
