@@ -2,8 +2,8 @@ import { LiveServerParams } from './types'
 import { colors } from './colors'
 import fs from 'fs'
 import { message } from './msg'
-import path from 'path'
 import os from 'os'
+import path from 'path'
 export * from './helpers'
 
 // just a fallback for removing http-errors dependency
