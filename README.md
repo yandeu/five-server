@@ -256,4 +256,4 @@ Download it from [marketplace.visualstudio.com](https://marketplace.visualstudio
 
 ## License
 
-See [LICENSE](https://github.com/yandeu/five-server/blob/main/LICENSE)
+This software cannot be used in any way, or forked, without express consent from Yannick Deubel. See [LICENSE](https://github.com/yandeu/five-server/blob/main/LICENSE). To get permission, [open a Discussion](https://github.com/yandeu/five-server/discussions).
