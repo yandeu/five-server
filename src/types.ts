@@ -58,7 +58,7 @@ export interface LiveServerParams {
   root?: string
   /** This option lets the browser open with your local IP. */
   useLocalIp?: boolean
-  /** Waits for all changes, before reloading. Defaults to 0 sec. */
+  /** Waits for all changes, before reloading. Defaults to 0ms. */
   wait?: number
   /** Paths to exclusively watch for changes. Defaults to cwd. */
   watch?: boolean | Array<string | RegExp | Glob>
