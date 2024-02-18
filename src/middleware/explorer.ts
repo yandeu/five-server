@@ -71,6 +71,7 @@ const explorer = (root, options?: any) => {
 
   // resolve root to absolute and normalize
   const rootPath = normalize(resolve(root) + sep)
+  const serverRoot = opts.serverRoot
 
   const filter = opts.filter
   const hidden = opts.hidden || false
@@ -140,14 +141,14 @@ const explorer = (root, options?: any) => {
           })
         files.sort()
 
-        explorer['html'](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet)
+        explorer['html'](req, res, files, next, originalDir, serverRoot, showUp, icons, path, view, template, stylesheet)
       })
     })
   }
 }
 export default explorer
 
-explorer.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+explorer.html = function _html(req, res, files, next, dir, serverRoot, showUp, icons, path, view, template, stylesheet) {
   const render = typeof template !== 'function' ? createHtmlRender(template) : template
 
   if (showUp) {
@@ -168,6 +169,7 @@ explorer.html = function _html(req, res, files, next, dir, showUp, icons, path, 
       // create locals for rendering
       const locals = {
         directory: dir,
+        serverRoot: serverRoot,
         displayIcons: Boolean(icons),
         fileList: fileList,
         path: path,
@@ -223,7 +225,7 @@ explorer.plain = function _plain(req, res, files, next, dir, showUp, icons, path
   })
 }
 
-function createHtmlFileList(files, dir, useIcons, view) {
+function createHtmlFileList(files, webroot, useIcons, view) {
   let html =
     '<ul id="files" class="view-' +
     escapeHtml(view) +
@@ -240,7 +242,7 @@ function createHtmlFileList(files, dir, useIcons, view) {
     .map(function (file) {
       const classes: string[] = []
       const isDir = file.stat && file.stat.isDirectory()
-      const path = dir.split('/').map(function (c) {
+      const path = webroot.split('/').map(function (c) {
         return encodeURIComponent(c)
       })
 
@@ -319,7 +321,7 @@ function createHtmlRender(template) {
         .replace(/\{style\}/g, locals.style.concat(iconStyle(locals.fileList, locals.displayIcons)))
         .replace(
           /\{files\}/g,
-          createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.viewName)
+          createHtmlFileList(locals.fileList, locals.serverRoot + locals.directory, locals.displayIcons, locals.viewName)
         )
         .replace(/\{directory\}/g, escapeHtml(locals.directory))
         .replace(/\{linked-path\}/g, htmlPath(locals.directory))

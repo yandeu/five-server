@@ -75,15 +75,15 @@ export class Inject extends Writable {
   }
 }
 
-export const code = (filePath: string, injectBodyOptions: boolean) => {
+export const code = (filePath: string, serverRoot: string, injectBodyOptions: boolean) => {
   const a = injectBodyOptions ? ' data-inject-body="true"' : ''
   return `<!-- Code injected by Five-server -->
-  <script async data-id="five-server" data-file="${filePath}"${a} type="application/javascript" src="/fiveserver.js"></script>
+  <script async data-id="five-server" data-file="${filePath}"${a} type="application/javascript" src="${serverRoot}/fiveserver.js"></script>
   `
 }
 
 /** Injects the five-server script into the html page and converts the cache attributes. */
-export const injectCode = (root: string, PHP: any, injectBodyOptions: boolean) => {
+export const injectCode = (root: string, serverRoot: string, PHP: any, injectBodyOptions: boolean) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const { pathname } = url.parse(req.url)
 
@@ -100,7 +100,7 @@ export const injectCode = (root: string, PHP: any, injectBodyOptions: boolean) =
       if (!existsSync(filePath)) return next()
       if (!statSync(filePath).isFile()) return next()
 
-      const inject = new Inject(['</head>', '</html>', '</body>'], code(filePath, injectBodyOptions))
+      const inject = new Inject(['</head>', '</html>', '</body>'], code(filePath, serverRoot, injectBodyOptions))
 
       if (extname(pathname) === '.php') {
         const html = await PHP.parseFile(filePath, res)

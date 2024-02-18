@@ -190,6 +190,7 @@ export default class LiveServer {
       port = 5500,
       proxy = {},
       remoteLogs = false,
+      serverRoot = "",
       useLocalIp = false,
       wait = 100,
       withExtension = 'unset',
@@ -350,7 +351,7 @@ export default class LiveServer {
       if (R.indexOf('/') !== 0) R = `/${R}`
 
       // inject code to html and php files
-      app.use(R, injectCode(mountPath, PHP, injectBody || false))
+      app.use(R, injectCode(mountPath, serverRoot, PHP, injectBody || false))
 
       // serve static files via express.static()
       app.use(R, serveStatic(mountPath))
@@ -382,14 +383,14 @@ export default class LiveServer {
       }
 
       const { proxyMiddleware } = require('./middleware/proxy')
-      app.use(ROUTE, proxyMiddleware(proxyOpts, injectBody || false))
+      app.use(ROUTE, proxyMiddleware(proxyOpts, serverRoot, injectBody || false))
       if (this.logLevel >= 1) message.log(`Mapping "${ROUTE}" to "${TARGET}"`)
     }
 
     // find index file and modify req.url
     app.use(findIndex(root, withExtension, ['html', 'php']))
 
-    const injectHandler = injectCode(root, PHP, injectBody || false)
+    const injectHandler = injectCode(root, serverRoot, PHP, injectBody || false)
 
     // inject five-server script
     app.use(injectHandler)
@@ -405,7 +406,7 @@ export default class LiveServer {
     app.use(preview(root, this.servePreview))
 
     // explorer middleware (previously serve-index)
-    app.use(explorer(root, { icons: true, hidden: false, dotFiles: true }))
+    app.use(explorer(root, { icons: true, hidden: false, dotFiles: true, serverRoot: serverRoot}))
 
     // no one want to see a 404 favicon error
     app.use(favicon)
