@@ -17,9 +17,10 @@ if ('WebSocket' in window && !block) {
     console.log('[Five Server] connecting...')
 
     const script = document.querySelector('[data-id="five-server"]') as HTMLScriptElement
-
+    
+    const baseurl = new URL(script.src).pathname.split("/").slice(0,-1).join("/")
     const protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://'
-    const address = appendPathToUrl(`${protocol}${new URL(script.src).host}`, 'fsws')
+    const address = appendPathToUrl(`${protocol}${new URL(script.src).host}${baseurl}`, 'fsws')
 
     // check if we need to clone the body for the "injectBody" feature or not
     const optionsInjectBody = script.getAttribute('data-inject-body')
@@ -190,7 +191,8 @@ if ('WebSocket' in window && !block) {
     const addDiffDOM = (): Promise<void> => {
       _diffDOMStatus = 'loading'
       return new Promise(resolve => {
-        const url = `//${new URL(script.src).host}/fiveserver/scripts/diffDOM.js`
+        const baseurl = new URL(script.src).pathname.split("/").slice(0,-1).join("/")
+        const url = `//${new URL(script.src).host}${baseurl}/fiveserver/scripts/diffDOM.js`
         const s = document.createElement('script')
         s.type = 'text/javascript'
         s.src = url
@@ -409,8 +411,9 @@ if ('WebSocket' in window && !block) {
       statusChecks++
       const p = new URL(script.src).protocol
       const h = new URL(script.src).host
+      const baseurl = new URL(script.src).pathname.split("/").slice(0,-1).join("/")
 
-      const url = `${p}//${h}/fiveserver/status`
+      const url = `${p}//${h}${baseurl}/fiveserver/status`
 
       try {
         const res = await fetch(url)

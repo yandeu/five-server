@@ -403,7 +403,7 @@ export default class LiveServer {
 
     // inject to any (converts and file to a .html file (if possible))
     // (makes that nice preview page)
-    app.use(preview(root, this.servePreview))
+    app.use(preview(root, serverRoot, this.servePreview))
 
     // explorer middleware (previously serve-index)
     app.use(explorer(root, { icons: true, hidden: false, dotFiles: true, serverRoot: serverRoot}))
@@ -412,7 +412,7 @@ export default class LiveServer {
     app.use(favicon)
 
     // serve 403/404 page
-    app.use(notFound(root))
+    app.use(notFound(root, serverRoot))
 
     // create http server
     if (_https !== null && _https !== false) {

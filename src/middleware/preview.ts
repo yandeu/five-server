@@ -10,7 +10,7 @@ import { readFileSync, statSync } from 'fs'
 import { fileTypes } from '../fileTypes'
 import { htmlPath } from './explorer'
 
-export const preview = (root: string, injectToAny: boolean) => {
+export const preview = (root: string, serverRoot: string, injectToAny: boolean) => {
   return (req, res, next) => {
     if (!injectToAny) return next()
     if (!['.preview', '.fullscreen', '.php'].includes(extname(req.url))) return next()
@@ -101,7 +101,7 @@ export const preview = (root: string, injectToAny: boolean) => {
 
       const TEMPLATE = isFullscreenPreview ? PREVIEW_FULLSCREEN : PREVIEW
 
-      const html = TEMPLATE.replace('{linked-path}', htmlPath(URL))
+      const html = TEMPLATE.replace('{linked-path}', htmlPath(URL, serverRoot))
         .replace(/{fileName}/gm, fileName)
         .replace(/{ext}/gm, ext)
         .replace('{phpMsg}', phpMsg ? `<div class="message"><p>${phpMsg}</p></div>` : '')

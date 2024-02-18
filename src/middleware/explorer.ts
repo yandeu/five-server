@@ -324,7 +324,8 @@ function createHtmlRender(template) {
           createHtmlFileList(locals.fileList, locals.serverRoot + locals.directory, locals.displayIcons, locals.viewName)
         )
         .replace(/\{directory\}/g, escapeHtml(locals.directory))
-        .replace(/\{linked-path\}/g, htmlPath(locals.directory))
+        .replace(/\{linked-path\}/g, htmlPath(locals.directory, locals.serverRoot))
+        .replace(/\{server-root\}/g, escapeHtml(locals.serverRoot))
 
       callback(null, body)
     })
@@ -351,7 +352,7 @@ function getRequestedDir(req) {
   }
 }
 
-export function htmlPath(dir) {
+export function htmlPath(dir, webdir) {
   const parts = dir.split('/')
   const crumb = new Array(parts.length)
 
@@ -360,7 +361,7 @@ export function htmlPath(dir) {
 
     if (part) {
       parts[i] = encodeURIComponent(part)
-      crumb[i] = '<a href="' + escapeHtml(parts.slice(0, i + 1).join('/')) + '">' + escapeHtml(part) + '</a>'
+      crumb[i] = '<a href="' + escapeHtml(webdir + parts.slice(0, i + 1).join('/')) + '">' + escapeHtml(part) + '</a>'
     }
   }
 
