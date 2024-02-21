@@ -78,7 +78,7 @@ export class Inject extends Writable {
 export const code = (filePath: string, baseURL: string, injectBodyOptions: boolean) => {
   const a = injectBodyOptions ? ' data-inject-body="true"' : ''
   return `<!-- Code injected by Five-server -->
-  <script async data-id="five-server" data-file="${filePath}"${a} type="application/javascript" src="${baseURL}/fiveserver.js"></script>
+  <script async data-id="five-server" data-file="${filePath}"${a} type="application/javascript" src="${baseURL}fiveserver.js"></script>
   `
 }
 
