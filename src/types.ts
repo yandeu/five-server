@@ -56,6 +56,8 @@ export interface LiveServerParams {
   remoteLogs?: boolean | Colors
   /** Set root directory that's being served. Defaults to cwd. */
   root?: string
+  /** Set base URL of the server. Useful if the server is behind a proxy. Defaults to "/". */
+  baseURL?: string
   /** This option lets the browser open with your local IP. */
   useLocalIp?: boolean
   /** Waits for all changes, before reloading. Defaults to 0ms. */

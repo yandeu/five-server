@@ -33,6 +33,10 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
     const root = arg.substring(7)
     opts.root = root
     process.argv.splice(i, 1)
+  } else if (arg.indexOf('--baseURL=') > -1) {
+    const baseURL = arg.substring(10)
+    opts.baseURL = baseURL
+    process.argv.splice(i, 1)
   } else if (arg.indexOf('--useLocalIp') > -1) {
     opts.useLocalIp = true
     process.argv.splice(i, 1)
