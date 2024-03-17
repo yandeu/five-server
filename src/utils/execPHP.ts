@@ -5,6 +5,7 @@
  */
 
 import { PHP_ERROR, PHP_TEMPLATE } from '../public'
+import { dirname } from 'path'
 import { exec } from 'child_process'
 import fs from 'fs'
 
@@ -52,7 +53,7 @@ export class ExecPHP {
       const cmd = `"${this.php}" "${absolutePath}"`
 
       // https://nodejs.org/docs/latest-v18.x/api/child_process.html#child_processexeccommand-options-callback
-      exec(cmd, { maxBuffer: 1024 * 1024 * 2 }, function (error, stdout, stderr) {
+      exec(cmd, { maxBuffer: 1024 * 1024 * 2, cwd: dirname(absolutePath) }, function (error, stdout, stderr) {
         if (error) returnWithError(`<p>error: ${error.message}</p>`, PHP_ERROR)
         if (stderr) returnWithError(`<p>stderr: ${stderr}</p>`, PHP_ERROR)
 
