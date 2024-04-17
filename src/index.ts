@@ -491,16 +491,34 @@ export default class LiveServer {
      */
     this.wss = new WebSocketServer({ server: this.httpServer })
 
+    // keep track of delayed file changes
+    let totalChanges = 0
+    let lastChange = +new Date()
+
     this.wss.on('connection', (ws: ExtendedWebSocket, req: any) => {
       if (remoteLogs !== false) ws.send('initRemoteLogs')
       ws.send('connected')
 
       ws.sendWithDelay = (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => {
+        totalChanges++
         setTimeout(
           () => {
-            ws.send(data, e => {
-              if (cb) cb(e)
-            })
+            totalChanges--
+            if (totalChanges === 0) {
+              // send immediately
+              ws.send(data, e => {
+                if (cb) cb(e)
+              })
+            } else {
+              // send with rate limit
+              const now = +new Date()
+              if (now - lastChange > wait) {
+                lastChange = now
+                ws.send(data, e => {
+                  if (cb) cb(e)
+                })
+              }
+            }
           },
           wait,
           { once: true }
