@@ -7,18 +7,18 @@ import { appendPathToUrl } from '../src/helpers'
 // manipulates it inside window.addEventListener('load', (...))
 let _internalDOMBody
 
-const block = (document.body) ? document.body.hasAttribute('data-server-no-reload') : false;
+const block = document.body ? document.body.hasAttribute('data-server-no-reload') : false
 
 if (block) {
-  console.info('[Five Server] Reload disabled due to \'data-server-no-reload\' attribute on BODY element')
+  console.info("[Five Server] Reload disabled due to 'data-server-no-reload' attribute on BODY element")
 }
 if ('WebSocket' in window && !block) {
   window.addEventListener('load', () => {
     console.log('[Five Server] connecting...')
 
     const script = document.querySelector('[data-id="five-server"]') as HTMLScriptElement
-    
-    const baseurl = new URL(script.src).pathname.split("/").slice(0,-1).join("/")
+
+    const baseurl = new URL(script.src).pathname.split('/').slice(0, -1).join('/')
     const protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://'
     const address = appendPathToUrl(`${protocol}${new URL(script.src).host}${baseurl}`, 'fsws')
 
@@ -191,7 +191,7 @@ if ('WebSocket' in window && !block) {
     const addDiffDOM = (): Promise<void> => {
       _diffDOMStatus = 'loading'
       return new Promise(resolve => {
-        const baseurl = new URL(script.src).pathname.split("/").slice(0,-1).join("/")
+        const baseurl = new URL(script.src).pathname.split('/').slice(0, -1).join('/')
         const url = `//${new URL(script.src).host}${baseurl}/fiveserver/scripts/diffDOM.js`
         const s = document.createElement('script')
         s.type = 'text/javascript'
@@ -411,7 +411,7 @@ if ('WebSocket' in window && !block) {
       statusChecks++
       const p = new URL(script.src).protocol
       const h = new URL(script.src).host
-      const baseurl = new URL(script.src).pathname.split("/").slice(0,-1).join("/")
+      const baseurl = new URL(script.src).pathname.split('/').slice(0, -1).join('/')
 
       const url = `${p}//${h}${baseurl}/fiveserver/status`
 
