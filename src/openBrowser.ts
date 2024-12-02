@@ -67,8 +67,13 @@ export class OpenBrowser {
 
     if (!res) {
       if (typeof browser === 'string') {
-        message.log(colors(`Could not open browser "${browser}". Trying the default browser next.`, 'yellow'))
-        await this.launchDefaultBrowser(target)
+        if (browser === 'default') {
+          message.log(colors(`Could not open the default browser. Will abort!`, 'red'))
+          return
+        } else {
+          message.log(colors(`Could not open browser "${browser}". Trying the default browser next.`, 'yellow'))
+          await this.launchDefaultBrowser(target)
+        }
       } else if (Array.isArray(browser)) {
         if (typeof browser[index + 1] === 'undefined') {
           message.log(colors(`Could not open browser "${browser[index]}". Trying the default browser next.`, 'yellow'))
