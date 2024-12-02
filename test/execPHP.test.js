@@ -2,7 +2,7 @@ const path = require('path')
 const { defaultPHPPath } = require('../lib/misc')
 const { ExecPHP } = require('../lib/utils/execPHP')
 
-let phpPath = defaultPHPPath()
+let phpPath = defaultPHPPath(true)
 
 const PHP = new ExecPHP()
 PHP.php = phpPath

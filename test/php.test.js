@@ -5,7 +5,7 @@ const LiveServer = require('../lib').default
 
 const liveServer = new LiveServer()
 
-let phpPath = defaultPHPPath()
+let phpPath = defaultPHPPath(true)
 
 const open = async () => {
   await liveServer.start({

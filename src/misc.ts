@@ -22,10 +22,13 @@ export const fileDoesExist = (path: string): Promise<boolean> => {
   })
 }
 
-export const defaultPHPPath = () => {
+export const defaultPHPPath = (is_ci: boolean = false) => {
+  // is_ci is for macos on github actions for shivammathur/setup-php@v2
+  // (https://github.com/marketplace/actions/setup-php-action)
+
   switch (os.platform()) {
     case 'darwin':
-      return '/usr/local/bin/php'
+      return is_ci ? '/opt/homebrew/bin/php' : '/usr/local/bin/php'
     case 'linux':
       return '/usr/bin/php'
     case 'win32':
