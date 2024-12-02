@@ -192,7 +192,7 @@ if ('WebSocket' in window && !block) {
       _diffDOMStatus = 'loading'
       return new Promise(resolve => {
         const baseurl = new URL(script.src).pathname.split('/').slice(0, -1).join('/')
-        const url = `//${new URL(script.src).host}${baseurl}/fiveserver/scripts/diffDOM.js`
+        const url = `//${new URL(script.src).host}${baseurl}/fiveserver/scripts/diffDOM/diffDOM.js`
         const s = document.createElement('script')
         s.type = 'text/javascript'
         s.src = url
