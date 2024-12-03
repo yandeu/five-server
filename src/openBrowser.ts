@@ -65,23 +65,33 @@ export class OpenBrowser {
       res = await this.open(target, browser[index])
     }
 
+    const is_undefined_str = browser => typeof browser === 'string' && browser === 'undefined'
+
     if (!res) {
       if (typeof browser === 'string') {
         if (browser === 'default') {
           message.log(colors(`Could not open the default browser. Will abort!`, 'red'))
           return
         } else {
-          message.log(colors(`Could not open browser "${browser}". Trying the default browser next.`, 'yellow'))
+          if (!is_undefined_str(browser)) {
+            message.log(colors(`Could not open browser "${browser}". Trying the default browser next.`, 'yellow'))
+          }
           await this.launchDefaultBrowser(target)
         }
       } else if (Array.isArray(browser)) {
         if (typeof browser[index + 1] === 'undefined') {
-          message.log(colors(`Could not open browser "${browser[index]}". Trying the default browser next.`, 'yellow'))
+          if (!is_undefined_str(browser[index])) {
+            message.log(
+              colors(`Could not open browser "${browser[index]}". Trying the default browser next.`, 'yellow')
+            )
+          }
           await this.launchDefaultBrowser(target)
         } else {
-          message.log(
-            colors(`Could not open browser "${browser[index]}". Trying "${browser[index + 1]}" next.`, 'yellow')
-          )
+          if (!is_undefined_str(browser[index])) {
+            message.log(
+              colors(`Could not open browser "${browser[index]}". Trying "${browser[index + 1]}" next.`, 'yellow')
+            )
+          }
           await this.launchBrowser(target, browser, index)
         }
       }
