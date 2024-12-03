@@ -56,10 +56,13 @@ export class OpenBrowser {
   private async launchBrowser(target: string, browser: string | string[] = 'default', index = -1) {
     let res
 
+    // if browser is empty array; set to default
+    if (Array.isArray(browser) && browser.length === 0) {
+      browser = 'default'
+    }
+
     // browser is string
     if (typeof browser === 'string') res = await this.open(target, browser)
-    // browser is empty array
-    else if (Array.isArray(browser) && browser.length === 0) res = await this.launchDefaultBrowser(target)
     // browser is non-empty array
     else if (Array.isArray(browser)) {
       index++
