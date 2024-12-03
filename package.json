@@ -1,6 +1,6 @@
 {
   "name": "five-server",
-  "version": "0.3.3",
+  "version": "0.4.0-dev.0",
   "description": "Development Server with Live Reload Capability. (Maintained Fork of Live Server)",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
