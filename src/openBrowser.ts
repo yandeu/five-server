@@ -4,7 +4,7 @@
  * @license   {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
  */
 
-import type { ChildProcess } from 'child_process'
+import ChildProcess from 'node:child_process'
 import { colors } from './colors'
 import { message } from './msg'
 import open from '@yandeu/open-cjs'
@@ -12,18 +12,19 @@ import open from '@yandeu/open-cjs'
 export class OpenBrowser {
   constructor(public _open: any) {}
 
-  private async _o(target: string, cfg: any = {}): Promise<void | ChildProcess> {
+  private async _o(target: string, cfg: any = {}): Promise<void | ChildProcess.ChildProcessWithoutNullStreams> {
     return new Promise(resolve => {
       try {
-        this._open(target, { wait: false, ...cfg }).then(a => {
-          a.once('error', () => {
+        this._open(target, { wait: false, ...cfg }).then(({ command, cliArguments, childProcessOptions }) => {
+          const child = ChildProcess.spawn(command, cliArguments, childProcessOptions)
+          child.once('error', () => {
             return resolve()
           })
-          a.once('exit', () => {
+          child.once('exit', () => {
             return resolve()
           })
-          a.once('spawn', () => {
-            return resolve(a)
+          child.once('spawn', () => {
+            return resolve(child)
           })
         })
       } catch (error) {
@@ -32,7 +33,7 @@ export class OpenBrowser {
     })
   }
 
-  private async launchDefaultBrowser(target: string): Promise<void | ChildProcess> {
+  private async launchDefaultBrowser(target: string): Promise<void | ChildProcess.ChildProcessWithoutNullStreams> {
     await this.launchBrowser(target, 'default')
   }
 
