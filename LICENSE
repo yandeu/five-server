@@ -1,6 +1,6 @@
 Five Server License
 
-Copyright (C) 2021, Yannick Deubel (https://github.com/yandeu)
+Copyright (C) 2024, Yannick Deubel (https://github.com/yandeu)
 All rights reserved.
 
 This file is part of the "Five Server" project.
@@ -11,26 +11,36 @@ This file is part of the "Five Server" project.
 
 2. RESTRICTIONS
 You are NOT permitted to:
-  a)  Edit, alter, modify, adapt, translate or otherwise change the whole or any 
-      part of the Software without the express permission of the Licensor. 
-  b)  Decompile, disassemble or reverse engineer the Software or attempt to do 
-      any such things.
-  c)  Reproduce, copy, distribute, resell or otherwise use the whole or any part 
-      of the Software for any commercial or non-commercial purpose.
-  d)  Disable, modify or hide notifications sent by the Software.
+  a)  Share, distribute or resell the whole or any part of the Software for
+      any commercial or non-commercial purpose except where permitted by
+      item 3 Private Use and item 4 Contribute.
+  b)  Remove, edit, alter, modify, adapt, translate or otherwise change the
+      whole or any part of this License.
 
-3. OWNERSHIP
-The Software, copyright, and other intellectual property rights of whatever 
-nature in the Software, including any modifications made thereto are and shall 
+3. PRIVATE USE
+You have the freedom to:
+  a)  Use the Software for any purpose.
+  b)  Change the Software to suit your needs.
+  c)  Share the Software and changes you make within a circle of persons
+      closely connected to you, such as relatives or friends.
+
+4. CONTRIBUTE
+You are permitted to:
+  a)  Create a fork of the repository with the intention to contribute back
+      your changes to the upstream repository.
+
+5. OWNERSHIP
+The Software, copyright, and other intellectual property rights of whatever
+nature in the Software, including any modifications made thereto are and shall
 remain the property of the Licensor.
 
-4. WARRANTY DISCLAIMER
+6. WARRANTY DISCLAIMER
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED.
 
-5. LIMITATION OF LIABILITY
+7. LIMITATION OF LIABILITY
 IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
