@@ -115,12 +115,9 @@ export const injectCode = (root: string, baseURL: string, PHP: any, injectBodyOp
       createReadStream(filePath)
         .pipe(inject)
         .on('finish', () => {
-          if (!inject.injectTag) return next()
-          else {
-            res.type('html')
-            res.setHeader('Content-Length', inject.data.length)
-            res.send(inject.data)
-          }
+          res.type('html')
+          res.setHeader('Content-Length', inject.data.length)
+          res.send(inject.data)
         })
         .on('error', () => {
           return next()
