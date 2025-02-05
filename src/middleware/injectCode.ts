@@ -48,6 +48,8 @@ export class Inject extends Writable {
 
     if (this.injectTag) {
       data = data.replace(this.injectTag, this.code + this.injectTag)
+    } else {
+      data = data + '\n' + this.code
     }
 
     // convert cache to [src|href]="/.cache/.."
