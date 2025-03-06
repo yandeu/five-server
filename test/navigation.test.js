@@ -28,7 +28,7 @@ const getInnerText = async query => {
 beforeAll(async () => {
   await fiveServer.start(options)
 
-  browser = await puppeteer.launch({ headless: 'new' })
+  browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] })
 
   page = await browser.newPage()
   page.on('console', msg => {
