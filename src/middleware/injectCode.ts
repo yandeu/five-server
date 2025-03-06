@@ -30,7 +30,10 @@ export class Inject extends Writable {
   data = ''
   injectTag = ''
 
-  constructor(public tags, public code) {
+  constructor(
+    public tags,
+    public code
+  ) {
     super()
   }
 

@@ -37,7 +37,10 @@ export default class WorkerPool extends EventEmitter {
   private terminating = false
   private logLevel = 1
 
-  constructor(public script: string, public options: WorkerPoolOptions = {}) {
+  constructor(
+    public script: string,
+    public options: WorkerPoolOptions = {}
+  ) {
     super()
 
     const { rateLimit = 50, worker = 1, logLevel = 1, init } = options
