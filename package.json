@@ -56,7 +56,7 @@
   "homepage": "https://github.com/yandeu/five-server#readme",
   "dependencies": {
     "@yandeu/open-cjs": "0.0.2",
-    "chokidar": "^3.5.1",
+    "chokidar": "^4.0.3",
     "cors": "^2.8.5",
     "debug": "^4.3.1",
     "express6": "^0.1.2",

@@ -12,7 +12,7 @@
  * previously licensed under MIT (https://github.com/tapio/live-server#license)
  */
 
-import chokidar from 'chokidar'
+import chokidar, { FSWatcher } from 'chokidar'
 import { donate, getConfigFile, removeLeadingSlash } from './misc'
 import http from 'http'
 import https from 'https'
@@ -65,7 +65,7 @@ interface ExtendedWebSocket extends WebSocket {
 
 export default class LiveServer {
   public httpServer!: http.Server
-  public watcher!: chokidar.FSWatcher
+  public watcher!: FSWatcher
   public logLevel = 1
   public injectBody = false
 
