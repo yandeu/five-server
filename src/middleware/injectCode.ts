@@ -51,6 +51,8 @@ export class Inject extends Writable {
 
     if (this.injectTag) {
       data = data.replace(this.injectTag, this.code + this.injectTag)
+    } else {
+      data = data + '\n' + this.code
     }
 
     // convert cache to [src|href]="/.cache/.."
@@ -116,12 +118,9 @@ export const injectCode = (root: string, baseURL: string, PHP: any, injectBodyOp
       createReadStream(filePath)
         .pipe(inject)
         .on('finish', () => {
-          if (!inject.injectTag) return next()
-          else {
-            res.type('html')
-            res.setHeader('Content-Length', inject.data.length)
-            res.send(inject.data)
-          }
+          res.type('html')
+          res.setHeader('Content-Length', inject.data.length)
+          res.send(inject.data)
         })
         .on('error', () => {
           return next()
