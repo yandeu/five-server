@@ -359,9 +359,13 @@ export function htmlPath(dir, baseURL) {
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i]
 
+    let link = escapeHtml(baseURL + parts.slice(0, i + 1).join('/'))
+    // remove double slashes, except after a :
+    link = link.replace(/(?<![:])\/+/, '/')
+
     if (part) {
       parts[i] = encodeURIComponent(part)
-      crumb[i] = '<a href="' + escapeHtml(baseURL + parts.slice(0, i + 1).join('/')) + '">' + escapeHtml(part) + '</a>'
+      crumb[i] = '<a href="' + escapeHtml(link) + '">' + escapeHtml(part) + '</a>'
     }
   }
 
