@@ -57,10 +57,13 @@ export { LiveServerParams }
 
 // extend WebSocket interface
 interface ExtendedWebSocket extends WebSocket {
-  sendWithDelay: (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => void
+  // sendWithDelay: (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => void
   file: string
   ip: string
   color: Colors
+}
+interface ExtendedWebSocketServer extends WebSocketServer {
+  broadcastWithDelay: (wss: ExtendedWebSocket[], data: any) => void
 }
 
 export default class LiveServer {
@@ -143,7 +146,7 @@ export default class LiveServer {
   }
 
   /** WebSocket Server */
-  private wss!: WebSocketServer
+  private wss!: ExtendedWebSocketServer
   /** WebSocket Clients Array */
   public wsc: ExtendedWebSocket[] = []
 
@@ -489,41 +492,37 @@ export default class LiveServer {
      * STEP: 3/4
      * Make WebSocket Connection using "ws" (https://www.npmjs.com/package/ws)
      */
-    this.wss = new WebSocketServer({ server: this.httpServer })
+    this.wss = new WebSocketServer({ server: this.httpServer }) as ExtendedWebSocketServer
 
     // keep track of delayed file changes
     let totalChanges = 0
-    let lastChange = +new Date()
+    let lastChange = new Date().getTime()
+
+    this.wss.broadcastWithDelay = (wsc: ExtendedWebSocket[], data: any) => {
+      totalChanges++
+      setTimeout(
+        () => {
+          totalChanges--
+          if (totalChanges === 0) {
+            // send immediately
+            wsc.forEach(ws => ws.send(data, e => {}))
+          } else {
+            // send with rate limit
+            const now = new Date().getTime()
+            if (now - lastChange > wait) {
+              lastChange = now
+              wsc.forEach(ws => ws.send(data, e => {}))
+            }
+          }
+        },
+        wait,
+        { once: true }
+      )
+    }
 
     this.wss.on('connection', (ws: ExtendedWebSocket, req: any) => {
       if (remoteLogs !== false) ws.send('initRemoteLogs')
       ws.send('connected')
-
-      ws.sendWithDelay = (data: any, cb?: ((err?: Error | undefined) => void) | undefined) => {
-        totalChanges++
-        setTimeout(
-          () => {
-            totalChanges--
-            if (totalChanges === 0) {
-              // send immediately
-              ws.send(data, e => {
-                if (cb) cb(e)
-              })
-            } else {
-              // send with rate limit
-              const now = +new Date()
-              if (now - lastChange > wait) {
-                lastChange = now
-                ws.send(data, e => {
-                  if (cb) cb(e)
-                })
-              }
-            }
-          },
-          wait,
-          { once: true }
-        )
-      }
 
       // store ip
       ws.ip = req?.connection?.remoteAddress
@@ -617,9 +616,7 @@ export default class LiveServer {
       const phpChange = path.extname(changePath) === '.php'
       if ((htmlChange || phpChange) && injectBody) return
 
-      this.wsc.forEach(ws => {
-        if (ws) ws.sendWithDelay(cssChange ? 'refreshcss' : 'reload')
-      })
+      this.wss.broadcastWithDelay(this.wsc, cssChange ? 'refreshcss' : 'reload')
     }
 
     this.watcher
@@ -672,9 +669,7 @@ export default class LiveServer {
    * @param url Navigates to the given URL.
    */
   public navigate(url: string) {
-    this.wsc.forEach(ws => {
-      if (ws) ws.sendWithDelay(JSON.stringify({ navigate: url }))
-    })
+    this.wss.broadcastWithDelay(this.wsc, JSON.stringify({ navigate: url }))
   }
 
   /** Launch a new browser window. */
@@ -688,9 +683,7 @@ export default class LiveServer {
 
   /** Reloads all browser windows */
   public reloadBrowserWindow() {
-    this.wsc.forEach(ws => {
-      if (ws) ws.sendWithDelay('reload')
-    })
+    this.wss.broadcastWithDelay(this.wsc, 'reload')
   }
 
   /** Send message to the client. (Will show a popup in the Browser) */
@@ -704,9 +697,7 @@ export default class LiveServer {
 
   /** Manually refresh css */
   public refreshCSS(showPopup = true) {
-    this.wsc.forEach(ws => {
-      if (ws) ws.sendWithDelay(showPopup ? 'refreshcss' : 'refreshcss-silent')
-    })
+    this.wss.broadcastWithDelay(this.wsc, showPopup ? 'refreshcss' : 'refreshcss-silent')
   }
 
   /** Inject a a new <body> into the DOM. (Better prepend parseBody first) */
@@ -716,15 +707,16 @@ export default class LiveServer {
     })
   }
 
+  /** @deprecated */
   public highlightSelector(file: string, selector: string) {
     // TODO(yandeu): add this
   }
 
   /** @deprecated */
   public highlight(file: string, position: { line: number; character: number }) {
-    this.wsc.forEach(ws => {
-      if (ws && ws.file === decodeURI(file)) ws.sendWithDelay(JSON.stringify({ position }))
-    })
+    // this.wsc.forEach(ws => {
+    //   if (ws && ws.file === decodeURI(file)) ws.sendWithDelay(JSON.stringify({ position }))
+    // })
   }
 
   /** Close five-server (same as shutdown()) */
