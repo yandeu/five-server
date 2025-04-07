@@ -28,7 +28,7 @@ export class Inject extends Writable {
   size: number = 0
   chunks: Buffer[] = []
   data = ''
-  injectTag = ''
+  injectTag: string | boolean = ''
 
   constructor(
     public tags,
@@ -49,10 +49,14 @@ export class Inject extends Writable {
       }
     }
 
-    if (this.injectTag) {
+    if (this.injectTag && typeof this.injectTag === 'string') {
       data = data.replace(this.injectTag, this.code + this.injectTag)
-    } else {
-      data = data + '\n' + this.code
+    }
+    // inject the code at the bottom of the file,
+    // if there are at least some html tags
+    else if (/<[a-z]\w+>/gm.test(data)) {
+      this.injectTag = true
+      data = `${data}\n${this.code}`
     }
 
     // convert cache to [src|href]="/.cache/.."
@@ -118,9 +122,12 @@ export const injectCode = (root: string, baseURL: string, PHP: any, injectBodyOp
       createReadStream(filePath)
         .pipe(inject)
         .on('finish', () => {
-          res.type('html')
-          res.setHeader('Content-Length', inject.data.length)
-          res.send(inject.data)
+          if (!inject.injectTag) return next()
+          else {
+            res.type('html')
+            res.setHeader('Content-Length', inject.data.length)
+            res.send(inject.data)
+          }
         })
         .on('error', () => {
           return next()
