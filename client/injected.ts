@@ -14,7 +14,7 @@ if (block) {
 }
 if ('WebSocket' in window && !block) {
   window.addEventListener('load', () => {
-    console.log('[Five Server] connecting...')
+    // console.log('[Five Server] connecting...')
 
     const script = document.querySelector('[data-id="five-server"]') as HTMLScriptElement
 
@@ -292,7 +292,7 @@ if ('WebSocket' in window && !block) {
         else if (msg.data === 'refreshcss') refreshCSS(true)
         else if (msg.data === 'refreshcss-silent') refreshCSS(false)
         else if (msg.data === 'connected') {
-          console.log(CONNECTED_MSG)
+          // console.log(CONNECTED_MSG)
           // dispatch "connected" event when client is connected
           const script = document.querySelector('[data-id="five-server"]')
           if (script) script.dispatchEvent(new Event('connected'))
