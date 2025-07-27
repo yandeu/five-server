@@ -179,8 +179,8 @@ export class Highlight {
     if (!borderBox) {
       innerWidth += parseFloat(elementStyling.paddingLeft) + parseFloat(elementStyling.paddingRight)
       innerHeight += parseFloat(elementStyling.paddingTop) + parseFloat(elementStyling.paddingBottom)
-      ;(outerWidth = innerWidth + parseFloat(realElBorder.right) + parseFloat(realElBorder.left)),
-        (outerHeight = innerHeight + parseFloat(realElBorder.bottom) + parseFloat(realElBorder.top))
+      ;((outerWidth = innerWidth + parseFloat(realElBorder.right) + parseFloat(realElBorder.left)),
+        (outerHeight = innerHeight + parseFloat(realElBorder.bottom) + parseFloat(realElBorder.top)))
     }
 
     const visualizations = {
