@@ -15,6 +15,10 @@ export const removeTrailingSlash = (str: string) => {
   return str.replace(/\/+$/g, '')
 }
 
+export const removeDoubleSlash = (str: string) => {
+  return str.replace(/\/\/+/g, '/')
+}
+
 /** Just like path.join() (for url) */
 export const appendPathToUrl = (url: string, append: string): string => {
   return `${removeTrailingSlash(url)}/${removeLeadingSlash(append)}`
