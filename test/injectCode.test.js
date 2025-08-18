@@ -1,4 +1,4 @@
-const express = require('express6').default
+const express = require('express')
 const request = require('supertest')
 const { injectCode } = require('../lib/middleware/injectCode')
 const path = require('path')

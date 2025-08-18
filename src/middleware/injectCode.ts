@@ -4,7 +4,7 @@
  * @license   {@link https://github.com/yandeu/five-server/blob/main/LICENSE LICENSE}
  */
 
-import type { NextFunction, Request, Response } from 'express6'
+import type { NextFunction, Request, Response } from 'express'
 import { createReadStream, existsSync, fstat, statSync } from 'fs'
 import { extname, join, resolve } from 'path'
 import { Writable } from 'stream'
