@@ -18,33 +18,30 @@ export const findIndex = (
 ) => {
   return async (req: Request, res, next) => {
     const reg = new RegExp(`(${extensions.join('|')})$`)
+    const pathname = url.parse(req.url).pathname || ''
 
-    const isAllowedExtension = reg.test(req.url)
-    const hasNoExtension = extname(req.url) === ''
+    const isAllowedExtension = reg.test(pathname)
+    const hasExtension = extname(pathname) !== ''
 
-    if (withExtension === 'always' && hasNoExtension) return next()
-    if (withExtension === 'avoid' && isAllowedExtension) return next()
-    if (withExtension === 'redirect') {
+    if (withExtension === 'always' && !hasExtension) return next()
+    else if (withExtension === 'avoid' && isAllowedExtension) return next()
+    else if (withExtension === 'redirect') {
       if (isAllowedExtension) {
-        const reg = new RegExp(`${extname(req.url)}$`)
-        return res.redirect(req.url.replace(reg, ''))
+        const redirectTo = req.url.replace(extname(pathname), '')
+        return res.redirect(redirectTo)
       }
     }
 
-    if (hasNoExtension) {
+    if (!hasExtension) {
       // get the absolute path
-      const absolute = resolve(join(root + req.pathname))
+      const absolute = resolve(join(root + pathname))
 
       // check if file exists and modify req.url
       extensions.forEach(ext => {
-        if (existsSync(`${absolute}.${ext}`)) req.url = removeDoubleSlash(`${req.pathname}.${ext}`)
-        else if (existsSync(`${absolute}/index.${ext}`)) req.url = removeDoubleSlash(`${req.pathname}/index.${ext}`)
+        if (existsSync(`${absolute}.${ext}`)) req.url = removeDoubleSlash(`${pathname}.${ext}`)
+        else if (existsSync(`${absolute}/index.${ext}`)) req.url = removeDoubleSlash(`${pathname}/index.${ext}`)
       })
     }
-
-    // re-add query params
-    const queryString = new URLSearchParams(req.query).toString()
-    req.url += queryString
 
     next()
   }
