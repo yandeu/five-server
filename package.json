@@ -59,7 +59,7 @@
     "chokidar": "^4.0.3",
     "cors": "^2.8.5",
     "debug": "^4.3.1",
-    "express6": "^0.1.2",
+    "express": "^5.1.0",
     "html-validate": "^7.1.1",
     "mime-types": "~2.1.24",
     "node-html-parser": "~5.4.1",
@@ -69,6 +69,7 @@
   },
   "devDependencies": {
     "@actions/exec": "^1.0.4",
+    "@types/express": "^5.0.3",
     "@types/node": "^18.11.17",
     "@types/ws": "^8.2.0",
     "@yandeu/eslint-config": "^0.0.4",

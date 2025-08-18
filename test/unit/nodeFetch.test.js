@@ -1,4 +1,4 @@
-const { express } = require('express6')
+const express = require('express')
 const { nodeFetch } = require('../../lib/nodeFetch')
 const { listen, close } = require('../helpers/express')
 const pause = require('../helpers/pause')

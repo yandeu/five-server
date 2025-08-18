@@ -7,7 +7,8 @@
 import { extname, join, resolve } from 'path'
 import { existsSync } from 'fs'
 import { removeDoubleSlash } from '../helpers'
-import type { Request } from 'express6'
+import type { Request } from 'express'
+import url from 'node:url'
 
 /** Checks if there is an index file and modifies req.url */
 export const findIndex = (

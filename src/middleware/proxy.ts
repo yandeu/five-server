@@ -11,7 +11,7 @@
  */
 
 import { Inject, code } from './injectCode'
-import type { NextFunction, Request, Response } from 'express6'
+import type { NextFunction, Request, Response } from 'express'
 import { IncomingMessage } from 'http'
 import http from 'http'
 import https from 'https'
