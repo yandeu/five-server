@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Cache Bug Test Page</title>
+    <link cache rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <h1>Test for cache bug</h1>
+    <!-- This should NOT be transformed -->
+    <button id="setting-clear-cache" class="danger">Clear article cache</button>
+    <div class="cache-container">Cache content here</div>
+    <p>The word cache should not trigger replacement</p>
+
+    <!-- These SHOULD be transformed -->
+    <img cache src="image.jpg" alt="test" />
+    <script cache src="script.js"></script>
+</body>
+
+</html>

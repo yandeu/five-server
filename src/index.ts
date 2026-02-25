@@ -354,7 +354,7 @@ export default class LiveServer {
       if (R.indexOf('/') !== 0) R = `/${R}`
 
       // inject code to html and php files
-      app.use(R, injectCode(mountPath, baseURL, PHP, injectBody || false))
+      app.use(R, injectCode(mountPath, baseURL, PHP, injectBody || false, cache))
 
       // serve static files via express.static()
       app.use(R, express.static(mountPath))
@@ -386,14 +386,14 @@ export default class LiveServer {
       }
 
       const { proxyMiddleware } = require('./middleware/proxy')
-      app.use(ROUTE, proxyMiddleware(proxyOpts, baseURL, injectBody || false))
+      app.use(ROUTE, proxyMiddleware(proxyOpts, baseURL, injectBody || false, cache))
       if (this.logLevel >= 1) message.log(`Mapping "${ROUTE}" to "${TARGET}"`)
     }
 
     // find index file and modify req.url
     app.use(findIndex(root, withExtension, ['html', 'php']))
 
-    const injectHandler = injectCode(root, baseURL, PHP, injectBody || false)
+    const injectHandler = injectCode(root, baseURL, PHP, injectBody || false, cache)
 
     // inject five-server script
     app.use(injectHandler)
@@ -505,13 +505,13 @@ export default class LiveServer {
           totalChanges--
           if (totalChanges === 0) {
             // send immediately
-            wsc.forEach(ws => ws.send(data, e => {}))
+            wsc.forEach(ws => ws.send(data, e => { }))
           } else {
             // send with rate limit
             const now = new Date().getTime()
             if (now - lastChange > wait) {
               lastChange = now
-              wsc.forEach(ws => ws.send(data, e => {}))
+              wsc.forEach(ws => ws.send(data, e => { }))
             }
           }
         },

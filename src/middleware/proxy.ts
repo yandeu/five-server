@@ -35,7 +35,7 @@ interface RequestWithRetry extends Request {
   retries: number
 }
 
-export const proxyMiddleware = (options: ProxyMiddlewareOptions, baseURL: string, injectBody: boolean) => {
+export const proxyMiddleware = (options: ProxyMiddlewareOptions, baseURL: string, injectBody: boolean, enableCache: boolean) => {
   // enable ability to quickly pass a url for shorthand setup
   if (typeof options === 'string') {
     options = require('url').parse(options)
@@ -117,7 +117,7 @@ export const proxyMiddleware = (options: ProxyMiddlewareOptions, baseURL: string
 
       // inject the reload script before proxying
       if (shouldInject) {
-        const inject = new Inject(['</head>', '</html>', '</body>'], code(url, baseURL, injectBody))
+        const inject = new Inject(['</head>', '</html>', '</body>'], code(url, baseURL, injectBody), enableCache)
 
         request.pipe(inject).on('finish', () => {
           // could not inject the script :/
