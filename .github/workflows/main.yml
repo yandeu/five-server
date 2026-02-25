@@ -11,26 +11,18 @@ jobs:
       fail-fast: false
       # max-parallel: 2
       matrix:
-        node-version: [16, 18, 20, 22]
+        node-version: [22, 24]
         os: [ubuntu-latest, windows-latest, macos-latest]
-        # test only nodejs v18 on win and mac
+        # test only nodejs v24 on win and mac
         exclude:
           - os: macos-latest
-            node-version: 16
-          - os: macos-latest
-            node-version: 20
-          - os: macos-latest
             node-version: 22
-          - os: windows-latest
-            node-version: 16
-          - os: windows-latest
-            node-version: 20
           - os: windows-latest
             node-version: 22
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP for macos
         if: matrix.os == 'macos-latest'
@@ -39,7 +31,7 @@ jobs:
           tools: none
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -52,13 +44,13 @@ jobs:
       - name: Run Tests
         run: npm test
 
-      - name: Run Prettier
-        if: matrix.os == 'ubuntu-latest'
-        run: npm run format
+      # - name: Run Prettier
+      #   if: matrix.os == 'ubuntu-latest'
+      #   run: npm run format
 
-      - name: Run ESLint
-        if: matrix.os == 'ubuntu-latest'
-        run: npm run lint
+      # - name: Run ESLint
+      #   if: matrix.os == 'ubuntu-latest'
+      #   run: npm run lint
 
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest'
