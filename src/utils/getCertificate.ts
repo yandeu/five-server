@@ -14,7 +14,7 @@ import path from 'path'
 import { message } from '../msg'
 // import del from 'del'
 
-export const getCertificate = (cacheDir: string = '.cache') => {
+export const getCertificate = async (cacheDir: string = '.cache') => {
   // Use a self-signed certificate if no certificate was configured.
   // Cycle certs every 24 hours
   const certificateDir = cacheDir || path.resolve() || os.tmpdir()
@@ -48,7 +48,7 @@ export const getCertificate = (cacheDir: string = '.cache') => {
     message.info(`Generating SSL Certificate "${path.resolve(certificatePath)}"`)
 
     const attributes = [{ name: 'commonName', value: 'localhost' }]
-    const pems = createCertificate(attributes)
+    const pems = await createCertificate(attributes)
 
     fs.mkdirSync(certificateDir, { recursive: true })
     fs.writeFileSync(certificatePath, pems.private + pems.cert, {

@@ -6,10 +6,14 @@
 
 import selfsigned from 'selfsigned'
 
-export const createCertificate = attributes => {
+export const createCertificate = async attributes => {
+  const notBeforeDate = new Date()
+  const notAfterDate = new Date(notBeforeDate.getTime() + 30 * 24 * 60 * 60 * 1000)
+
   return selfsigned.generate(attributes, {
     algorithm: 'sha256',
-    days: 30,
+    notBeforeDate,
+    notAfterDate,
     keySize: 2048,
     extensions: [
       // {
