@@ -9,7 +9,7 @@ beforeAll(async () => {
     root: path.join(__dirname, 'data'),
     port: 0,
     open: false,
-    cors: true
+    cors: '*'
   })
 })
 

@@ -65,6 +65,13 @@ interface ExtendedWebSocketServer extends WebSocketServer {
   broadcastWithDelay: (wss: ExtendedWebSocket[], data: any) => void
 }
 
+/** Origins on this machine or the private network (RFC 1918), any port, http or https. */
+const LOCAL_ORIGIN =
+  /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\]|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?$/
+
+/** Origins on this machine only (loopback). */
+const LOOPBACK_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/
+
 export default class LiveServer {
   public httpServer!: http.Server
   public watcher!: FSWatcher
@@ -294,7 +301,14 @@ export default class LiveServer {
     })
 
     // enable CORS
-    if (cors) app.use(require('cors')({ credentials: true }))
+    // cors: true = this machine (and the private network if the server is reachable from it),
+    // false = off, '*' = any origin, array = custom origins
+    if (cors !== false) {
+      const loopbackOnly = host === '127.0.0.1' || host === 'localhost' || host === '::1'
+      const trusted = loopbackOnly ? LOOPBACK_ORIGIN : LOCAL_ORIGIN
+      const origin = cors === true ? trusted : cors
+      app.use(require('cors')({ origin, credentials: true }))
+    }
 
     // serve fiveserver files
     app.use((req, res, next) => {

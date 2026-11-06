@@ -91,9 +91,9 @@ new FiveServer().start({ open: false })
 
 _Will be available soon._
 
-## Config File
+## Network Access
 
-### Local only or network access (`host`)
+### Host
 
 By default, Five Server binds to `127.0.0.1`, so only your own computer can connect. The browser opens `http://localhost:<port>` if your system resolves `localhost` to `127.0.0.1`, and `http://127.0.0.1:<port>` otherwise.
 
@@ -114,6 +114,28 @@ module.exports = {
 ```
 
 _`0.0.0.0` makes your project files reachable by every device on the network. Use it only on networks you trust._
+
+### CORS
+
+A cross-origin read happens when a page on one origin (scheme, host, and port) reads a response from another origin. For example, a frontend on `http://localhost:3000` fetching data from Five Server on port 5500. The `cors` option controls which origins may read responses.
+
+| `cors` | Origins that may read responses |
+| --- | --- |
+| `true` (default) | This computer: `localhost`, `127.0.0.1`, `[::1]`, on any port, over `http` or `https`. If `host` is `'0.0.0.0'` or a LAN address, your private network too: `10.x.x.x`, `172.16.x.x` to `172.31.x.x`, and `192.168.x.x`. |
+| `false` | None. Five Server sends no CORS headers. |
+| `['http://localhost:3000']` | Only the listed origins. Strings must match exactly, including the port. Regular expressions are allowed. |
+| `'*'` | Any origin. Unsafe: any website you visit can read Five Server's responses. |
+
+```js
+// fiveserver.config.js
+module.exports = {
+  cors: ['http://localhost:3000', 'http://192.168.1.26:5173']
+}
+```
+
+Pages that Five Server serves itself are same-origin and do not need CORS. To reach a backend from a frontend without CORS, use the `proxy` option. On the command line, use `--cors` or `--no-cors`.
+
+## Config File
 
 ### Reference:
 

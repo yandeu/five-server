@@ -16,8 +16,15 @@ export interface LiveServerParams {
   browser?: string | string[]
   /** Enable or disable the use of a config file. Or specify a custom path to your config file. */
   configFile?: boolean | string
-  /** Enable CORS. (default: true) */
-  cors?: boolean
+  /**
+   * Which origins may read responses cross-origin (CORS).
+   * - true (default): this machine (localhost, 127.0.0.1, [::1]). If host is 0.0.0.0 or a LAN address,
+   *   also the private network (10.x, 172.16-31.x, 192.168.x).
+   * - false: no CORS headers.
+   * - '*': any origin (unsafe but anything works).
+   * - array: only the listed origins (strings must match exactly, RegExp is allowed).
+   */
+  cors?: boolean | '*' | Array<string | RegExp>
   /** When set, serve this file (server root relative) for every 404 (useful for single-page applications). */
   file?: string
   /** Address to bind to. Defaults to 127.0.0.1 (this computer only). Use 0.0.0.0 to allow other devices on your network. */
