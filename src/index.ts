@@ -658,9 +658,9 @@ export default class LiveServer {
             this.listen(0, host) // 0 means random port
           }, 1000)
         } else {
+          // the server never started listening, so there is nothing to shut down
           message.error(colors(e.toString(), 'red'), null, false)
-          this.shutdown()
-          reject(e.message)
+          reject(e)
         }
       })
 
@@ -745,7 +745,8 @@ export default class LiveServer {
       await this.watcher.close()
     }
 
-    this.wss.close()
+    // wss is created after the server is listening, so it can be undefined if start() failed
+    this.wss?.close()
     for (const ws of this.wsc) {
       ws.terminate()
     }

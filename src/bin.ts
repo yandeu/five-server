@@ -184,7 +184,8 @@ if (opts.ignore) {
   if (typeof opts.ignore === 'string') opts.ignore = [opts.ignore]
 }
 
-if (!isTesting) liveServer.start(opts)
+// the error is already printed by start(), so only the exit code is set here
+if (!isTesting) liveServer.start(opts).catch(() => process.exit(1))
 
 // when testing with jest
 if (isTesting) {
