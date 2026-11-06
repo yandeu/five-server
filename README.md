@@ -93,6 +93,28 @@ _Will be available soon._
 
 ## Config File
 
+### Local only or network access (`host`)
+
+By default, Five Server binds to `127.0.0.1`, so only your own computer can connect. The browser opens `http://localhost:<port>` if your system resolves `localhost` to `127.0.0.1`, and `http://127.0.0.1:<port>` otherwise.
+
+| `host` | Who can connect | Browser opens |
+| --- | --- | --- |
+| not set (default) | this computer only | `http://localhost:<port>` or `http://127.0.0.1:<port>` |
+| `'0.0.0.0'` | any device on your network | `http://localhost:<port>` or `http://127.0.0.1:<port>` |
+| any other value, e.g. `'192.168.1.20'` | that address only | that address |
+
+**To test on a mobile phone on the same network,** set `host: '0.0.0.0'` (or start with `--host=0.0.0.0`). Five Server then prints a **Network** URL in the terminal. Open that URL on your phone.
+
+```js
+// fiveserver.config.js
+module.exports = {
+  host: '0.0.0.0',
+  remoteLogs: 'magenta' // optional: show phone logs in your terminal (true | false | Color)
+}
+```
+
+_`0.0.0.0` makes your project files reachable by every device on the network. Use it only on networks you trust._
+
 ### Reference:
 
 You will find all available options for your Config File in [`/src/types.ts`](https://github.com/yandeu/five-server/blob/main/src/types.ts).
@@ -127,20 +149,6 @@ module.exports = {
 ```
 
 (_The **https certificate** is self-signed. Means, the first time you open your browser, you have to confirm that you want to continue._)
-
-### Debug on your Mobile Device
-
-Allows you to connect your mobile device by making your server accessible externally.  
-You will see all logs from the mobile device in your terminal in yellow.
-
-```js
-// fiveserver.config.js
-module.exports = {
-  host: '0.0.0.0', // default: '0.0.0.0' (could also be 'localhost' for example)
-  remoteLogs: 'magenta', // true | false | Color
-  useLocalIp: true, // optional: opens browser with your local IP
-}
-```
 
 ### Watch & Ignore:
 

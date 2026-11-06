@@ -22,7 +22,7 @@ export interface LiveServerParams {
   cors?: boolean
   /** When set, serve this file (server root relative) for every 404 (useful for single-page applications). */
   file?: string
-  /** Set the address to bind to. Defaults to 0.0.0.0 or process.env.IP. */
+  /** Address to bind to. Defaults to 127.0.0.1 (this computer only). Use 0.0.0.0 to allow other devices on your network. */
   host?: string
   /** Path to htpasswd file to enable HTTP Basic authentication */
   htpasswd?: string
@@ -58,8 +58,6 @@ export interface LiveServerParams {
   root?: string
   /** Set base URL of the server. Useful if the server is behind a proxy. Defaults to "/". */
   baseURL?: string
-  /** This option lets the browser open with your local IP. */
-  useLocalIp?: boolean
   /** Waits for all changes, before reloading. Defaults to 100ms. */
   wait?: number
   /** Paths to exclusively watch for changes. Defaults to cwd. */

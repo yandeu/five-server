@@ -28,7 +28,7 @@ import { Colors, colors } from './colors'
 import { ProxyMiddlewareOptions } from './middleware/proxy'
 import { Certificate, LiveServerParams } from './types'
 import { getCertificate } from './utils/getCertificate'
-import { getNetworkAddress } from './utils/getNetworkAddress'
+import { localhostResolvesTo127 } from './utils/localhost'
 import { openBrowser } from './openBrowser'
 
 // execute php
@@ -194,7 +194,6 @@ export default class LiveServer {
       proxy = {},
       remoteLogs = false,
       baseURL = '/',
-      useLocalIp = false,
       wait = 100,
       withExtension = 'unset',
       workspace
@@ -205,8 +204,8 @@ export default class LiveServer {
 
     this.logLevel = message.logLevel = logLevel
 
-    let host = options.host || '0.0.0.0' // 'localhost'
-    if (useLocalIp && host === 'localhost') host = '0.0.0.0'
+    // 127.0.0.1 = this computer only. 0.0.0.0 = all network interfaces.
+    const host = options.host || '127.0.0.1'
 
     this.injectBody = injectBody
 
@@ -443,8 +442,11 @@ export default class LiveServer {
     const address = this.httpServer.address() as any
     //const serveHost = address.address === '0.0.0.0' ? '127.0.0.1' : address.address
 
-    let openHost = host === '0.0.0.0' ? '127.0.0.1' : host
-    if (useLocalIp) openHost = getNetworkAddress() || openHost
+    // Loopback and wildcard binds open "localhost" only if the OS resolves it to 127.0.0.1.
+    // Otherwise they open 127.0.0.1. Any other host is opened as given.
+    const isLoopbackBind = host === '0.0.0.0' || host === '127.0.0.1'
+    const useLocalhost = isLoopbackBind && (await localhostResolvesTo127())
+    const openHost = isLoopbackBind ? (useLocalhost ? 'localhost' : '127.0.0.1') : host
 
     //const serveURL = `${this._protocol}://${serveHost}:${address.port}`
     this._openURL = `${this._protocol}://${openHost}:${address.port}`
@@ -456,26 +458,37 @@ export default class LiveServer {
 
     //let serveURLs: any = [serveURL]
     if (this.logLevel >= 1) {
-      if (address.address === '0.0.0.0') {
+      const printURL = (label: string, h: string) => {
+        const url = `${this._protocol}://${h}:${colors(address.port, 'bold')}`
+        message.log(`  > ${label} ${colors(url, 'cyan')}`)
+      }
+
+      // local addresses: localhost (only if it resolves to 127.0.0.1) and 127.0.0.1
+      if (isLoopbackBind) {
+        if (useLocalhost) printURL('Local:  ', 'localhost')
+        printURL('Local:  ', '127.0.0.1')
+      } else {
+        printURL('Local:  ', openHost)
+      }
+
+      // tip for local-only binds: how to reach the server from another device
+      if (host === '127.0.0.1' || host === 'localhost') {
+        message.log('')
+        message.log(`  Tip: to open this on another device on your network (e.g. a phone),`)
+        message.log(`       start with ${colors('--host=0.0.0.0', 'bold')} or set ${colors("host: '0.0.0.0'", 'bold')} in your config.`)
+      }
+
+      // wildcard bind: one URL per LAN interface, for other devices on the network
+      if (host === '0.0.0.0') {
         const interfaces = os.networkInterfaces()
 
         Object.keys(interfaces).forEach(key =>
           (interfaces[key] || [])
-            .filter(details => details.family === 'IPv4')
-            .map(detail => {
-              return {
-                type: detail.address.includes('127.0.0.1') ? 'Local:   ' : 'Network: ',
-                host: detail.address.replace('127.0.0.1', 'localhost')
-              }
-            })
-            .forEach(({ type, host }) => {
-              const url = `${this._protocol}://${host}:${colors(address.port, 'bold')}`
-              message.log(`  > ${type} ${colors(url, 'cyan')}`)
-            })
+            .filter(details => details.family === 'IPv4' && !details.internal)
+            .forEach(details => printURL('Network:', details.address))
         )
-      } else {
-        message.log(`  > Local: ${colors(`${this._protocol}://${openHost}:${colors(address.port, 'bold')}`, 'cyan')}`)
       }
+
       message.log('')
     }
 

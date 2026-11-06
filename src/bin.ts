@@ -37,9 +37,6 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
     const baseURL = arg.substring(10)
     opts.baseURL = baseURL
     process.argv.splice(i, 1)
-  } else if (arg.indexOf('--useLocalIp') > -1) {
-    opts.useLocalIp = true
-    process.argv.splice(i, 1)
   } else if (arg.indexOf('--php=') > -1) {
     const php = arg.substring(6)
     opts.php = php
