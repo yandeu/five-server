@@ -35,7 +35,12 @@ interface RequestWithRetry extends Request {
   retries: number
 }
 
-export const proxyMiddleware = (options: ProxyMiddlewareOptions, baseURL: string, injectBody: boolean, enableCache: boolean) => {
+export const proxyMiddleware = (
+  options: ProxyMiddlewareOptions,
+  baseURL: string,
+  injectBody: boolean,
+  enableCache: boolean
+) => {
   // enable ability to quickly pass a url for shorthand setup
   if (typeof options === 'string') {
     options = require('url').parse(options)

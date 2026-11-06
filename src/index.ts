@@ -505,13 +505,13 @@ export default class LiveServer {
           totalChanges--
           if (totalChanges === 0) {
             // send immediately
-            wsc.forEach(ws => ws.send(data, e => { }))
+            wsc.forEach(ws => ws.send(data, e => {}))
           } else {
             // send with rate limit
             const now = new Date().getTime()
             if (now - lastChange > wait) {
               lastChange = now
-              wsc.forEach(ws => ws.send(data, e => { }))
+              wsc.forEach(ws => ws.send(data, e => {}))
             }
           }
         },

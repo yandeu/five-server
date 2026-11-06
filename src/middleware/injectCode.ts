@@ -88,7 +88,7 @@ export class Inject extends Writable {
     const buffer = Buffer.concat(this.chunks)
     this.data = buffer.toString()
 
-    const raw = await unzip(buffer).catch(() => { })
+    const raw = await unzip(buffer).catch(() => {})
     if (raw) this.data = raw
 
     this.doInjection(this.data)
@@ -104,7 +104,13 @@ export const code = (filePath: string, baseURL: string, injectBodyOptions: boole
 }
 
 /** Injects the five-server script into the html page and converts the cache attributes. */
-export const injectCode = (root: string, baseURL: string, PHP: any, injectBodyOptions: boolean, enableCache: boolean) => {
+export const injectCode = (
+  root: string,
+  baseURL: string,
+  PHP: any,
+  injectBodyOptions: boolean,
+  enableCache: boolean
+) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const { pathname } = url.parse(req.url)
 
@@ -121,7 +127,11 @@ export const injectCode = (root: string, baseURL: string, PHP: any, injectBodyOp
       if (!existsSync(filePath)) return next()
       if (!statSync(filePath).isFile()) return next()
 
-      const inject = new Inject(['</head>', '</html>', '</body>'], code(filePath, baseURL, injectBodyOptions), enableCache)
+      const inject = new Inject(
+        ['</head>', '</html>', '</body>'],
+        code(filePath, baseURL, injectBodyOptions),
+        enableCache
+      )
 
       if (extname(pathname) === '.php') {
         const html = await PHP.parseFile(filePath, res)
