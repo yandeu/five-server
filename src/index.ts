@@ -33,7 +33,7 @@ import { openBrowser } from './openBrowser'
 
 // execute php
 import { ExecPHP } from './utils/execPHP'
-import { INJECTED_CODE } from './public'
+import { INJECTED_CODE, STATUS_CODE } from './public'
 import { message } from './msg'
 const PHP = new ExecPHP()
 
@@ -42,12 +42,14 @@ import WorkerPool from './workers/workerPool'
 import type { Report } from 'html-validate'
 
 // middleware
-import explorer from './middleware/explorer' // const serveIndex = require('serve-index')
+import explorer, { htmlPath } from './middleware/explorer' // const serveIndex = require('serve-index')
 import { findIndex } from './middleware/findIndex'
 import { injectCode } from './middleware/injectCode'
 import { fallbackFile } from './middleware/fallbackFile'
 import { preview } from './middleware/preview'
 import { ignoreExtension } from './middleware/ignoreExtension'
+import { dotfileBlock, dotfileMessage } from './utils/dotfiles'
+import escapeHtml from './dependencies/escape-html'
 import { favicon } from './middleware/favicon'
 import { notFound } from './middleware/notFound'
 import type { Socket } from 'net'
@@ -185,6 +187,7 @@ export default class LiveServer {
     const {
       browser = 'default',
       cors = true,
+      dotFiles = false,
       file,
       htpasswd = null,
       https: _https = null,
@@ -350,6 +353,25 @@ export default class LiveServer {
       app.use(mw)
     })
 
+    // dotfiles: hidden unless dotFiles is true, .git is always hidden
+    app.use((req, res, next) => {
+      const blocked = dotfileBlock(req.path, dotFiles)
+      if (!blocked) return next()
+
+      // .preview and .fullscreen requests show a message page instead (see preview middleware)
+      if (this.servePreview && /\.(preview|fullscreen)$/.test(req.path)) return next()
+
+      const message = dotfileMessage(blocked)
+      if (req.accepts(['html', 'text']) === 'html') {
+        const html = STATUS_CODE.replace('{linked-path}', htmlPath(req.path, baseURL))
+          .replace('{status}', '403')
+          .replace('{message}', escapeHtml(message))
+        return res.status(403).type('html').send(html)
+      }
+
+      return res.status(403).type('text').send(`403 ${message}\n`)
+    })
+
     // mount
     for (const [ROUTE, TARGET] of Object.entries(mount)) {
       const mountPath = path.resolve(process.cwd(), TARGET)
@@ -365,7 +387,7 @@ export default class LiveServer {
       app.use(R, injectCode(mountPath, baseURL, PHP, injectBody || false))
 
       // serve static files via express.static()
-      app.use(R, express.static(mountPath))
+      app.use(R, express.static(mountPath, { dotfiles: dotFiles ? 'allow' : 'ignore' }))
 
       // log the mapping folder
       if (this.logLevel >= 1) message.log(`Mapping "${R}" to "${TARGET}"`)
@@ -407,14 +429,14 @@ export default class LiveServer {
     app.use(injectHandler)
 
     // serve static files (ignore php files) (don't serve index files)
-    app.use(ignoreExtension(['php'], express.static(root, { index: false })))
+    app.use(ignoreExtension(['php'], express.static(root, { index: false, dotfiles: dotFiles ? 'allow' : 'ignore' })))
 
     // inject to fallback "file"
     app.use(fallbackFile(injectHandler, file))
 
     // inject to any (converts and file to a .html file (if possible))
     // (makes that nice preview page)
-    app.use(preview(root, baseURL, this.servePreview))
+    app.use(preview(root, baseURL, this.servePreview, dotFiles))
 
     // explorer middleware (previously serve-index)
     app.use(explorer(root, { icons: true, hidden: false, dotFiles: true, baseURL: baseURL }))

@@ -62,6 +62,19 @@ $ five-server
 $ npm -g i five-server@latest
 ```
 
+### Dotfiles
+
+Files and folders whose names start with a dot (such as `.env`) are hidden by default, so their contents cannot be read in the browser. They still appear in the explorer. Requesting one directly (for example `/.env`), or opening it with `.preview` or `.fullscreen`, shows a message explaining why it is hidden.
+
+To serve dotfiles, set `dotFiles: true` in your config or start with `--dotFiles`. The `.git` folder is always hidden, even with `dotFiles` enabled.
+
+```js
+// fiveserver.config.js
+module.exports = {
+  dotFiles: true
+}
+```
+
 ## Usage
 
 _Five Server is written in TypeScript. Since it is nearly impossible to have a clean import for all module resolvers without restricting/adding explicit access to submodules via the exports property in package.json (which I don't want), I just list some very simple import examples._

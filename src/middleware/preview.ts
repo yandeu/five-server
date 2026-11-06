@@ -9,8 +9,10 @@ import { basename, extname, join, resolve } from 'path'
 import { readFileSync, statSync } from 'fs'
 import { fileTypes } from '../fileTypes'
 import { htmlPath } from './explorer'
+import escapeHtml from '../dependencies/escape-html'
+import { dotfileBlock, dotfileMessage } from '../utils/dotfiles'
 
-export const preview = (root: string, baseURL: string, injectToAny: boolean) => {
+export const preview = (root: string, baseURL: string, injectToAny: boolean, dotFiles: boolean = false) => {
   return (req, res, next) => {
     if (!injectToAny) return next()
     if (!['.preview', '.fullscreen', '.php'].includes(extname(req.url))) return next()
@@ -20,6 +22,21 @@ export const preview = (root: string, baseURL: string, injectToAny: boolean) => 
     // remove .preview
     req.url = req.url.replace(/\.preview$|\.fullscreen$/, '')
     const URL = decodeURI(req.url)
+
+    // hidden files: show why instead of the content
+    const blocked = dotfileBlock(URL, dotFiles)
+    if (blocked) {
+      const reason = escapeHtml(dotfileMessage(blocked))
+
+      const TEMPLATE = isFullscreenPreview ? PREVIEW_FULLSCREEN : PREVIEW
+      const html = TEMPLATE.replace('{linked-path}', htmlPath(URL, baseURL))
+        .replace(/{fileName}/gm, escapeHtml(basename(URL)))
+        .replace(/{ext}/gm, '')
+        .replace('{phpMsg}', '')
+        .replace('{preview}', `<div class="message"><p>${reason}</p></div>`)
+
+      return res.status(403).type('html').send(html)
+    }
 
     const isPHP = extname(req.url) === '.php'
     const phpMsg = isPHP

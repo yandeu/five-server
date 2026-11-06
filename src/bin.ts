@@ -134,6 +134,9 @@ for (let i = process.argv.length - 1; i >= 2; --i) {
   } else if (arg === '--no-cors') {
     opts.cors = false
     process.argv.splice(i, 1)
+  } else if (arg === '--dotFiles') {
+    opts.dotFiles = true
+    process.argv.splice(i, 1)
   } else if (arg.indexOf('--https=') > -1) {
     const https = arg.substring(8)
     if (https === 'true') opts.https = true

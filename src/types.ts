@@ -51,6 +51,11 @@ export interface LiveServerParams {
   php?: string
   /** Absolute path to php.ini file. */
   phpIni?: string
+  /**
+   * Serve dotfiles (e.g. .env). Default: false. Dotfiles stay listed in the explorer, but their content is hidden.
+   * .git is always hidden.
+   */
+  dotFiles?: boolean
   /** Set the server port. Defaults to 5500. */
   port?: number
   /** Proxy all requests for ROUTE to TARGET.
