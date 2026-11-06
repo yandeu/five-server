@@ -32,8 +32,7 @@ export class Inject extends Writable {
 
   constructor(
     public tags,
-    public code,
-    public enableCache: boolean
+    public code
   ) {
     super()
   }
@@ -58,22 +57,6 @@ export class Inject extends Writable {
     else if (/<[a-z]\w+>/gm.test(data)) {
       this.injectTag = true
       data = `${data}\n${this.code}`
-    }
-
-    // convert cache to [src|href]="/.cache/.." (only if cache is enabled)
-    if (this.enableCache) {
-      const replacer = (match, tag, beforeAttr, attrName, attrValue, afterAttr) => {
-        // Remove the cache attribute and prepend /.cache/ to the resource path
-        const withoutCache = beforeAttr.replace(/\s*\bcache\b\s*/gi, ' ')
-        const cachePath = `/.cache/${attrValue.replace(/^\//, '')}`
-        return `<${tag}${withoutCache}${attrName}="${cachePath}"${afterAttr}>`
-      }
-      // Match only resource tags with cache attribute and src/href
-      // Groups: 1=tag, 2=attrs before src/href, 3=src|href, 4=value, 5=attrs after
-      data = data.replace(
-        /<(link|script|img|source|video|audio|iframe)\b([^>]*\bcache\b[^>]*?)\b(src|href)="([^"]+)"([^>]*)>/gi,
-        replacer
-      )
     }
 
     this.data = data
@@ -104,13 +87,7 @@ export const code = (filePath: string, baseURL: string, injectBodyOptions: boole
 }
 
 /** Injects the five-server script into the html page and converts the cache attributes. */
-export const injectCode = (
-  root: string,
-  baseURL: string,
-  PHP: any,
-  injectBodyOptions: boolean,
-  enableCache: boolean
-) => {
+export const injectCode = (root: string, baseURL: string, PHP: any, injectBodyOptions: boolean) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const { pathname } = url.parse(req.url)
 
@@ -127,11 +104,7 @@ export const injectCode = (
       if (!existsSync(filePath)) return next()
       if (!statSync(filePath).isFile()) return next()
 
-      const inject = new Inject(
-        ['</head>', '</html>', '</body>'],
-        code(filePath, baseURL, injectBodyOptions),
-        enableCache
-      )
+      const inject = new Inject(['</head>', '</html>', '</body>'], code(filePath, baseURL, injectBodyOptions))
 
       if (extname(pathname) === '.php') {
         const html = await PHP.parseFile(filePath, res)

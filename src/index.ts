@@ -50,7 +50,6 @@ import { preview } from './middleware/preview'
 import { ignoreExtension } from './middleware/ignoreExtension'
 import { favicon } from './middleware/favicon'
 import { notFound } from './middleware/notFound'
-import { cache as cacheMiddleware } from './middleware/cache'
 import type { Socket } from 'net'
 
 export { LiveServerParams }
@@ -178,7 +177,6 @@ export default class LiveServer {
 
     const {
       browser = 'default',
-      cache = true,
       cors = true,
       file,
       htpasswd = null,
@@ -298,9 +296,6 @@ export default class LiveServer {
     // enable CORS
     if (cors) app.use(require('cors')({ credentials: true }))
 
-    // .cache
-    if (cache) app.use('/.cache', cacheMiddleware)
-
     // serve fiveserver files
     app.use((req, res, next) => {
       if (req.url === '/fiveserver.js') return res.type('.js').send(INJECTED_CODE)
@@ -353,7 +348,7 @@ export default class LiveServer {
       if (R.indexOf('/') !== 0) R = `/${R}`
 
       // inject code to html and php files
-      app.use(R, injectCode(mountPath, baseURL, PHP, injectBody || false, cache))
+      app.use(R, injectCode(mountPath, baseURL, PHP, injectBody || false))
 
       // serve static files via express.static()
       app.use(R, express.static(mountPath))
@@ -385,14 +380,14 @@ export default class LiveServer {
       }
 
       const { proxyMiddleware } = require('./middleware/proxy')
-      app.use(ROUTE, proxyMiddleware(proxyOpts, baseURL, injectBody || false, cache))
+      app.use(ROUTE, proxyMiddleware(proxyOpts, baseURL, injectBody || false))
       if (this.logLevel >= 1) message.log(`Mapping "${ROUTE}" to "${TARGET}"`)
     }
 
     // find index file and modify req.url
     app.use(findIndex(root, withExtension, ['html', 'php']))
 
-    const injectHandler = injectCode(root, baseURL, PHP, injectBody || false, cache)
+    const injectHandler = injectCode(root, baseURL, PHP, injectBody || false)
 
     // inject five-server script
     app.use(injectHandler)
