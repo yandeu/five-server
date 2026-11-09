@@ -9,6 +9,7 @@ import { createReadStream, existsSync, fstat, statSync } from 'fs'
 import { extname, join, resolve } from 'path'
 import { Writable } from 'stream'
 import { unzip as _unzip } from 'zlib'
+import { isPathInside } from '../misc'
 import url from 'url'
 
 /**
@@ -98,8 +99,10 @@ export const injectCode = (root: string, baseURL: string, PHP: any, injectBodyOp
         extname(pathname) === '.htm' ||
         extname(pathname) === '.php')
     ) {
-      let filePath = resolve(join(root + pathname))
-      filePath = decodeURI(filePath)
+      // decode before resolving, so encoded "../" segments are normalized along with the rest of the path
+      const filePath = resolve(join(root + decodeURI(pathname)))
+      // never serve or run a file outside of the root folder
+      if (!isPathInside(filePath, root)) return res.status(403).send("Can't access files outside of root.")
 
       if (!existsSync(filePath)) return next()
       if (!statSync(filePath).isFile()) return next()

@@ -22,6 +22,18 @@ export const fileDoesExist = (path: string): Promise<boolean> => {
   })
 }
 
+/**
+ * Checks whether `filePath` is the `rootDir` folder itself or lies below it.
+ * Both paths are resolved first, so ".." segments are normalized before the comparison.
+ */
+export const isPathInside = (filePath: string, rootDir: string): boolean => {
+  const rel = path.relative(path.resolve(rootDir), path.resolve(filePath))
+  // a path that climbs out of rootDir starts with "..", but a name like "..config" does not
+  const climbsOut = rel === '..' || rel.startsWith(`..${path.sep}`)
+  // on Windows, a path on another drive gives an absolute relative path
+  return !climbsOut && !path.isAbsolute(rel)
+}
+
 export const defaultPHPPath = (is_ci: boolean = false) => {
   // is_ci is for macos on github actions for shivammathur/setup-php@v2
   // (https://github.com/marketplace/actions/setup-php-action)

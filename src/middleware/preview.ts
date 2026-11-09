@@ -11,6 +11,7 @@ import { fileTypes } from '../fileTypes'
 import { htmlPath } from './explorer'
 import escapeHtml from '../dependencies/escape-html'
 import { dotfileBlock, dotfileMessage } from '../utils/dotfiles'
+import { isPathInside } from '../misc'
 
 export const preview = (root: string, baseURL: string, injectToAny: boolean, dotFiles: boolean = false) => {
   return (req, res, next) => {
@@ -45,6 +46,9 @@ export const preview = (root: string, baseURL: string, injectToAny: boolean, dot
 
     try {
       const filePath = resolve(join(root + URL))
+
+      // never read a file outside of the root folder
+      if (!isPathInside(filePath, root)) return res.status(403).send("Can't access files outside of root.")
 
       const isFile = statSync(filePath).isFile()
       if (!isFile) return next()
