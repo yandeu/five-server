@@ -9,7 +9,6 @@ Development Server with **Live Reload** Capability.
 
 ---
 
-[![Visual Studio Marketplace Rating](https://img.shields.io/visual-studio-marketplace/r/yandeu.five-server?logo=Visual%20Studio%20Code&style=flat-square)](https://marketplace.visualstudio.com/items?itemName=yandeu.five-server)
 [![Sponsors](https://img.shields.io/github/sponsors/yandeu?style=flat-square)](https://github.com/sponsors/yandeu)
 [![NPM version](https://img.shields.io/npm/v/five-server.svg?style=flat-square)](https://www.npmjs.com/package/five-server)
 [![Github Workflow](https://img.shields.io/github/actions/workflow/status/yandeu/five-server/main.yml?branch=main&label=build&logo=github&style=flat-square)](https://github.com/yandeu/five-server/actions?query=workflow%3ACI)
@@ -24,7 +23,7 @@ Development Server with **Live Reload** Capability.
 
 - 🚀 **Remote Logs**  
    Displays the logs of your browser in your terminal!  
-   _Useful for debugging on your smart phone for example._
+   _Useful for debugging on your smartphone for example._
 
 - 🚀 **PHP Server**  
   Serves not only your **.html** files but also **.php**.  
@@ -183,7 +182,7 @@ module.exports = {
 }
 ```
 
-(_The **https certificate** is self-signed. Means, the first time you open your browser, you have to confirm that you want to continue._)
+(_The **https certificate** is self-signed. This means the first time you open your browser, you have to confirm that you want to continue._)
 
 ### Watch & Ignore:
 
@@ -216,11 +215,11 @@ To prevent a single page from automatically reloading, add `data-server-no-reloa
 </html>
 ```
 
-This will omit the usually injected Javascript from being instantiated on that given page.
+This will omit the usually injected JavaScript from being instantiated on that page.
 
 ### Browser of your choice
 
-The option browser can be a `string` or an `string[]`.  
+The option browser can be a `string` or a `string[]`.  
 _If you provide an array, the first browser found will be opened._
 
 Following options are all valid:
@@ -235,7 +234,7 @@ Following options are all valid:
 
 ### PHP Server
 
-Serve and auto-reload PHP file in your browser!
+Serve and auto-reload PHP files in your browser!
 
 Simply add the path to your PHP executable.
 
@@ -256,7 +255,7 @@ You can enable live reload for any server side generated content.
 
 Check out the express.js example at [/examples/express](https://github.com/yandeu/five-server/tree/main/examples/express).
 
-Simply start Five Server and add the script below to you files:
+Simply start Five Server and add the script below to your files:
 
 ```html
 <script async data-id="five-server" src="http://localhost:8080/fiveserver.js"></script>
