@@ -506,7 +506,9 @@ export default class LiveServer {
       if (host === '127.0.0.1' || host === 'localhost') {
         message.log('')
         message.log(`  Tip: to open this on another device on your network (e.g. a phone),`)
-        message.log(`       start with ${colors('--host=0.0.0.0', 'bold')} or set ${colors("host: '0.0.0.0'", 'bold')} in your config.`)
+        message.log(
+          `       start with ${colors('--host=0.0.0.0', 'bold')} or set ${colors("host: '0.0.0.0'", 'bold')} in your config.`
+        )
       }
 
       // wildcard bind: one URL per LAN interface, for other devices on the network
