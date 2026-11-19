@@ -75,7 +75,7 @@ const explorer = (root, options?: any) => {
 
   const filter = opts.filter
   const hidden = opts.hidden || false
-  const dotFiles = opts.dotFiles || true
+  const dotFiles = opts.dotFiles || false
   const icons = opts.icons
   const stylesheet = opts.stylesheet || defaultStylesheet
   const template = opts.template || defaultTemplate

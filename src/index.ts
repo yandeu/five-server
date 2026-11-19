@@ -439,7 +439,7 @@ export default class LiveServer {
     app.use(preview(root, baseURL, this.servePreview, dotFiles))
 
     // explorer middleware (previously serve-index)
-    app.use(explorer(root, { icons: true, hidden: false, dotFiles: true, baseURL: baseURL }))
+    app.use(explorer(root, { icons: true, hidden: false, dotFiles, baseURL: baseURL }))
 
     // no one want to see a 404 favicon error
     app.use(favicon)
