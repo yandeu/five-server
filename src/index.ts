@@ -29,7 +29,7 @@ import { ProxyMiddlewareOptions } from './middleware/proxy'
 import { Certificate, LiveServerParams } from './types'
 import { getCertificate } from './utils/getCertificate'
 import { localhostResolvesTo127 } from './utils/localhost'
-import { allowedHostnames, isHostAllowed } from './utils/hostCheck'
+import { allowedHostnames, isHostAllowed, isWebSocketAllowed } from './utils/hostCheck'
 import { openBrowser } from './openBrowser'
 
 // execute php
@@ -313,13 +313,13 @@ export default class LiveServer {
       const origin = cors === true ? trusted : cors
       app.use(require('cors')({ origin, credentials: true }))
     }
+
     // reject requests whose Host header is not an allowed name
     const allowedHosts = allowedHostnames(host)
     app.use((req, res, next) => {
       if (isHostAllowed(req.headers.host, allowedHosts)) return next()
       res.status(403).type('text').send('403 Invalid Host header\n')
     })
-
 
     // serve fiveserver files
     app.use((req, res, next) => {
@@ -546,7 +546,10 @@ export default class LiveServer {
      * STEP: 3/4
      * Make WebSocket Connection using "ws" (https://www.npmjs.com/package/ws)
      */
-    this.wss = new WebSocketServer({ server: this.httpServer }) as ExtendedWebSocketServer
+    this.wss = new WebSocketServer({
+      server: this.httpServer,
+      verifyClient: ({ req }: { req: http.IncomingMessage }) => isWebSocketAllowed(req.headers, allowedHosts)
+    }) as ExtendedWebSocketServer
 
     // keep track of delayed file changes
     let totalChanges = 0
