@@ -21,7 +21,7 @@ import { createHttpError } from '../misc' // const createHttpError = require('ht
 const debug = require('debug')('explorer')
 import escapeHtml from '../dependencies/escape-html'
 import fs from 'fs'
-import { extname as _extname, normalize, sep, join } from 'path'
+import { extname as _extname, normalize, posix, sep, join } from 'path'
 
 // wrap extname for special files like .d.ts
 const extname = (p: string) => {
@@ -275,7 +275,8 @@ function createHtmlFileList(files, baseURL, useIcons, view) {
       // file size
       // const size = file.stat && !isDir ? file.stat.size : ''
 
-      let href = escapeHtml(normalizeSlashes(normalize(path.join('/'))))
+      // URL paths always use "/", so normalize with posix rules (platform normalize breaks "//" on Windows)
+      let href = escapeHtml(posix.normalize(path.join('/')))
 
       // use serve-preview
       if (!isDir && !['.html', '.htm', '.php'].includes(extname(file.name))) href += '.preview'
@@ -467,10 +468,6 @@ function iconStyle(files, useIcons) {
 function load(icon) {
   if (cache[icon]) return cache[icon]
   return (cache[icon] = 'background-image: url(/fiveserver/serve-explorer/icons/' + icon + ');')
-}
-
-function normalizeSlashes(path) {
-  return path.split(sep).join('/')
 }
 
 function removeHidden(files) {
